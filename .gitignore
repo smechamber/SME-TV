@@ -1,0 +1,14 @@
+node_modules
+.next
+.turbo
+dist
+coverage
+.env
+.env.local
+*.log
+*.tsbuildinfo
+apps/mobile/.expo
+apps/mobile/.expo-shared
+apps/mobile/web-build
+apps/mobile/android
+apps/mobile/ios

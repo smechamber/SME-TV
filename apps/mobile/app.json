@@ -1,0 +1,14 @@
+{
+  "expo": {
+    "name": "SME-TV",
+    "slug": "sme-tv",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "smetv",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "plugins": ["expo-router"],
+    "ios": { "supportsTablet": true },
+    "android": { "adaptiveIcon": { "backgroundColor": "#fffaf5" } }
+  }
+}
