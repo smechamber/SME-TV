@@ -1,0 +1,7 @@
+import Image from 'next/image';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+type Article = { title: string; summary: string; content: string; slug: string; publishedAt?: string; imageUrl?: string | null; category?: { name?: string } | null };
+async function getArticle(slug: string): Promise<Article | null> { try { const r = await fetch(`${API}/api/news/${encodeURIComponent(slug)}`, { next: { revalidate: 60 } }); if (!r.ok) return null; const p = await r.json() as { data?: Article }; return p.data ?? null; } catch { return null; } }
+export default async function ArticlePage({ params }: { params: { slug: string } }) { const item = await getArticle(params.slug); if (!item) notFound(); return <main className="site-width article-page"><Link className="back-link" href="/news">&lt;- All news</Link><span className="eyebrow">{item.category?.name ?? 'SME TV NEWS'}</span><h1>{item.title}</h1><p className="article-summary">{item.summary}</p><div className="article-meta">SME TV newsroom{item.publishedAt ? ` - ${new Date(item.publishedAt).toLocaleDateString('en-IN')}` : ''}</div>{item.imageUrl && <Image className="article-image" src={item.imageUrl} alt="" width={1200} height={675} unoptimized />}<div className="article-rich-content" dangerouslySetInnerHTML={{ __html: item.content }} /></main>; }
