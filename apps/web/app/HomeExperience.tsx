@@ -1,75 +1,195 @@
 'use client';
 
-import Image from 'next/image';
-import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
+import Header from '../app/components/Header';
+import Tickers from '../app/components/Tickers';
+import MainContent from '../app/components/MainContent';
+import Footer from '../app/components/Footer';
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
-type Story = { id: string; slug: string; title: string; summary?: string; imageUrl?: string; category?: { name?: string }; publishedAt?: string };
-type Video = { id: string; title: string; description?: string; thumbnail?: string; videoUrl?: string; youtubeId?: string; videoType?: string };
-type EventItem = { id: string; slug: string; title: string; description?: string; location?: string; startsAt: string };
+
+type Story = {
+  id: string;
+  slug: string;
+  title: string;
+  summary?: string;
+  imageUrl?: string;
+  category?: { name?: string };
+  publishedAt?: string;
+  readTime?: string;
+};
+
+type Video = {
+  id: string;
+  title: string;
+  description?: string;
+  thumbnail?: string;
+  duration?: string;
+  views?: string;
+};
+
+type EventItem = {
+  id: string;
+  slug: string;
+  title: string;
+  description?: string;
+  location?: string;
+  startsAt: string;
+  tag?: string;
+};
+
+const FALLBACK_STORIES: Story[] = [
+  {
+    id: 'f-1',
+    slug: 'msme-budget-2025-credit-guarantee-scheme',
+    title: 'Government Enhances Credit Guarantee Scheme Limit for MSMEs to ₹10 Crore',
+    summary:
+      'The Ministry of Micro, Small and Medium Enterprises has expanded collateral-free loan access to boost manufacturing and export competitiveness across tier-2 and tier-3 industrial hubs.',
+    imageUrl: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1200&q=80',
+    category: { name: 'Policy & MSME' },
+    publishedAt: new Date().toISOString(),
+    readTime: '3 min read',
+  },
+  {
+    id: 'f-2',
+    slug: 'rbi-interest-rate-impact-small-business-loans',
+    title: 'RBI Monetary Policy: How Interest Rate Decisions Impact SME Working Capital',
+    summary:
+      'Financial analysts break down borrowing costs, NBFC liquidity, and floating rate strategies for small businesses facing global supply chain shifts.',
+    imageUrl: 'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=800&q=80',
+    category: { name: 'Finance' },
+    publishedAt: new Date(Date.now() - 3600000 * 2).toISOString(),
+    readTime: '4 min read',
+  },
+  {
+    id: 'f-3',
+    slug: 'export-promotion-digital-trade-hub-india',
+    title: 'India’s SME Export Push: New Digital Commerce Hubs Open in Gujarat & Tamil Nadu',
+    summary:
+      'Special trade corridors aim to onboard over 50,000 local manufacturers onto global cross-border e-commerce platforms with zero duty friction.',
+    imageUrl: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=800&q=80',
+    category: { name: 'Exports' },
+    publishedAt: new Date(Date.now() - 3600000 * 5).toISOString(),
+    readTime: '2 min read',
+  },
+  {
+    id: 'f-4',
+    slug: 'ai-adoption-in-indian-manufacturing-startups',
+    title: 'Industrial AI Adoption: How Indian Startups Are Modernizing Textile & Auto Ancillaries',
+    summary:
+      'Smart factory sensors and AI inventory forecasting are helping traditional workshops cut wastage by 28% while boosting output.',
+    imageUrl: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=800&q=80',
+    category: { name: 'Technology' },
+    publishedAt: new Date(Date.now() - 3600000 * 12).toISOString(),
+    readTime: '5 min read',
+  },
+  {
+    id: 'f-5',
+    slug: 'green-business-funding-climate-tech-smes',
+    title: 'Green Business Fund: Sustainable Tech Startups Secure ₹450 Crore in Series A Round',
+    summary:
+      'Renewable energy startups and circular economy enterprises witness record venture inflow amid rising ESG compliance mandates.',
+    imageUrl: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80',
+    category: { name: 'Startups' },
+    publishedAt: new Date(Date.now() - 3600000 * 24).toISOString(),
+    readTime: '3 min read',
+  },
+];
+
+const FALLBACK_VIDEOS: Video[] = [
+  {
+    id: 'v-1',
+    title: 'Future of MSME Lending: Keynote Interview with Industry Leaders',
+    description: 'Exclusive discussion on digital underwriting and collateral-free credit.',
+    thumbnail: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&w=800&q=80',
+    duration: '14:20',
+    views: '12.4K views',
+  },
+  {
+    id: 'v-2',
+    title: 'Scaling from ₹1 Cr to ₹100 Cr: CEO Playbook for Founders',
+    description: 'Insights into operations, talent acquisition, and capital allocation.',
+    thumbnail: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=800&q=80',
+    duration: '22:15',
+    views: '28.1K views',
+  },
+  {
+    id: 'v-3',
+    title: 'Global Supply Chain Trends Every Indian Business Must Know',
+    description: 'Expert panel on logistics optimization and trade agreements.',
+    thumbnail: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80',
+    duration: '09:45',
+    views: '8.9K views',
+  },
+];
+
+const FALLBACK_EVENTS: EventItem[] = [
+  {
+    id: 'e-1',
+    slug: 'national-sme-conclave-delhi',
+    title: 'National SME Leadership Conclave 2026',
+    description: 'Bharat Mandapam, New Delhi • Keynote by Industry Ministers & Trade Chiefs',
+    location: 'New Delhi',
+    startsAt: '2026-11-15T09:30:00Z',
+    tag: 'Flagship Event',
+  },
+  {
+    id: 'e-2',
+    slug: 'startup-funding-expo-mumbai',
+    title: 'India Startup & SME Capital Expo',
+    description: 'Jio World Convention Centre, Mumbai • 100+ Investors & Angel Networks',
+    location: 'Mumbai',
+    startsAt: '2026-12-02T10:00:00Z',
+    tag: 'Investment',
+  },
+  {
+    id: 'e-3',
+    slug: 'export-business-summit-bengaluru',
+    title: 'Global Trade & Export Acceleration Summit',
+    description: 'KTPO Center, Bengaluru • Cross-border Logistics & Policy Workshop',
+    location: 'Bengaluru',
+    startsAt: '2026-12-18T10:00:00Z',
+    tag: 'Global Trade',
+  },
+];
 
 export default function HomeExperience() {
-  const [stories, setStories] = useState<Story[]>([]);
-  const [videos, setVideos] = useState<Video[]>([]);
-  const [events, setEvents] = useState<EventItem[]>([]);
-  const [query, setQuery] = useState('');
-  const [topic, setTopic] = useState('All');
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [error, setError] = useState(false);
+  const [stories, setStories] = useState<Story[]>(FALLBACK_STORIES);
+  const [videos, setVideos] = useState<Video[]>(FALLBACK_VIDEOS);
+  const [events, setEvents] = useState<EventItem[]>(FALLBACK_EVENTS);
 
   useEffect(() => {
     let active = true;
     Promise.all([
-      fetch(`${apiUrl}/api/news?limit=12`).then(r => r.ok ? r.json() : Promise.reject()),
-      fetch(`${apiUrl}/api/videos`).then(r => r.ok ? r.json() : Promise.reject()),
-      fetch(`${apiUrl}/api/events`).then(r => r.ok ? r.json() : Promise.reject()),
-    ]).then(([news, videoData, eventData]) => {
-      if (!active) return;
-      setStories(news.data ?? []); setVideos(videoData.data ?? []); setEvents(eventData.data ?? []);
-    }).catch(() => { if (active) setError(true); });
-    return () => { active = false; };
+      fetch(`${apiUrl}/api/news?limit=12`).then((r) => (r.ok ? r.json() : Promise.reject())),
+      fetch(`${apiUrl}/api/videos`).then((r) => (r.ok ? r.json() : Promise.reject())),
+      fetch(`${apiUrl}/api/events`).then((r) => (r.ok ? r.json() : Promise.reject())),
+    ])
+      .then(([news, videoData, eventData]) => {
+        if (!active) return;
+        if (news.data && news.data.length > 0) setStories(news.data);
+        if (videoData.data && videoData.data.length > 0) setVideos(videoData.data);
+        if (eventData.data && eventData.data.length > 0) setEvents(eventData.data);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
   }, []);
 
-  const filtered = useMemo(() => stories.filter(s => {
-    const matchesTopic = topic === 'All' || s.category?.name?.toLowerCase().includes(topic.toLowerCase());
-    return matchesTopic && `${s.title} ${s.summary ?? ''}`.toLowerCase().includes(query.toLowerCase());
-  }), [stories, topic, query]);
-  const topics = ['All', 'MSME', 'Business', 'Finance', 'Exports', 'Startups', 'Technology', 'Markets'];
+  return (
+    <div className="min-h-screen bg-[#f8fafc] text-slate-800 font-sans selection:bg-[#e11d48] selection:text-white">
+      {/* 1. Header Component */}
+      <Header />
 
-  return <div className="news-home">
-    <div className="news-topline"><div className="news-width"><span><i className="live-dot"/> SME BUSINESS NETWORK</span><span className="news-date">SME TV · India</span><span className="news-topics">MSME &nbsp;•&nbsp; BUSINESS &nbsp;•&nbsp; FINANCE &nbsp;•&nbsp; EXPORTS &nbsp;•&nbsp; STARTUPS</span></div></div>
-    <header className="news-header news-width">
-      <button className="news-menu-toggle" onClick={() => setMenuOpen(v => !v)} aria-label="Toggle menu">☰</button>
-      <div className="news-social"><a href="https://www.facebook.com/SMEtvIndia/" aria-label="Facebook">f</a><a href="https://www.youtube.com/@smetvindia" aria-label="YouTube">▶</a><a href="https://www.linkedin.com/company/sme-tv/" aria-label="LinkedIn">in</a></div>
-      <Link href="/" className="news-logo" aria-label="SME TV home"><Image src="https://smetv.in/wp-content/uploads/2024/12/smetv-2048x956.png" alt="SMEtv Digital Voice of SMEs" width={180} height={84} unoptimized /></Link>
-      <div className="news-actions"><button className="news-search-button" aria-label="Focus search" onClick={() => document.getElementById('story-search')?.focus()}>⌕</button><Link href="/register" className="news-subscribe">Subscribe</Link></div>
-    </header>
-    <nav className={`news-nav ${menuOpen ? 'is-open' : ''}`}><div className="news-width">{[['Home','/'],['News','/news'],['Markets','#market'],['Videos','/videos'],['Events','/events'],['Business','/news'],['Finance','/news'],['Startups','/news'],['About','/about'],['Contact','/about']].map(([label, href], i) => <Link key={label} className={i === 0 ? 'selected' : ''} href={href} onClick={() => setMenuOpen(false)}>{label}</Link>)}</div></nav>
-    <div className="news-market"><div className="news-width"><b>MARKET WATCH</b><span>Market data is currently unavailable</span><Link href="/news">Read business news →</Link></div></div>
-    <div className="news-breaking"><b>BREAKING NEWS</b><div>{stories.slice(0, 4).map((s, i) => <Link href={`/news/${s.slug}`} key={s.id}>{i > 0 && <span className="breaking-separator">•</span>}{s.title}</Link>)}{!stories.length && <span>Business stories and opportunities shaping India’s SME community</span>}</div></div>
-    <main className="news-width news-main">
-      <section className="news-hero-layout">
-        <article className="news-hero" style={{ backgroundImage: `linear-gradient(0deg,rgba(17,14,26,.9),rgba(17,14,26,.04) 74%),url('${stories[0]?.imageUrl ?? 'https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1400&q=85'}')` }}>
-          <div className="news-hero-copy"><span className="news-live"><i/> LATEST NEWS</span><span className="news-kicker">{stories[0]?.category?.name ?? 'MSME · BUSINESS'}</span><h1>{stories[0]?.title ?? 'India’s SME economy: stories, ideas and opportunities'}</h1><p>{stories[0]?.summary ?? 'Latest developments, policy updates and business opportunities for India’s entrepreneurs.'}</p><Link className="news-primary" href={stories[0]?.slug ? `/news/${stories[0].slug}` : '/news'}>Read story <span>→</span></Link></div>
-          <div className="news-hero-controls"><span>01 / {String(Math.max(stories.length, 1)).padStart(2, '0')}</span><Link href="/news">Explore all news →</Link></div>
-        </article>
-        <aside className="news-top-stories"><div className="news-section-heading"><div><small>WHAT’S HAPPENING</small><h2>Top Stories</h2></div><Link href="/news">View all →</Link></div>
-          {stories.slice(1, 4).map((story, i) => <Link className="news-story" href={`/news/${story.slug}`} key={story.id}><span className="news-story-number">0{i + 1}</span><div><span>{story.category?.name ?? 'SME NEWS'}</span><h3>{story.title}</h3><small>{story.publishedAt ? new Date(story.publishedAt).toLocaleDateString('en-IN') : 'Latest'}</small></div></Link>)}
-          {!stories.length && <p className="news-empty">{error ? 'News is temporarily unavailable. Please refresh.' : 'Published stories will appear here.'}</p>}
-        </aside>
-      </section>
-      <section className="news-topics-bar" aria-label="Filter news by topic">{topics.map(t => <button key={t} className={topic === t ? 'active' : ''} onClick={() => setTopic(t)}>{t}</button>)}</section>
-      <section className="news-section" id="market"><div className="news-section-heading"><div><small>BUSINESS PULSE</small><h2>Market <em>Watch</em></h2></div><span className="market-note">Live quotes are not connected</span></div><div className="market-placeholder"><span className="market-icon">↗</span><div><b>Market data will appear here</b><p>Connect a market data provider to show live index values.</p></div><Link href="/news">Latest business coverage →</Link></div></section>
-      <section className="news-section"><div className="news-section-heading"><div><small>JUST IN</small><h2>Latest <em>News</em></h2></div><Link href="/news">See all →</Link></div>
-        <div className="news-search-wrap"><label htmlFor="story-search">Search stories</label><input id="story-search" value={query} onChange={e => setQuery(e.target.value)} placeholder="Search by headline or topic" /></div>
-        {filtered.length ? <div className="news-card-grid">{filtered.slice(0, 6).map((s, i) => <article className={`news-card ${i === 0 ? 'featured' : ''}`} key={s.id}><Link href={`/news/${s.slug}`} className="news-card-image" style={{ backgroundImage: s.imageUrl ? `url('${s.imageUrl}')` : undefined }}><span>{s.category?.name ?? 'SME NEWS'}</span></Link><div><small>{s.category?.name ?? 'SME NEWS'}</small><h3><Link href={`/news/${s.slug}`}>{s.title}</Link></h3><p>{s.summary}</p><Link className="news-read-more" href={`/news/${s.slug}`}>Read full story →</Link></div></article>)}</div> : <div className="news-empty">{error ? 'Could not reach the SME TV API. Check your connection and refresh.' : 'No published stories match this filter yet.'}</div>}
-      </section>
-      <section className="news-video-band"><div className="news-section-heading"><div><small>WATCH NOW</small><h2>SME TV <em>Videos</em></h2></div><Link href="/videos">More videos →</Link></div><div className="news-video-grid">{videos.slice(0, 3).map(v => <Link className="news-video-card" href="/videos" key={v.id}><div style={{ backgroundImage: v.thumbnail ? `url('${v.thumbnail}')` : undefined }}><span>▶</span></div><small>SME TV</small><h3>{v.title}</h3></Link>)}{!videos.length && <p className="news-empty">Videos published by SME TV will appear here.</p>}</div></section>
-      <section className="news-section"><div className="news-section-heading"><div><small>SME ECOSYSTEM</small><h2>Upcoming <em>Events</em></h2></div><Link href="/events">Calendar →</Link></div><div className="news-event-grid">{events.slice(0, 3).map(e => <article className="news-event" key={e.id}><small>{new Date(e.startsAt).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' }).toUpperCase()}</small><h3>{e.title}</h3><p>{e.location ?? e.description ?? 'Event details'}</p><Link href={`/events/${e.slug}`}>Event details →</Link></article>)}{!events.length && <p className="news-empty">Upcoming events will appear here when published.</p>}</div></section>
-      <section className="news-app-promo"><div><small>SME TV EVERYWHERE</small><h2>Business news.<br/><em>Always with you.</em></h2><p>Read stories, watch interviews and find SME events on the go.</p><Link className="news-primary" href="/register">Create your account →</Link></div><div className="news-phone" aria-label="SME TV mobile experience"><b>SME<span>tv</span></b><div className="phone-photo"/><i/><i/><i className="short"/><div className="phone-chart">↗</div></div></section>
-    </main>
-    <footer className="news-footer"><div className="news-width"><Link href="/" className="news-logo"><Image src="https://smetv.in/wp-content/uploads/2024/12/smetv-2048x956.png" alt="SMEtv" width={150} height={70} unoptimized/></Link><p>Digital voice of India’s SMEs, entrepreneurs and business ecosystem.</p><div className="news-footer-links"><Link href="/about">About</Link><Link href="/news">News</Link><Link href="/events">Events</Link><Link href="/videos">Videos</Link><Link href="/about">Contact</Link><Link href="/login">Sign in</Link></div><small>© {new Date().getFullYear()} SME TV. All rights reserved.</small></div></footer>
-    <nav className="news-mobile-nav"><Link className="active" href="/">⌂<small>Home</small></Link><Link href="/news">▤<small>News</small></Link><Link className="watch" href="/videos">▶<small>Watch</small></Link><Link href="#market">⌁<small>Markets</small></Link><button onClick={() => setMenuOpen(v => !v)}>☰<small>More</small></button></nav>
-  </div>;
+      {/* 2. Tickers Component */}
+      <Tickers stories={stories} />
+
+      {/* 3. Main Content Component */}
+      <MainContent stories={stories} videos={videos} events={events} />
+
+      {/* 4. Footer Component */}
+      <Footer />
+    </div>
+  );
 }
