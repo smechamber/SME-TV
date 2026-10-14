@@ -1,6 +1,15 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
+
+type MarketItem = {
+  symbol: string;
+  name: string;
+  value: string;
+  change: string;
+  isUp: boolean;
+};
 
 type Story = {
   id: string;
@@ -9,6 +18,36 @@ type Story = {
 };
 
 export default function Tickers({ stories }: { stories: Story[] }) {
+  
+  const [marketData, setMarketData] = useState<MarketItem[]>([
+    { symbol: '^NSEI', name: 'NIFTY 50', value: '24,850.15', change: '+0.42%', isUp: true },
+    { symbol: '^BSESN', name: 'SENSEX', value: '81,410.20', change: '+0.38%', isUp: true },
+    { symbol: 'INR=X', name: 'USD/INR', value: '83.92', change: '-0.05%', isUp: false },
+    { symbol: 'GC=F', name: 'GOLD (10g)', value: '76,450.00', change: '+0.22%', isUp: true },
+  ]);
+
+  useEffect(() => {
+    const fetchMarketData = async () => {
+      try {
+        
+        const res = await fetch('http://localhost:4000/api/market-data');
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            setMarketData(data);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching live market ticker:', err);
+      }
+    };
+
+    fetchMarketData();
+    
+    const interval = setInterval(fetchMarketData, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <>
       <style jsx global>{`
@@ -50,37 +89,24 @@ export default function Tickers({ stories }: { stories: Story[] }) {
             <div className="animate-ticker text-xs font-mono">
               {[1, 2].map((loopKey) => (
                 <div key={loopKey} className="flex items-center gap-8 pr-8 flex-shrink-0">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-slate-400">NIFTY 50</span>
-                    <span className="text-white font-semibold">24,850.15</span>
-                    <span className="text-emerald-400 text-[11px]">▲ +0.42%</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-slate-400">SENSEX</span>
-                    <span className="text-white font-semibold">81,410.20</span>
-                    <span className="text-emerald-400 text-[11px]">▲ +0.38%</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-slate-400">NIFTY SME EMERGE</span>
-                    <span className="text-white font-semibold">16,240.80</span>
-                    <span className="text-emerald-400 text-[11px]">▲ +1.15%</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-slate-400">USD/INR</span>
-                    <span className="text-white font-semibold">83.92</span>
-                    <span className="text-rose-400 text-[11px]">▼ -0.05%</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-slate-400">GOLD (10g)</span>
-                    <span className="text-white font-semibold">₹76,450</span>
-                    <span className="text-emerald-400 text-[11px]">▲ +0.22%</span>
-                  </div>
+                  {marketData.map((item, index) => (
+                    <div key={`${loopKey}-${index}`} className="flex items-center gap-1.5">
+                      <span className="text-slate-400">{item.name}</span>
+                      <span className="text-white font-semibold">{item.value}</span>
+                      <span className={item.isUp ? 'text-emerald-400 text-[11px]' : 'text-rose-400 text-[11px]'}>
+                        {item.isUp ? '▲' : '▼'} {item.change}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               ))}
             </div>
           </div>
 
-          <Link href="/news" className="text-[11px] font-bold text-indigo-300 hover:text-white uppercase tracking-wider flex-shrink-0 z-10 bg-slate-900 pl-4 hidden sm:block">
+          <Link
+            href="/news"
+            className="text-[11px] font-bold text-indigo-300 hover:text-white uppercase tracking-wider flex-shrink-0 z-10 bg-slate-900 pl-4 hidden sm:block"
+          >
             Market News →
           </Link>
         </div>
@@ -98,7 +124,11 @@ export default function Tickers({ stories }: { stories: Story[] }) {
               {[1, 2].map((loopKey) => (
                 <div key={loopKey} className="flex items-center gap-8 pr-8 flex-shrink-0">
                   {stories.map((s) => (
-                    <Link href={`/news/${s.slug}`} key={`${loopKey}-${s.id}`} className="hover:text-[#e11d48] transition-colors flex items-center gap-3">
+                    <Link
+                      href={`/news/${s.slug}`}
+                      key={`${loopKey}-${s.id}`}
+                      className="hover:text-[#e11d48] transition-colors flex items-center gap-3"
+                    >
                       <span className="text-[#e11d48] font-bold">•</span>
                       <span>{s.title}</span>
                     </Link>
