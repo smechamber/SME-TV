@@ -58,13 +58,13 @@ export default function MediaUpload({
     }
   }
 
-  return <div className="media-upload">
-    <label>{label}<input type="file" accept={accept} onChange={upload} disabled={busy} /></label>
-    {busy && <span className="upload-status">Uploading to media server…</span>}
-    {notice && <span className={uploaded ? 'upload-status success' : 'upload-status error'}>{notice}</span>}
-    {uploaded?.resourceType === 'image' && <img className="media-preview" src={uploaded.url} alt="Uploaded preview" />}
-    {uploaded?.resourceType === 'video' && <video className="media-preview" controls src={uploaded.url} />}
-    {uploaded?.resourceType === 'document' && <a className="media-document-preview" href={uploaded.url} target="_blank" rel="noreferrer">Open uploaded document</a>}
-    {uploaded && <input type="text" readOnly value={uploaded.url} aria-label="Uploaded media URL" />}
+  return <div className="grid gap-2 text-xs font-bold text-[#504b5b]">
+    <label>{label}<input className="mt-2 block w-full text-xs font-normal" type="file" accept={accept} onChange={upload} disabled={busy} /></label>
+    {busy && <span className="text-[11px] font-normal text-[#777283]">Uploading to media server…</span>}
+    {notice && <span className={`text-[11px] font-normal ${uploaded ? 'text-[#24724f]' : 'text-[#a33232]'}`}>{notice}</span>}
+    {uploaded?.resourceType === 'image' && <img className="max-h-48 w-full rounded object-cover" src={uploaded.url} alt="Uploaded preview" />}
+    {uploaded?.resourceType === 'video' && <video className="max-h-48 w-full rounded object-cover" controls src={uploaded.url} />}
+    {uploaded?.resourceType === 'document' && <a className="text-[11px] text-[#d92867] underline" href={uploaded.url} target="_blank" rel="noreferrer">Open uploaded document</a>}
+    {uploaded && <input className="w-full rounded border border-[#dedbe3] p-2 text-xs font-normal" type="text" readOnly value={uploaded.url} aria-label="Uploaded media URL" />}
   </div>;
 }
