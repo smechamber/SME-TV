@@ -134,6 +134,7 @@ const eventFormCreate = z.object({
   capacity: z.number().int().positive().optional(),
 });
 const authWindows = new Map<string, { count: number; resetAt: number }>();
+const ADMIN_SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 7;
 function authRateLimit(request: Request, response: express.Response, next: express.NextFunction) {
   const key = request.ip || 'unknown';
   const now = Date.now();
@@ -159,8 +160,9 @@ async function authenticate(
     where: { tokenHash: hash(token) },
     include: { user: true },
   });
-  if (!session || session.expiresAt < new Date() || session.user.status !== 'ACTIVE')
+  if (!session || session.expiresAt <= new Date() || session.user.status !== 'ACTIVE') {
     return response.status(401).json({ success: false, message: 'Session expired' });
+  }
   request.user = { id: session.user.id, role: session.user.role };
   next();
 }
@@ -281,6 +283,40 @@ app.post(
         userId: user.id,
         tokenHash: hash(token),
         expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 14),
+      },
+    });
+    response.json({
+      success: true,
+      data: { token, user: { id: user.id, name: user.name, email: user.email, role: user.role } },
+    });
+  }),
+);
+app.post(
+  '/api/admin/login',
+  authRateLimit,
+  asyncRoute(async (request, response) => {
+    const input = z
+      .object({ email: z.string().email(), password: z.string().min(1).max(128) })
+      .parse(request.body);
+    const user = await db.user.findUnique({ where: { email: input.email.toLowerCase() } });
+    const [salt, expected] = user?.passwordHash?.split(':') ?? ['', ''];
+    const actual = scryptSync(input.password, salt || 'invalid', 64).toString('hex');
+    const valid =
+      expected.length === actual.length &&
+      timingSafeEqual(Buffer.from(actual, 'hex'), Buffer.from(expected, 'hex'));
+    if (
+      !user ||
+      !valid ||
+      user.status !== 'ACTIVE' ||
+      !['ADMIN', 'EDITOR'].includes(user.role)
+    )
+      return response.status(401).json({ success: false, message: 'Invalid admin email or password' });
+    const token = randomBytes(32).toString('base64url');
+    await db.session.create({
+      data: {
+        userId: user.id,
+        tokenHash: hash(token),
+        expiresAt: new Date(Date.now() + ADMIN_SESSION_TTL_MS),
       },
     });
     response.json({
