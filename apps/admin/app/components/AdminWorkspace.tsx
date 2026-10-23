@@ -6,6 +6,7 @@ import type { Registration, Stats } from '../types';
 import AdminSidebar from './AdminSidebar';
 import AdminTopbar from './AdminTopbar';
 import ContentStudioPage from './ContentStudioPage';
+import ContentFormPage from './ContentFormPage';
 import OverviewPage from './OverviewPage';
 
 export type ContentType = 'news' | 'video' | 'event';
@@ -28,7 +29,7 @@ export type AdminWorkspaceProps = {
 };
 
 export default function AdminWorkspace(props: AdminWorkspaceProps) {
-  const [activeView, setActiveView] = useState<'overview' | 'content-studio'>('overview');
+  const [activeView, setActiveView] = useState<'overview' | 'content-studio' | 'content-form'>('overview');
 
   function showRegistrations() {
     setActiveView('overview');
@@ -49,7 +50,15 @@ export default function AdminWorkspace(props: AdminWorkspaceProps) {
       <section className="ml-0 min-h-screen md:ml-[225px]">
         <AdminTopbar activeView={activeView} onSignOut={props.onSignOut} />
         {activeView === 'content-studio' ? (
-          <ContentStudioPage />
+          <ContentStudioPage
+            active={props.active}
+            onOpenForm={(type) => {
+              props.onActiveChange(type);
+              setActiveView('content-form');
+            }}
+          />
+        ) : activeView === 'content-form' ? (
+          <ContentFormPage {...props} onBack={() => setActiveView('content-studio')} />
         ) : (
           <OverviewPage {...props} />
         )}

@@ -1,7 +1,7 @@
 'use client';
 
 type AdminSidebarProps = {
-  activeView: 'overview' | 'content-studio';
+  activeView: 'overview' | 'content-studio' | 'content-form';
   onOverview: () => void;
   onContentStudio: () => void;
   onRegistrations: () => void;
@@ -27,7 +27,7 @@ export default function AdminSidebar({
       </a>
       <span className="px-2 pb-2 text-[9px] font-bold tracking-[.14em] text-[#a8a1b1]">WORKSPACE</span>
       <button className={itemClass(activeView === 'overview')} onClick={onOverview}>Overview</button>
-      <button className={itemClass(activeView === 'content-studio')} onClick={onContentStudio}>Content studio</button>
+      <button className={itemClass(activeView === 'content-studio' || activeView === 'content-form')} onClick={onContentStudio}>Content studio</button>
       <button className={itemClass()} onClick={onRegistrations}>Registrations</button>
       <div className="mt-auto flex items-center gap-2 border-t border-white/10 px-1 pt-4">
         <span className="grid h-[30px] w-[30px] place-items-center rounded-full bg-[#ad4275] text-xs font-bold">A</span>
