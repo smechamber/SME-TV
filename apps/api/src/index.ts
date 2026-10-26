@@ -10,6 +10,7 @@ import eventRouter from './modules/events/index.js';
 import marketRouter from './modules/market/index.js';
 import newsRouter from './modules/news/index.js';
 import videoRouter from './modules/videos/index.js';
+import homepageRouter from './modules/homepage/index.js';
 import userRouter from './modules/users/index.js';
 
 const app = express();
@@ -45,6 +46,7 @@ app.use('/api', newsRouter);
 app.use('/api', videoRouter);
 app.use('/api', eventRouter);
 app.use('/api', marketRouter);
+app.use('/api', homepageRouter);
 
 const errorHandler: ErrorRequestHandler = (error, _request, response, _next) => {
   if (error instanceof multer.MulterError) {

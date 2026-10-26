@@ -8,6 +8,8 @@ import AdminTopbar from './AdminTopbar';
 import ContentStudioPage from './ContentStudioPage';
 import ContentFormPage from './ContentFormPage';
 import OverviewPage from './OverviewPage';
+import HomepageBuilder from './HomepageBuilder';
+import type { ManagedContent } from './ContentStudioPage';
 
 export type ContentType = 'news' | 'video' | 'event';
 
@@ -26,10 +28,13 @@ export type AdminWorkspaceProps = {
   onSignOut: () => void;
   onPublish: (event: FormEvent<HTMLFormElement>) => void;
   onArticleContentChange: (content: string) => void;
+  onNotice: (message: string) => void;
+  editingContent: ManagedContent | null;
+  onEditContent: (type: ContentType, item: ManagedContent | null) => void;
 };
 
 export default function AdminWorkspace(props: AdminWorkspaceProps) {
-  const [activeView, setActiveView] = useState<'overview' | 'content-studio' | 'content-form'>('overview');
+  const [activeView, setActiveView] = useState<'overview' | 'content-studio' | 'content-form' | 'homepage'>('overview');
 
   function showRegistrations() {
     setActiveView('overview');
@@ -44,21 +49,30 @@ export default function AdminWorkspace(props: AdminWorkspaceProps) {
         activeView={activeView}
         onOverview={() => setActiveView('overview')}
         onContentStudio={() => setActiveView('content-studio')}
+        onHomepage={() => setActiveView('homepage')}
         onRegistrations={showRegistrations}
         onSignOut={props.onSignOut}
       />
       <section className="ml-0 min-h-screen md:ml-[225px]">
         <AdminTopbar activeView={activeView} onSignOut={props.onSignOut} />
-        {activeView === 'content-studio' ? (
+          {activeView === 'homepage' ? <HomepageBuilder token={props.token} onNotice={props.onNotice} /> : activeView === 'content-studio' ? (
           <ContentStudioPage
             active={props.active}
+            token={props.token}
+            onNotice={props.onNotice}
+            onEdit={(type, item) => {
+              props.onActiveChange(type);
+              props.onEditContent(type, item);
+              setActiveView('content-form');
+            }}
             onOpenForm={(type) => {
               props.onActiveChange(type);
+              props.onEditContent(type, null);
               setActiveView('content-form');
             }}
           />
         ) : activeView === 'content-form' ? (
-          <ContentFormPage {...props} onBack={() => setActiveView('content-studio')} />
+          <ContentFormPage {...props} initialContent={props.editingContent} onBack={() => setActiveView('content-studio')} />
         ) : (
           <OverviewPage {...props} />
         )}

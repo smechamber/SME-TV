@@ -9,10 +9,19 @@ import Youtube from '@tiptap/extension-youtube';
 
 const extensions = [StarterKit.configure({ link: { openOnClick: false } }), TextAlign.configure({ types: ['heading', 'paragraph'] }), Image.configure({ allowBase64: false }), TableKit, Youtube.configure({ nocookie: true, controls: true })];
 const draftKey = 'smetv-article-draft-v1';
-export default function RichTextEditor({ onChange }: { onChange: (html: string) => void }) {
+export default function RichTextEditor({ onChange, initialContent = '' }: { onChange: (html: string) => void; initialContent?: string }) {
   const [preview, setPreview] = useState(false);
   const editor = useEditor({ extensions, immediatelyRender: false, content: '<p></p>', onUpdate: ({ editor }) => { const html = editor.getHTML(); onChange(html); window.localStorage.setItem(draftKey, html); } });
-  useEffect(() => { if (!editor) return; const draft = window.localStorage.getItem(draftKey); if (draft && editor.getText().length === 0) { editor.commands.setContent(draft); onChange(draft); } }, [editor, onChange]);
+  useEffect(() => {
+    if (!editor) return;
+    if (initialContent) {
+      editor.commands.setContent(initialContent);
+      onChange(initialContent);
+      return;
+    }
+    const draft = window.localStorage.getItem(draftKey);
+    if (draft && editor.getText().length === 0) { editor.commands.setContent(draft); onChange(draft); }
+  }, [editor, initialContent, onChange]);
   if (!editor) return <div className="rounded border border-[#dedbe3] p-4 text-xs text-[#777283]">Loading editor…</div>;
   const activeEditor = editor;
   function run(command: () => void) { if (preview) return; command(); activeEditor.commands.focus(); }

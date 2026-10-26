@@ -16,6 +16,9 @@ export type Video = {
   thumbnail?: string;
   duration?: string;
   views?: string;
+  videoType?: 'UPLOAD' | 'YOUTUBE';
+  videoUrl?: string;
+  youtubeId?: string;
 };
 
 export type EventItem = {
@@ -26,6 +29,20 @@ export type EventItem = {
   location?: string;
   startsAt: string;
   tag?: string;
+};
+
+export type HomepageItem = Story | Video | EventItem;
+export type HomepageSection = {
+  id: string;
+  name: string;
+  kind: string;
+  layout: 'HERO' | 'GRID' | 'LIST' | 'CAROUSEL';
+  design: 'STANDARD' | 'FEATURED_GRID' | 'SPLIT_FEATURED' | 'DARK_BAND' | 'COMPACT_LIST' | 'EVENT_CARDS';
+  source: 'MANUAL' | 'LATEST' | 'TRENDING';
+  contentType: 'ARTICLE' | 'VIDEO' | 'EVENT';
+  itemCount: number;
+  displayFields: ('IMAGE' | 'CATEGORY' | 'SUMMARY' | 'DATE' | 'META')[];
+  items: HomepageItem[];
 };
 
 export const FALLBACK_STORIES: Story[] = [

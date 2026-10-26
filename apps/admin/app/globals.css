@@ -1,6 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+.builder-swatch{display:grid;height:52px;gap:4px;border-radius:5px;background:#f4f2f6;padding:5px;overflow:hidden}.builder-swatch i,.builder-swatch span{display:block;border-radius:3px;background:linear-gradient(135deg,#542c71,#d92867)}.builder-swatch-grid{grid-template-columns:1.6fr 1fr;grid-template-rows:1fr 1fr}.builder-swatch-grid span{grid-row:span 2}.builder-swatch-split{grid-template-columns:1.5fr 1fr;grid-template-rows:repeat(3,1fr)}.builder-swatch-split span{grid-row:span 3}.builder-swatch-dark{grid-template-columns:repeat(3,1fr);background:#211b2d}.builder-swatch-dark i{background:linear-gradient(135deg,#64748b,#e11d48)}.builder-swatch-list{grid-template-columns:20px 1fr;grid-template-rows:repeat(3,1fr);background:#fff}.builder-swatch-list b{font-size:8px;color:#d92867}.builder-swatch-list i{background:#d9d4df}.builder-swatch-events{grid-template-columns:repeat(3,1fr)}.builder-swatch-events i{border-top:3px solid #d92867;background:#fff}.builder-swatch-standard{grid-template-columns:repeat(3,1fr)}
 
 @layer base {
   :root { color-scheme: light; }

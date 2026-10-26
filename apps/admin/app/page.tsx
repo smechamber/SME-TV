@@ -3,6 +3,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import AdminLogin from './components/AdminLogin';
 import AdminWorkspace, { type ContentType } from './components/AdminWorkspace';
+import type { ManagedContent } from './components/ContentStudioPage';
 import { initialStats, type Registration, type Stats } from './types';
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
@@ -19,6 +20,7 @@ export default function AdminPage() {
   const [articleContent, setArticleContent] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
+  const [editingContent, setEditingContent] = useState<ManagedContent | null>(null);
 
   useEffect(() => {
     const savedToken = window.localStorage.getItem('smetv-admin-token');
@@ -29,6 +31,12 @@ export default function AdminPage() {
     if (!token) return;
     loadDashboard(token);
   }, [token]);
+
+  useEffect(() => {
+    setVideoUrl(editingContent?.videoUrl ?? '');
+    setArticleContent(editingContent?.content ?? '');
+    setImageUrl(editingContent?.imageUrl ?? '');
+  }, [editingContent]);
 
   async function loadDashboard(adminToken: string) {
     try {
@@ -84,8 +92,8 @@ export default function AdminPage() {
     const request = createContentRequest(active, form, { articleContent, imageUrl, videoUrl });
 
     try {
-      const response = await fetch(`${API}${request.path}`, {
-        method: 'POST',
+      const response = await fetch(`${API}${request.path}${editingContent ? `/${editingContent.id}` : ''}`, {
+        method: editingContent ? 'PATCH' : 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ ...request.body, status }),
       });
@@ -97,6 +105,7 @@ export default function AdminPage() {
           : 'Draft saved successfully.',
       );
       formElement.reset();
+      setEditingContent(null);
       if (active === 'news') {
         setImageUrl('');
         setArticleContent('');
@@ -160,6 +169,12 @@ export default function AdminPage() {
       onSignOut={signOut}
       onPublish={publish}
       onArticleContentChange={setArticleContent}
+      onNotice={setNotice}
+      editingContent={editingContent}
+      onEditContent={(type, item) => {
+        setActive(type);
+        setEditingContent(item);
+      }}
     />
   );
 }

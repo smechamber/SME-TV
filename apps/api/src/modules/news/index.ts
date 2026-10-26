@@ -41,6 +41,20 @@ router.get(
   }),
 );
 
+router.get(
+  '/admin/news',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (_request, response) => {
+    const data = await db.article.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+      include: { category: { select: { name: true } } },
+    });
+    response.json({ success: true, data });
+  }),
+);
+
 router.post(
   '/admin/news',
   authenticate,
@@ -71,6 +85,48 @@ router.post(
       },
     });
     response.status(201).json({ success: true, data });
+  }),
+);
+
+router.patch(
+  '/admin/news/:id',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (request, response) => {
+    const input = articleForm.parse(request.body);
+    const category = input.category
+      ? await db.category.upsert({
+          where: { slug: slugify(input.category) },
+          update: {},
+          create: { name: input.category, slug: slugify(input.category) },
+        })
+      : undefined;
+    const data = await db.article.update({
+      where: { id: String(request.params.id) },
+      data: {
+        title: input.title,
+        slug: slugify(input.slug || input.title),
+        summary: input.summary,
+        content: sanitizeArticleHtml(input.content),
+        imageUrl: input.imageUrl || null,
+        status: input.status,
+        isFeatured: input.isFeatured,
+        isBreaking: input.isBreaking,
+        publishedAt: input.status === 'PUBLISHED' ? new Date() : null,
+        categoryId: category?.id ?? null,
+      },
+    });
+    response.json({ success: true, data });
+  }),
+);
+
+router.delete(
+  '/admin/news/:id',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (request, response) => {
+    await db.article.delete({ where: { id: String(request.params.id) } });
+    response.status(204).send();
   }),
 );
 

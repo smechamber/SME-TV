@@ -10,17 +10,28 @@ export default function MediaUpload({
   token,
   accept,
   label = 'Upload media',
+  initialUrl = '',
   onUploaded,
+  onClear,
 }: {
   token: string;
   accept: string;
   label?: string;
+  initialUrl?: string;
   onUploaded: (media: UploadedMedia) => void;
+  onClear?: () => void;
 }) {
   const [previewUrl, setPreviewUrl] = useState('');
   const [uploaded, setUploaded] = useState<UploadedMedia | null>(null);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState('');
+
+  useEffect(() => {
+    setUploaded(initialUrl ? {
+      url: initialUrl,
+      resourceType: accept.startsWith('video') ? 'video' : 'image',
+    } : null);
+  }, [accept, initialUrl]);
 
   useEffect(() => () => {
     if (previewUrl.startsWith('blob:')) URL.revokeObjectURL(previewUrl);
@@ -65,6 +76,6 @@ export default function MediaUpload({
     {uploaded?.resourceType === 'image' && <img className="max-h-48 w-full rounded object-cover" src={uploaded.url} alt="Uploaded preview" />}
     {uploaded?.resourceType === 'video' && <video className="max-h-48 w-full rounded object-cover" controls src={uploaded.url} />}
     {uploaded?.resourceType === 'document' && <a className="text-[11px] text-[#d92867] underline" href={uploaded.url} target="_blank" rel="noreferrer">Open uploaded document</a>}
-    {uploaded && <input className="w-full rounded border border-[#dedbe3] p-2 text-xs font-normal" type="text" readOnly value={uploaded.url} aria-label="Uploaded media URL" />}
+    {uploaded && <><input className="w-full rounded border border-[#dedbe3] p-2 text-xs font-normal" type="text" readOnly value={uploaded.url} aria-label="Uploaded media URL" /><button className="w-max rounded border border-[#f1c8d7] px-3 py-2 text-[11px] font-bold text-[#c5225b]" type="button" onClick={() => { setUploaded(null); setPreviewUrl(''); onClear?.(); }}>Remove media</button></>}
   </div>;
 }

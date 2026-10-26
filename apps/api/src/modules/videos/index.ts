@@ -19,6 +19,16 @@ router.get(
   }),
 );
 
+router.get(
+  '/admin/videos',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (_request, response) => {
+    const data = await db.video.findMany({ orderBy: { createdAt: 'desc' }, take: 100 });
+    response.json({ success: true, data });
+  }),
+);
+
 router.post(
   '/admin/videos',
   authenticate,
@@ -52,6 +62,49 @@ router.post(
       },
     });
     response.status(201).json({ success: true, data });
+  }),
+);
+
+router.patch(
+  '/admin/videos/:id',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (request, response) => {
+    const input = videoForm.parse(request.body);
+    const youtubeId =
+      input.videoType === 'YOUTUBE'
+        ? (input.youtubeId ??
+          input.videoUrl?.match(
+            /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/,
+          )?.[1])
+        : undefined;
+    if (input.videoType === 'YOUTUBE' && !youtubeId)
+      return response.status(400).json({ success: false, message: 'Provide a valid YouTube URL or video ID' });
+    const data = await db.video.update({
+      where: { id: String(request.params.id) },
+      data: {
+        title: input.title,
+        description: input.description,
+        videoType: input.videoType,
+        videoUrl: input.videoType === 'UPLOAD' ? input.videoUrl : null,
+        youtubeId,
+        thumbnail: input.thumbnail,
+        status: input.status,
+        isFeatured: input.isFeatured,
+        publishedAt: input.status === 'PUBLISHED' ? new Date() : null,
+      },
+    });
+    response.json({ success: true, data });
+  }),
+);
+
+router.delete(
+  '/admin/videos/:id',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (request, response) => {
+    await db.video.delete({ where: { id: String(request.params.id) } });
+    response.status(204).send();
   }),
 );
 

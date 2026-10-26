@@ -123,6 +123,25 @@ model EventRegistration {
   @@index([eventId, createdAt])
 }
 
+model HomepageSection {
+  id            String               @id @default(cuid())
+  name          String
+  kind          HomepageSectionKind  @default(CUSTOM)
+  layout        HomepageLayout       @default(GRID)
+  design        HomepageDesign       @default(STANDARD)
+  source        HomepageSource       @default(MANUAL)
+  contentType   HomepageContentType  @default(ARTICLE)
+  itemCount     Int                  @default(6)
+  contentIds    String[]
+  displayFields String[]
+  displayOrder  Int                  @default(0)
+  enabled       Boolean              @default(true)
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+
+  @@index([enabled, displayOrder])
+}
+
 enum UserRole {
   USER
   ADMIN
@@ -148,4 +167,37 @@ enum EventStatus {
   POSTPONED
   CANCELLED
 }
-
+enum HomepageSectionKind {
+  HERO
+  TRENDING
+  LATEST
+  INTERVIEWS
+  NEWS
+  VIDEOS
+  EVENTS
+  CUSTOM
+}
+enum HomepageLayout {
+  HERO
+  GRID
+  LIST
+  CAROUSEL
+}
+enum HomepageDesign {
+  STANDARD
+  FEATURED_GRID
+  SPLIT_FEATURED
+  DARK_BAND
+  COMPACT_LIST
+  EVENT_CARDS
+}
+enum HomepageSource {
+  MANUAL
+  LATEST
+  TRENDING
+}
+enum HomepageContentType {
+  ARTICLE
+  VIDEO
+  EVENT
+}

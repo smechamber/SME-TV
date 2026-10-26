@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
+import DynamicHomepage from './DynamicHomepage';
+import type { HomepageSection } from '../home-data';
 
 type Story = {
   id: string;
@@ -21,6 +23,9 @@ type Video = {
   thumbnail?: string;
   duration?: string;
   views?: string;
+  videoType?: 'UPLOAD' | 'YOUTUBE';
+  videoUrl?: string;
+  youtubeId?: string;
 };
 
 type EventItem = {
@@ -37,11 +42,13 @@ interface MainContentProps {
   stories: Story[];
   videos: Video[];
   events: EventItem[];
+  homepageSections?: HomepageSection[] | null;
 }
 
-export default function MainContent({ stories, videos, events }: MainContentProps) {
+export default function MainContent({ stories, videos, events, homepageSections }: MainContentProps) {
   const [query, setQuery] = useState('');
   const [topic, setTopic] = useState('All');
+  const [playingVideoId, setPlayingVideoId] = useState<string | null>(null);
 
   const filtered = useMemo(
     () =>
@@ -66,6 +73,10 @@ export default function MainContent({ stories, videos, events }: MainContentProp
     'Technology',
     'Markets',
   ];
+
+  if (homepageSections?.length) {
+    return <main className="news-width news-main"><DynamicHomepage sections={homepageSections} /></main>;
+  }
 
   return (
     <main className="max-w-7xl mx-auto px-4 py-8 space-y-12">
@@ -221,17 +232,48 @@ export default function MainContent({ stories, videos, events }: MainContentProp
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {videos.map((v) => (
-            <Link className="bg-slate-800/80 border border-slate-700/60 rounded-xl overflow-hidden shadow-md hover:border-slate-500 transition-all group p-3 space-y-3" href="/videos" key={v.id}>
-              <div className="relative aspect-video rounded-lg bg-slate-950 bg-cover bg-center overflow-hidden flex items-center justify-center" style={{ backgroundImage: v.thumbnail ? `url('${v.thumbnail}')` : undefined }}>
-                <div className="absolute inset-0 bg-slate-950/40 group-hover:bg-slate-950/20 transition-all" />
-                <span className="w-10 h-10 rounded-full bg-[#e11d48] text-white flex items-center justify-center font-bold shadow-lg group-hover:scale-110 transition-transform z-10 text-xs">▶</span>
-                {v.duration && (
-                  <span className="absolute bottom-2 right-2 bg-slate-950/90 text-white text-[10px] font-mono px-2 py-0.5 rounded">
-                    {v.duration}
-                  </span>
-                )}
-              </div>
+          {videos.map((v) => {
+            const isPlaying = playingVideoId === v.id;
+            const youtubeThumbnail =
+              v.youtubeId && /^[\w-]{11}$/.test(v.youtubeId)
+                ? `https://i.ytimg.com/vi/${v.youtubeId}/hqdefault.jpg`
+                : undefined;
+            const thumbnail = v.thumbnail ?? youtubeThumbnail;
+
+            return (
+            <article className="bg-slate-800/80 border border-slate-700/60 rounded-xl overflow-hidden shadow-md hover:border-slate-500 transition-all group p-3 space-y-3" key={v.id}>
+              {isPlaying && v.videoType === 'YOUTUBE' && v.youtubeId ? (
+                <div className="relative aspect-video rounded-lg overflow-hidden bg-slate-950">
+                  <iframe
+                    className="absolute inset-0 h-full w-full"
+                    src={`https://www.youtube-nocookie.com/embed/${v.youtubeId}?autoplay=1&rel=0`}
+                    title={v.title}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    allowFullScreen
+                  />
+                </div>
+              ) : isPlaying && v.videoType === 'UPLOAD' && v.videoUrl ? (
+                <div className="relative aspect-video rounded-lg overflow-hidden bg-slate-950">
+                  <video className="h-full w-full" controls autoPlay poster={thumbnail} src={v.videoUrl} />
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  className="relative aspect-video w-full rounded-lg bg-slate-950 bg-cover bg-center overflow-hidden flex items-center justify-center"
+                  style={thumbnail ? { backgroundImage: `url('${thumbnail}')` } : undefined}
+                  onClick={() => setPlayingVideoId(v.id)}
+                  aria-label={`Play ${v.title}`}
+                >
+                  <div className="absolute inset-0 bg-slate-950/40 group-hover:bg-slate-950/20 transition-all" />
+                  <span className="w-10 h-10 rounded-full bg-[#e11d48] text-white flex items-center justify-center font-bold shadow-lg group-hover:scale-110 transition-transform z-10 text-xs">▶</span>
+                  {v.duration && (
+                    <span className="absolute bottom-2 right-2 bg-slate-950/90 text-white text-[10px] font-mono px-2 py-0.5 rounded">
+                      {v.duration}
+                    </span>
+                  )}
+                </button>
+              )}
               <div>
                 <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-rose-400 mb-1">
                   <span>SME TV SHOW</span>
@@ -239,8 +281,9 @@ export default function MainContent({ stories, videos, events }: MainContentProp
                 </div>
                 <h3 className="text-xs font-bold text-white group-hover:text-rose-200 transition-colors line-clamp-2 leading-snug">{v.title}</h3>
               </div>
-            </Link>
-          ))}
+            </article>
+            );
+          })}
         </div>
       </section>
 
