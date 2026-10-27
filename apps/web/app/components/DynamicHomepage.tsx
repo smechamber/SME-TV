@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import type { HomepageSection } from '../home-data';
+import HeroHeadlines from './homepage/HeroHeadlines';
 import {
   ArticleCards,
   ArticleHero,
@@ -90,6 +91,13 @@ export default function DynamicHomepage({ sections }: { sections: HomepageSectio
         if (section.items.length === 0)
           return (
             <div key={section.id} className="pt-12">
+              {index === 0 && filters}
+            </div>
+          );
+        if (section.kind === 'HERO')
+          return (
+            <div key={section.id} className="space-y-8 pt-6">
+              <HeroHeadlines items={section.items} featuredVideoId={section.heroVideoId} />
               {index === 0 && filters}
             </div>
           );

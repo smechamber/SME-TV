@@ -18,18 +18,11 @@ type Story = {
 };
 
 export default function Tickers({ stories }: { stories: Story[] }) {
-  
-  const [marketData, setMarketData] = useState<MarketItem[]>([
-    { symbol: '^NSEI', name: 'NIFTY 50', value: '24,850.15', change: '+0.42%', isUp: true },
-    { symbol: '^BSESN', name: 'SENSEX', value: '81,410.20', change: '+0.38%', isUp: true },
-    { symbol: 'INR=X', name: 'USD/INR', value: '83.92', change: '-0.05%', isUp: false },
-    { symbol: 'GC=F', name: 'GOLD (10g)', value: '76,450.00', change: '+0.22%', isUp: true },
-  ]);
+  const [marketData, setMarketData] = useState<MarketItem[]>([]);
 
   useEffect(() => {
     const fetchMarketData = async () => {
       try {
-        
         const res = await fetch('http://localhost:4000/api/market-data');
         if (res.ok) {
           const data = await res.json();
@@ -43,7 +36,7 @@ export default function Tickers({ stories }: { stories: Story[] }) {
     };
 
     fetchMarketData();
-    
+
     const interval = setInterval(fetchMarketData, 30000);
     return () => clearInterval(interval);
   }, []);
@@ -78,7 +71,10 @@ export default function Tickers({ stories }: { stories: Story[] }) {
       `}</style>
 
       {/* Market Watch Ticker */}
-      <div className="bg-slate-900 text-white py-2.5 mt-1.5 overflow-hidden border-b border-slate-800" id="market">
+      <div
+        className={`${marketData.length ? '' : 'hidden'} bg-slate-900 text-white py-2.5 mt-1.5 overflow-hidden border-b border-slate-800`}
+        id="market"
+      >
         <div className="max-w-7xl mx-auto px-4 flex items-center">
           <div className="flex items-center gap-2 font-extrabold text-[#e11d48] uppercase tracking-wider text-[11px] flex-shrink-0 z-10 bg-slate-900 pr-4">
             <span>MARKET WATCH</span>
@@ -93,7 +89,11 @@ export default function Tickers({ stories }: { stories: Story[] }) {
                     <div key={`${loopKey}-${index}`} className="flex items-center gap-1.5">
                       <span className="text-slate-400">{item.name}</span>
                       <span className="text-white font-semibold">{item.value}</span>
-                      <span className={item.isUp ? 'text-emerald-400 text-[11px]' : 'text-rose-400 text-[11px]'}>
+                      <span
+                        className={
+                          item.isUp ? 'text-emerald-400 text-[11px]' : 'text-rose-400 text-[11px]'
+                        }
+                      >
                         {item.isUp ? '▲' : '▼'} {item.change}
                       </span>
                     </div>
@@ -113,7 +113,9 @@ export default function Tickers({ stories }: { stories: Story[] }) {
       </div>
 
       {/* Breaking News Ticker */}
-      <div className="bg-rose-50/80 border-b border-rose-100 py-2.5 overflow-hidden text-xs">
+      <div
+        className={`${stories.length ? '' : 'hidden'} bg-rose-50/80 border-b border-rose-100 py-2.5 overflow-hidden text-xs`}
+      >
         <div className="max-w-7xl mx-auto px-4 flex items-center">
           <span className="font-extrabold text-white bg-[#e11d48] px-3 py-1 rounded text-[10px] tracking-widest uppercase flex-shrink-0 z-10 shadow-sm mr-4">
             BREAKING

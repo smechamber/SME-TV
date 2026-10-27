@@ -75,7 +75,7 @@ export default function EventRegistrationModal(props: Props) {
         <Pressable
           style={[styles.pinkButton, submitting && { opacity: 0.6 }]}
           disabled={submitting}
-          onPress={() => void submitRegistration()}
+          onPress={onSubmit}
         >
           <Text style={styles.pinkButtonText}>
             {submitting ? 'Submitting...' : 'Submit registration'}

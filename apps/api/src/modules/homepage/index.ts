@@ -11,8 +11,8 @@ const sectionSchema = z.object({
   design: z.enum(['STANDARD', 'FEATURED_GRID', 'SPLIT_FEATURED', 'DARK_BAND', 'COMPACT_LIST', 'EVENT_CARDS']),
   source: z.enum(['MANUAL', 'LATEST', 'TRENDING']),
   contentType: z.enum(['ARTICLE', 'VIDEO', 'EVENT', 'MIXED']),
-  itemCount: z.number().int().min(1).max(24),
-  contentIds: z.array(z.string()).max(24),
+  itemCount: z.number().int().min(1).max(302),
+  contentIds: z.array(z.string()).max(302),
   displayFields: z.array(z.enum(['IMAGE', 'CATEGORY', 'SUMMARY', 'DATE', 'META'])).max(5),
   displayOrder: z.number().int().min(0),
   enabled: z.boolean(),
@@ -48,12 +48,23 @@ async function getContent(contentType: 'ARTICLE' | 'VIDEO' | 'EVENT' | 'MIXED', 
   return source === 'MANUAL' ? ids.map((id) => data.find((item) => item.id === id)).filter(present) : data;
 }
 
-async function resolveSection(section: { contentType: 'ARTICLE' | 'VIDEO' | 'EVENT' | 'MIXED'; source: 'MANUAL' | 'LATEST' | 'TRENDING'; contentIds: string[]; itemCount: number }) {
-  return { ...section, items: await getContent(section.contentType, section.source, section.contentIds, section.itemCount) };
+async function resolveSection(section: { id: string; kind: string; contentType: 'ARTICLE' | 'VIDEO' | 'EVENT' | 'MIXED'; source: 'MANUAL' | 'LATEST' | 'TRENDING'; contentIds: string[]; itemCount: number }) {
+  const markerIndex = section.contentIds.indexOf('__HERO_LATEST__');
+  const heroVideoId = section.kind === 'HERO'
+    ? markerIndex >= 0
+      ? section.contentIds.slice(0, markerIndex)[0] ?? null
+      : section.contentIds[0] ?? null
+    : undefined;
+  return {
+    ...section,
+    ...(section.kind === 'HERO' ? { heroVideoId } : {}),
+    items: await getContent(section.contentType, section.source, section.contentIds, section.itemCount),
+  };
 }
 
 router.get('/homepage', asyncRoute(async (_request, response) => {
   const sections = await db.homepageSection.findMany({ where: { enabled: true }, orderBy: { displayOrder: 'asc' } });
+  sections.sort((a, b) => Number(b.kind === 'HERO') - Number(a.kind === 'HERO'));
   response.json({ success: true, data: await Promise.all(sections.map(resolveSection)) });
 }));
 
@@ -73,18 +84,41 @@ router.get('/admin/homepage/content', authenticate, requireAdmin, asyncRoute(asy
 
 router.post('/admin/homepage', authenticate, requireAdmin, asyncRoute(async (request, response) => {
   const input = sectionSchema.parse(request.body);
+  if (input.kind === 'HERO') {
+    const existing = await db.homepageSection.findFirst({ where: { kind: 'HERO' } });
+    if (existing) {
+      const data = await db.homepageSection.update({ where: { id: existing.id }, data: input });
+      return response.json({ success: true, data });
+    }
+  }
   const data = await db.homepageSection.create({ data: input });
   response.status(201).json({ success: true, data });
 }));
 
 router.put('/admin/homepage/:id', authenticate, requireAdmin, asyncRoute(async (request, response) => {
   const input = sectionSchema.parse(request.body);
-  const data = await db.homepageSection.update({ where: { id: String(request.params.id) }, data: input });
+  const id = String(request.params.id);
+  const existing = await db.homepageSection.findUnique({ where: { id } });
+  if (existing?.kind === 'HERO') {
+    input.kind = 'HERO';
+    input.layout = 'HERO';
+    input.design = 'SPLIT_FEATURED';
+    input.source = 'MANUAL';
+    input.contentType = 'MIXED';
+    input.displayOrder = 0;
+    input.enabled = true;
+    input.name = 'Hero + Latest';
+  }
+  const data = await db.homepageSection.update({ where: { id }, data: input });
   response.json({ success: true, data });
 }));
 
 router.delete('/admin/homepage/:id', authenticate, requireAdmin, asyncRoute(async (request, response) => {
-  await db.homepageSection.delete({ where: { id: String(request.params.id) } });
+  const id = String(request.params.id);
+  const section = await db.homepageSection.findUnique({ where: { id } });
+  if (section?.kind === 'HERO')
+    return response.status(409).json({ success: false, message: 'The fixed hero section cannot be deleted.' });
+  await db.homepageSection.delete({ where: { id } });
   response.status(204).send();
 }));
 

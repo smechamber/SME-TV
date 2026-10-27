@@ -28,6 +28,9 @@ function Field({ children, className = '' }: { children: React.ReactNode; classN
   );
 }
 
+const inputClass =
+  'w-full rounded border border-[#dedbe3] bg-white p-3 text-[13px] font-normal text-[#282338] outline-none focus:border-[#a35a83] focus:ring-4 focus:ring-[#d9286714]';
+
 function youtubeIdFromValue(value: string) {
   return (
     value.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/)?.[1] ??

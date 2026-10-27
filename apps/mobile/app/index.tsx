@@ -15,7 +15,6 @@ import styles from './styles';
 import {
   ActivityIndicator,
   Image,
-  ImageBackground,
   Pressable,
   ScrollView,
   Text,
@@ -31,6 +30,8 @@ export default function HomeScreen() {
   const [videos, setVideos] = useState<Video[]>([]);
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingVideos, setLoadingVideos] = useState(false);
+  const [loadingEvents, setLoadingEvents] = useState(false);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
@@ -42,29 +43,34 @@ export default function HomeScreen() {
 
   const load = useCallback(async () => {
     setLoading(true);
+    setLoadingVideos(false);
+    setLoadingEvents(false);
     setError('');
     try {
-      const [newsResponse, videoResponse, eventResponse] = await Promise.all([
-        fetch(`${API}/api/news?limit=30`),
-        fetch(`${API}/api/videos`),
-        fetch(`${API}/api/events`),
-      ]);
-      if (!newsResponse.ok || !videoResponse.ok || !eventResponse.ok)
-        throw new Error(
-          'Some content is temporarily unavailable. Pull to refresh or try again later.',
-        );
-      const [news, videoData, eventData] = await Promise.all([
-        newsResponse.json(),
-        videoResponse.json(),
-        eventResponse.json(),
-      ]);
+      const newsResponse = await fetch(`${API}/api/news?limit=30`);
+      if (!newsResponse.ok) throw new Error('News is temporarily unavailable.');
+      const news = await newsResponse.json();
       setArticles(news.data ?? []);
-      setVideos(videoData.data ?? []);
-      setEvents(eventData.data ?? []);
-    } catch {
-      setError('Can’t reach SME TV right now. Check your connection and try again.');
-    } finally {
       setLoading(false);
+
+      setLoadingVideos(true);
+      const videoResponse = await fetch(`${API}/api/videos`);
+      if (!videoResponse.ok) throw new Error('Videos are temporarily unavailable.');
+      const videoData = await videoResponse.json();
+      setVideos(videoData.data ?? []);
+      setLoadingVideos(false);
+
+      setLoadingEvents(true);
+      const eventResponse = await fetch(`${API}/api/events`);
+      if (!eventResponse.ok) throw new Error('Events are temporarily unavailable.');
+      const eventData = await eventResponse.json();
+      setEvents(eventData.data ?? []);
+      setLoadingEvents(false);
+    } catch {
+      setError('Unable to load SME TV. Check your connection and try again.');
+      setLoading(false);
+      setLoadingVideos(false);
+      setLoadingEvents(false);
     }
   }, []);
   useEffect(() => {
@@ -127,37 +133,37 @@ export default function HomeScreen() {
         </View>
         {tab === 'Home' && (
           <>
-            <View style={styles.breaking}>
-              <Text style={styles.breakingLabel}>LATEST</Text>
-              <Text style={styles.breakingText}>News and ideas for India’s SME community</Text>
-            </View>
-            <ImageBackground
-              source={{
-                uri:
-                  articles[0]?.imageUrl ??
-                  'https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1000&q=85',
-              }}
-              imageStyle={mobileHeroStyles.heroImage}
-              style={styles.hero}
-            >
-              <View style={mobileHeroStyles.heroOverlay} />
-              <Text style={mobileHeroStyles.heroLive}>● LATEST NEWS</Text>
-              <Text style={styles.kicker}>
-                {articles[0]?.category?.name ?? 'BUSINESS · INDUSTRY · PEOPLE'}
-              </Text>
-              <Text style={styles.heroTitle}>
-                {articles[0]?.title ?? 'Stories that move business forward.'}
-              </Text>
-              <Text style={styles.heroSummary}>
-                {articles[0]?.summary ?? 'News and conversations for India’s SME community.'}
-              </Text>
-              <Pressable
-                style={styles.pinkButton}
-                onPress={() => (articles[0] ? void openArticle(articles[0]) : setTab('News'))}
-              >
-                <Text style={styles.pinkButtonText}>Read the story →</Text>
-              </Pressable>
-            </ImageBackground>
+            {articles[0] && (
+              <View style={styles.breaking}>
+                <Text style={styles.breakingLabel}>LATEST</Text>
+                <Text style={styles.breakingText}>{articles[0].title}</Text>
+              </View>
+            )}
+            {articles[0] ? (
+              <View style={styles.hero}>
+                {articles[0].imageUrl && (
+                  <Image
+                    source={{ uri: articles[0].imageUrl }}
+                    style={[
+                      mobileHeroStyles.heroImage,
+                      { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
+                    ]}
+                  />
+                )}
+                <View style={mobileHeroStyles.heroOverlay} />
+                <Text style={mobileHeroStyles.heroLive}>LATEST NEWS</Text>
+                {articles[0].category?.name && (
+                  <Text style={styles.kicker}>{articles[0].category.name}</Text>
+                )}
+                <Text style={styles.heroTitle}>{articles[0].title}</Text>
+                <Text style={styles.heroSummary}>{articles[0].summary}</Text>
+                <Pressable style={styles.pinkButton} onPress={() => void openArticle(articles[0])}>
+                  <Text style={styles.pinkButtonText}>Read the story</Text>
+                </Pressable>
+              </View>
+            ) : loading ? (
+              <ActivityIndicator color="#d92867" style={{ margin: 25 }} />
+            ) : null}
             <Section title="Top stories" onMore={() => setTab('News')} />
             {loading ? (
               <ActivityIndicator color="#d92867" style={{ margin: 25 }} />
@@ -179,12 +185,9 @@ export default function HomeScreen() {
               <View style={styles.card}>
                 <FeaturedVideo video={videos[0]} />
               </View>
-            ) : (
-              <View style={styles.empty}>
-                <Text style={styles.emptyTitle}>On screen with SMEs</Text>
-                <Text style={styles.muted}>Videos and interviews will appear here.</Text>
-              </View>
-            )}
+            ) : loadingVideos ? (
+              <ActivityIndicator color="#d92867" style={{ margin: 25 }} />
+            ) : null}
             <Section title="Upcoming events" onMore={() => setTab('Events')} />
             {events.slice(0, 3).map((item) => (
               <EventCard
@@ -196,11 +199,7 @@ export default function HomeScreen() {
                 }}
               />
             ))}
-            {!events.length && !loading && (
-              <View style={styles.empty}>
-                <Text style={styles.muted}>No upcoming events at the moment.</Text>
-              </View>
-            )}
+            {loadingEvents && <ActivityIndicator color="#d92867" style={{ margin: 25 }} />}
           </>
         )}
         {tab === 'News' && (
