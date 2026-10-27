@@ -2,29 +2,43 @@
 
 import { useEffect, useState } from 'react';
 import type { ContentType } from './AdminWorkspace';
-
-export type ManagedContent = {
-  id: string;
-  title: string;
-  status: string;
-  createdAt: string;
-  description?: string | null;
-  summary?: string;
-  content?: string;
-  videoType?: string;
-  videoUrl?: string | null;
-  youtubeId?: string | null;
-  imageUrl?: string | null;
-  isFeatured?: boolean;
-  isBreaking?: boolean;
-  category?: { name: string } | null;
-};
+import type { ManagedContent } from './content-studio/types';
+import ContentCard from './content-studio/ContentCard';
 
 const sections = [
-  { label: 'Videos', eyebrow: 'WATCH & SHARE', description: 'Manage interviews, explainers, highlights and other video stories for your audience.', color: 'pink', mark: '▶', type: 'video' },
-  { label: 'Articles', eyebrow: 'READ & INFORM', description: 'Create and organise news articles, features and updates from the SME community.', color: 'purple', mark: 'Aa', type: 'news' },
-  { label: 'Posts', eyebrow: 'CONNECT & ENGAGE', description: 'Share quick updates, announcements and conversations across the platform.', color: 'blue', mark: '✦', type: 'news' },
-  { label: 'Events', eyebrow: 'MEET & GROW', description: 'Publish upcoming events and keep your community informed about what is next.', color: 'orange', mark: '◷', type: 'event' },
+  {
+    label: 'Videos',
+    eyebrow: 'WATCH & SHARE',
+    description:
+      'Manage interviews, explainers, highlights and other video stories for your audience.',
+    color: 'pink',
+    mark: '▶',
+    type: 'video',
+  },
+  {
+    label: 'Articles',
+    eyebrow: 'READ & INFORM',
+    description: 'Create and organise news articles, features and updates from the SME community.',
+    color: 'purple',
+    mark: 'Aa',
+    type: 'news',
+  },
+  {
+    label: 'Posts',
+    eyebrow: 'CONNECT & ENGAGE',
+    description: 'Share quick updates, announcements and conversations across the platform.',
+    color: 'blue',
+    mark: '✦',
+    type: 'news',
+  },
+  {
+    label: 'Events',
+    eyebrow: 'MEET & GROW',
+    description: 'Publish upcoming events and keep your community informed about what is next.',
+    color: 'orange',
+    mark: '◷',
+    type: 'event',
+  },
 ] as const;
 
 const accents = {
@@ -59,17 +73,22 @@ export default function ContentStudioPage(props: ContentStudioPageProps) {
         if (!response.ok) throw new Error(payload.message ?? 'Unable to load content');
         setItems(payload.data ?? []);
       })
-      .catch((error: unknown) => props.onNotice(error instanceof Error ? error.message : 'Unable to load content'))
+      .catch((error: unknown) =>
+        props.onNotice(error instanceof Error ? error.message : 'Unable to load content'),
+      )
       .finally(() => setLoading(false));
   }, [props.onNotice, props.token, selected]);
 
   async function remove(item: ManagedContent) {
     if (!window.confirm(`Delete "${item.title}"? This cannot be undone.`)) return;
     const type = selected === 'video' ? 'videos' : 'news';
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000'}/api/admin/${type}/${item.id}`, {
-      method: 'DELETE',
-      headers: { Authorization: 'Bearer ' + props.token },
-    });
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000'}/api/admin/${type}/${item.id}`,
+      {
+        method: 'DELETE',
+        headers: { Authorization: 'Bearer ' + props.token },
+      },
+    );
     if (!response.ok) {
       const payload = (await response.json().catch(() => null)) as { message?: string } | null;
       props.onNotice(payload?.message ?? 'Unable to delete content');
@@ -83,13 +102,51 @@ export default function ContentStudioPage(props: ContentStudioPageProps) {
     const label = selected === 'video' ? 'Video' : 'Article';
     return (
       <div className="mx-auto min-h-[calc(100vh-58px)] max-w-[1200px] p-[22px] md:p-[34px]">
-        <button className="mb-4 text-xs font-bold text-[#777283] hover:text-[#d92867]" onClick={() => setSelected(null)} type="button">← Back to Content Studio</button>
+        <button
+          className="mb-4 text-xs font-bold text-[#777283] hover:text-[#d92867]"
+          onClick={() => setSelected(null)}
+          type="button"
+        >
+          ← Back to Content Studio
+        </button>
         <div className="flex items-start justify-between gap-4">
-          <div><p className="mb-2 text-[10px] font-extrabold tracking-[.15em] text-[#d92867]">CONTENT STUDIO</p><h1 className="text-[27px] font-bold tracking-[-.04em]">{label}s</h1><p className="mt-2 text-[13px] text-[#777283]">Manage content already added to your platform.</p></div>
-          <button className="rounded bg-[#d92867] px-4 py-3 text-xs font-bold text-white" onClick={() => props.onOpenForm(selected)} type="button">+ Add {label}</button>
+          <div>
+            <p className="mb-2 text-[10px] font-extrabold tracking-[.15em] text-[#d92867]">
+              CONTENT STUDIO
+            </p>
+            <h1 className="text-[27px] font-bold tracking-[-.04em]">{label}s</h1>
+            <p className="mt-2 text-[13px] text-[#777283]">
+              Manage content already added to your platform.
+            </p>
+          </div>
+          <button
+            className="rounded bg-[#d92867] px-4 py-3 text-xs font-bold text-white"
+            onClick={() => props.onOpenForm(selected)}
+            type="button"
+          >
+            + Add {label}
+          </button>
         </div>
         <div className="mt-6 overflow-hidden rounded border border-[#ebe8ef] bg-white">
-          {loading ? <p className="p-6 text-xs text-[#777283]">Loading {label.toLowerCase()}s…</p> : items.length === 0 ? <p className="p-6 text-xs text-[#777283]">No {label.toLowerCase()}s added yet. Use “Add {label}” to create one.</p> : <div className="grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-3">{items.map((item) => <ContentCard item={item} type={selected} key={item.id} onDelete={() => void remove(item)} onEdit={() => props.onEdit(selected, item)} />)}</div>}
+          {loading ? (
+            <p className="p-6 text-xs text-[#777283]">Loading {label.toLowerCase()}s…</p>
+          ) : items.length === 0 ? (
+            <p className="p-6 text-xs text-[#777283]">
+              No {label.toLowerCase()}s added yet. Use “Add {label}” to create one.
+            </p>
+          ) : (
+            <div className="grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-3">
+              {items.map((item) => (
+                <ContentCard
+                  item={item}
+                  type={selected}
+                  key={item.id}
+                  onDelete={() => void remove(item)}
+                  onEdit={() => props.onEdit(selected, item)}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     );
@@ -99,17 +156,28 @@ export default function ContentStudioPage(props: ContentStudioPageProps) {
     <div className="mx-auto min-h-[calc(100vh-58px)] max-w-[1200px] p-[22px] md:p-[34px]">
       <div className="flex items-start justify-between gap-5">
         <div>
-          <p className="mb-2 text-[10px] font-extrabold tracking-[.15em] text-[#d92867]">PUBLISH TO ALL PLATFORMS</p>
+          <p className="mb-2 text-[10px] font-extrabold tracking-[.15em] text-[#d92867]">
+            PUBLISH TO ALL PLATFORMS
+          </p>
           <h1 className="text-[27px] font-bold tracking-[-.04em]">Content studio</h1>
-          <p className="mt-2 text-[13px] leading-6 text-[#777283]">Choose a content format to create, manage and publish for your community.</p>
+          <p className="mt-2 text-[13px] leading-6 text-[#777283]">
+            Choose a content format to create, manage and publish for your community.
+          </p>
         </div>
         <span className="hidden items-center gap-2 rounded-full border border-[#dcece4] bg-[#f4fbf7] px-3 py-2 text-[11px] font-bold text-[#39805c] sm:flex">
           <span className="h-2 w-2 rounded-full bg-[#4ab477]" /> Workspace ready
         </span>
       </div>
       <div className="mt-7 flex items-center gap-3 rounded-lg border border-[#eadfea] bg-gradient-to-r from-white to-[#fcf8fc] p-4 md:p-5">
-        <span className="grid h-[34px] w-[34px] shrink-0 place-items-center rounded-full bg-[#f8e6ee] text-2xl font-light text-[#d92867]">+</span>
-        <div><strong className="text-[13px]">What would you like to create?</strong><p className="mt-1 text-[11px] text-[#777283]">Click a content type below to open its publishing form.</p></div>
+        <span className="grid h-[34px] w-[34px] shrink-0 place-items-center rounded-full bg-[#f8e6ee] text-2xl font-light text-[#d92867]">
+          +
+        </span>
+        <div>
+          <strong className="text-[13px]">What would you like to create?</strong>
+          <p className="mt-1 text-[11px] text-[#777283]">
+            Click a content type below to open its publishing form.
+          </p>
+        </div>
       </div>
       <div className="mt-[18px] grid gap-4 md:grid-cols-2">
         {sections.map((section) => {
@@ -125,64 +193,32 @@ export default function ContentStudioPage(props: ContentStudioPageProps) {
               type="button"
             >
               <div className="relative z-[1] flex items-center justify-between">
-                <span className={`grid h-11 w-11 place-items-center rounded-xl text-[17px] font-extrabold ${accent.icon}`}>{section.mark}</span>
-                <span className="text-[9px] font-extrabold tracking-[.14em] text-[#777283]">{section.eyebrow}</span>
+                <span
+                  className={`grid h-11 w-11 place-items-center rounded-xl text-[17px] font-extrabold ${accent.icon}`}
+                >
+                  {section.mark}
+                </span>
+                <span className="text-[9px] font-extrabold tracking-[.14em] text-[#777283]">
+                  {section.eyebrow}
+                </span>
               </div>
-              <h2 className="relative z-[1] mt-7 text-[22px] font-bold tracking-[-.04em]">{section.label}</h2>
-              <p className="relative z-[1] mt-2 max-w-[340px] text-xs leading-6 text-[#777283]">{section.description}</p>
-              <div className="relative z-[1] mt-5 flex items-center justify-between border-t border-[#ebe8ef] pt-3 text-[10px] font-bold text-[#777283]"><span>Create content</span><span className="text-lg text-[#282338]">↗</span></div>
-              <span className={`absolute -bottom-14 -right-9 h-[150px] w-[150px] rounded-full opacity-[.16] ${accent.glow}`} />
+              <h2 className="relative z-[1] mt-7 text-[22px] font-bold tracking-[-.04em]">
+                {section.label}
+              </h2>
+              <p className="relative z-[1] mt-2 max-w-[340px] text-xs leading-6 text-[#777283]">
+                {section.description}
+              </p>
+              <div className="relative z-[1] mt-5 flex items-center justify-between border-t border-[#ebe8ef] pt-3 text-[10px] font-bold text-[#777283]">
+                <span>Create content</span>
+                <span className="text-lg text-[#282338]">↗</span>
+              </div>
+              <span
+                className={`absolute -bottom-14 -right-9 h-[150px] w-[150px] rounded-full opacity-[.16] ${accent.glow}`}
+              />
             </button>
           );
         })}
       </div>
     </div>
-  );
-}
-
-function ContentCard({
-  item,
-  type,
-  onEdit,
-  onDelete,
-}: {
-  item: ManagedContent;
-  type: 'news' | 'video';
-  onEdit: () => void;
-  onDelete: () => void;
-}) {
-  const youtubeThumbnail = item.youtubeId
-    ? `https://img.youtube.com/vi/${item.youtubeId}/hqdefault.jpg`
-    : null;
-  const previewUrl = type === 'news' ? item.imageUrl : youtubeThumbnail;
-
-  return (
-    <article className="overflow-hidden rounded-lg border border-[#ebe8ef] bg-white shadow-[0_6px_18px_rgba(56,34,70,.04)]">
-      <div className="relative aspect-video overflow-hidden bg-[#f2eff4]">
-        {type === 'video' && item.videoType === 'UPLOAD' && item.videoUrl ? (
-          <video className="h-full w-full object-cover" controls preload="metadata" src={item.videoUrl} />
-        ) : previewUrl ? (
-          <img className="h-full w-full object-cover" src={previewUrl} alt={type === 'news' ? item.title : `${item.title} video thumbnail`} />
-        ) : (
-          <div className="grid h-full place-items-center text-xs font-bold text-[#aaa5b1]">
-            {type === 'video' ? 'No video preview' : 'No image added'}
-          </div>
-        )}
-        <span className="absolute left-3 top-3 rounded-full bg-white/95 px-2 py-1 text-[9px] font-extrabold uppercase tracking-wide text-[#595363] shadow-sm">{item.status}</span>
-      </div>
-      <div className="p-4">
-        <h2 className="line-clamp-2 min-h-[40px] text-sm font-bold leading-5">{item.title}</h2>
-        <p className="mt-2 line-clamp-2 min-h-[32px] text-[11px] leading-4 text-[#777283]">
-          {type === 'news' ? item.summary || 'No article summary added.' : item.description || 'No video description added.'}
-        </p>
-        <div className="mt-4 flex items-center justify-between border-t border-[#ebe8ef] pt-3">
-          <span className="text-[10px] text-[#aaa5b1]">{new Date(item.createdAt).toLocaleDateString('en-IN')}</span>
-          <div className="flex gap-2">
-            <button className="rounded border border-[#dedbe3] px-3 py-2 text-[11px] font-bold" onClick={onEdit} type="button">Edit</button>
-            <button className="rounded border border-[#f1c8d7] px-3 py-2 text-[11px] font-bold text-[#c5225b]" onClick={onDelete} type="button">Delete</button>
-          </div>
-        </div>
-      </div>
-    </article>
   );
 }

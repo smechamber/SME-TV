@@ -10,7 +10,7 @@ const sectionSchema = z.object({
   layout: z.enum(['HERO', 'GRID', 'LIST', 'CAROUSEL']),
   design: z.enum(['STANDARD', 'FEATURED_GRID', 'SPLIT_FEATURED', 'DARK_BAND', 'COMPACT_LIST', 'EVENT_CARDS']),
   source: z.enum(['MANUAL', 'LATEST', 'TRENDING']),
-  contentType: z.enum(['ARTICLE', 'VIDEO', 'EVENT']),
+  contentType: z.enum(['ARTICLE', 'VIDEO', 'EVENT', 'MIXED']),
   itemCount: z.number().int().min(1).max(24),
   contentIds: z.array(z.string()).max(24),
   displayFields: z.array(z.enum(['IMAGE', 'CATEGORY', 'SUMMARY', 'DATE', 'META'])).max(5),
@@ -19,24 +19,36 @@ const sectionSchema = z.object({
 });
 
 const publishedWhere = () => ({ status: 'PUBLISHED' as const, publishedAt: { lte: new Date() } });
+const present = <T>(item: T | undefined): item is T => Boolean(item);
 
-async function getContent(contentType: 'ARTICLE' | 'VIDEO' | 'EVENT', source: 'MANUAL' | 'LATEST' | 'TRENDING', ids: string[], itemCount: number) {
+async function getContent(contentType: 'ARTICLE' | 'VIDEO' | 'EVENT' | 'MIXED', source: 'MANUAL' | 'LATEST' | 'TRENDING', ids: string[], itemCount: number): Promise<Array<{ id: string }>> {
+  if (contentType === 'MIXED') {
+    const [articles, videos, events] = await Promise.all([
+      getContent('ARTICLE', source, ids, itemCount),
+      getContent('VIDEO', source, ids, itemCount),
+      getContent('EVENT', source, ids, itemCount),
+    ]);
+    const all = [...articles, ...videos, ...events];
+    return source === 'MANUAL'
+      ? ids.map((id) => all.find((item) => item.id === id)).filter(present)
+      : all.slice(0, itemCount);
+  }
   if (contentType === 'ARTICLE') {
     const where = source === 'MANUAL' ? { ...publishedWhere(), id: { in: ids } } : publishedWhere();
     const data = await db.article.findMany({ where, take: itemCount, orderBy: source === 'TRENDING' ? [{ isFeatured: 'desc' }, { publishedAt: 'desc' }] : { publishedAt: 'desc' }, include: { category: { select: { name: true } } } });
-    return source === 'MANUAL' ? ids.map((id) => data.find((item) => item.id === id)).filter(Boolean) : data;
+    return source === 'MANUAL' ? ids.map((id) => data.find((item) => item.id === id)).filter(present) : data;
   }
   if (contentType === 'VIDEO') {
     const where = source === 'MANUAL' ? { ...publishedWhere(), id: { in: ids } } : publishedWhere();
     const data = await db.video.findMany({ where, take: itemCount, orderBy: source === 'TRENDING' ? [{ isFeatured: 'desc' }, { publishedAt: 'desc' }] : { publishedAt: 'desc' } });
-    return source === 'MANUAL' ? ids.map((id) => data.find((item) => item.id === id)).filter(Boolean) : data;
+    return source === 'MANUAL' ? ids.map((id) => data.find((item) => item.id === id)).filter(present) : data;
   }
   const where = source === 'MANUAL' ? { status: 'PUBLISHED' as const, startsAt: { gte: new Date() }, id: { in: ids } } : { status: 'PUBLISHED' as const, startsAt: { gte: new Date() } };
   const data = await db.event.findMany({ where, take: itemCount, orderBy: { startsAt: 'asc' } });
-  return source === 'MANUAL' ? ids.map((id) => data.find((item) => item.id === id)).filter(Boolean) : data;
+  return source === 'MANUAL' ? ids.map((id) => data.find((item) => item.id === id)).filter(present) : data;
 }
 
-async function resolveSection(section: { contentType: 'ARTICLE' | 'VIDEO' | 'EVENT'; source: 'MANUAL' | 'LATEST' | 'TRENDING'; contentIds: string[]; itemCount: number }) {
+async function resolveSection(section: { contentType: 'ARTICLE' | 'VIDEO' | 'EVENT' | 'MIXED'; source: 'MANUAL' | 'LATEST' | 'TRENDING'; contentIds: string[]; itemCount: number }) {
   return { ...section, items: await getContent(section.contentType, section.source, section.contentIds, section.itemCount) };
 }
 

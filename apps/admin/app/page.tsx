@@ -3,7 +3,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import AdminLogin from './components/AdminLogin';
 import AdminWorkspace, { type ContentType } from './components/AdminWorkspace';
-import type { ManagedContent } from './components/ContentStudioPage';
+import type { ManagedContent } from './components/content-studio/types';
 import { initialStats, type Registration, type Stats } from './types';
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
@@ -92,11 +92,14 @@ export default function AdminPage() {
     const request = createContentRequest(active, form, { articleContent, imageUrl, videoUrl });
 
     try {
-      const response = await fetch(`${API}${request.path}${editingContent ? `/${editingContent.id}` : ''}`, {
-        method: editingContent ? 'PATCH' : 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ ...request.body, status }),
-      });
+      const response = await fetch(
+        `${API}${request.path}${editingContent ? `/${editingContent.id}` : ''}`,
+        {
+          method: editingContent ? 'PATCH' : 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ ...request.body, status }),
+        },
+      );
       const payload = (await response.json()) as { message?: string };
       if (!response.ok) throw new Error(payload.message ?? 'Unable to save content');
       setNotice(

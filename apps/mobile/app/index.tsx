@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ArticleCard, EventCard, FeaturedVideo, Retry, Section } from './components';
+import ArticleDetailModal from './modals/ArticleDetailModal';
+import EventRegistrationModal from './modals/EventRegistrationModal';
 import {
   emptyRegistration,
   type Article,
@@ -14,7 +16,6 @@ import {
   ActivityIndicator,
   Image,
   ImageBackground,
-  Modal,
   Pressable,
   ScrollView,
   Text,
@@ -22,7 +23,6 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native';
-import RenderHtml from '@native-html/render';
 
 const API = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:4000';
 export default function HomeScreen() {
@@ -294,97 +294,21 @@ export default function HomeScreen() {
           </Pressable>
         ))}
       </View>
-      <Modal
-        visible={Boolean(selectedEvent)}
-        animationType="slide"
-        onRequestClose={() => setSelectedEvent(null)}
-      >
-        <ScrollView style={styles.modal} contentContainerStyle={styles.modalContent}>
-          <Pressable onPress={() => setSelectedEvent(null)}>
-            <Text style={styles.close}>Close</Text>
-          </Pressable>
-          <Text style={styles.kicker}>EVENT REGISTRATION</Text>
-          <Text style={styles.pageTitle}>{selectedEvent?.title}</Text>
-          <Text style={styles.muted}>Please complete all required fields.</Text>
-          {(
-            [
-              'name',
-              'designation',
-              'companyName',
-              'businessActivity',
-              'specificInterest',
-              'email',
-              'mobile',
-              'city',
-              'state',
-            ] as (keyof Registration)[]
-          ).map((key) => (
-            <TextInput
-              key={key}
-              style={styles.formInput}
-              placeholder={`${key === 'companyName' ? 'Company name' : key === 'businessActivity' ? 'Business activity' : key === 'specificInterest' ? 'Specific interest' : key[0].toUpperCase() + key.slice(1)} *`}
-              placeholderTextColor="#928d9a"
-              value={String(registration[key])}
-              onChangeText={(value) => setRegistration((prev) => ({ ...prev, [key]: value }))}
-              keyboardType={
-                key === 'email' ? 'email-address' : key === 'mobile' ? 'phone-pad' : 'default'
-              }
-              autoCapitalize={key === 'email' ? 'none' : 'sentences'}
-            />
-          ))}
-          <Pressable
-            onPress={() => setRegistration((prev) => ({ ...prev, consent: !prev.consent }))}
-            style={styles.consent}
-          >
-            <Text style={styles.checkbox}>{registration.consent ? '[x]' : '[ ]'}</Text>
-            <Text style={styles.muted}>
-              I agree to the privacy notice and consent to being contacted about this event.
-            </Text>
-          </Pressable>
-          {formNotice ? (
-            <Text style={formNotice.includes('confirmed') ? styles.success : styles.formError}>
-              {formNotice}
-            </Text>
-          ) : null}
-          <Pressable
-            style={[styles.pinkButton, submitting && { opacity: 0.6 }]}
-            disabled={submitting}
-            onPress={() => void submitRegistration()}
-          >
-            <Text style={styles.pinkButtonText}>
-              {submitting ? 'Submitting...' : 'Submit registration'}
-            </Text>
-          </Pressable>
-        </ScrollView>
-      </Modal>
-      <Modal
-        visible={Boolean(selectedArticle)}
-        animationType="slide"
-        onRequestClose={() => setSelectedArticle(null)}
-      >
-        <ScrollView style={styles.modal} contentContainerStyle={styles.modalContent}>
-          <Pressable onPress={() => setSelectedArticle(null)}>
-            <Text style={styles.close}>Close</Text>
-          </Pressable>
-          {selectedArticle && (
-            <>
-              <Text style={styles.kicker}>{selectedArticle.category?.name ?? 'SME TV NEWS'}</Text>
-              <Text style={styles.pageTitle}>{selectedArticle.title}</Text>
-              <Text style={styles.muted}>{selectedArticle.summary}</Text>
-              {articleError ? (
-                <Text style={styles.formError}>{articleError}</Text>
-              ) : selectedArticle.content ? (
-                <RenderHtml
-                  contentWidth={Math.max(300, screenWidth - 40)}
-                  source={{ html: selectedArticle.content }}
-                />
-              ) : (
-                <ActivityIndicator color="#d92867" style={{ margin: 20 }} />
-              )}
-            </>
-          )}
-        </ScrollView>
-      </Modal>
+      <EventRegistrationModal
+        selectedEvent={selectedEvent}
+        registration={registration}
+        setRegistration={setRegistration}
+        submitting={submitting}
+        formNotice={formNotice}
+        onClose={() => setSelectedEvent(null)}
+        onSubmit={() => void submitRegistration()}
+      />
+      <ArticleDetailModal
+        selectedArticle={selectedArticle}
+        articleError={articleError}
+        screenWidth={screenWidth}
+        onClose={() => setSelectedArticle(null)}
+      />
     </View>
   );
 }

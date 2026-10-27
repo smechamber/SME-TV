@@ -39,7 +39,7 @@ export type HomepageSection = {
   layout: 'HERO' | 'GRID' | 'LIST' | 'CAROUSEL';
   design: 'STANDARD' | 'FEATURED_GRID' | 'SPLIT_FEATURED' | 'DARK_BAND' | 'COMPACT_LIST' | 'EVENT_CARDS';
   source: 'MANUAL' | 'LATEST' | 'TRENDING';
-  contentType: 'ARTICLE' | 'VIDEO' | 'EVENT';
+  contentType: 'ARTICLE' | 'VIDEO' | 'EVENT' | 'MIXED';
   itemCount: number;
   displayFields: ('IMAGE' | 'CATEGORY' | 'SUMMARY' | 'DATE' | 'META')[];
   items: HomepageItem[];

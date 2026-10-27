@@ -9,7 +9,7 @@ import ContentStudioPage from './ContentStudioPage';
 import ContentFormPage from './ContentFormPage';
 import OverviewPage from './OverviewPage';
 import HomepageBuilder from './HomepageBuilder';
-import type { ManagedContent } from './ContentStudioPage';
+import type { ManagedContent } from './content-studio/types';
 
 export type ContentType = 'news' | 'video' | 'event';
 
@@ -34,7 +34,9 @@ export type AdminWorkspaceProps = {
 };
 
 export default function AdminWorkspace(props: AdminWorkspaceProps) {
-  const [activeView, setActiveView] = useState<'overview' | 'content-studio' | 'content-form' | 'homepage'>('overview');
+  const [activeView, setActiveView] = useState<
+    'overview' | 'content-studio' | 'content-form' | 'homepage'
+  >('overview');
 
   function showRegistrations() {
     setActiveView('overview');
@@ -55,7 +57,9 @@ export default function AdminWorkspace(props: AdminWorkspaceProps) {
       />
       <section className="ml-0 min-h-screen md:ml-[225px]">
         <AdminTopbar activeView={activeView} onSignOut={props.onSignOut} />
-          {activeView === 'homepage' ? <HomepageBuilder token={props.token} onNotice={props.onNotice} /> : activeView === 'content-studio' ? (
+        {activeView === 'homepage' ? (
+          <HomepageBuilder token={props.token} onNotice={props.onNotice} />
+        ) : activeView === 'content-studio' ? (
           <ContentStudioPage
             active={props.active}
             token={props.token}
@@ -72,7 +76,11 @@ export default function AdminWorkspace(props: AdminWorkspaceProps) {
             }}
           />
         ) : activeView === 'content-form' ? (
-          <ContentFormPage {...props} initialContent={props.editingContent} onBack={() => setActiveView('content-studio')} />
+          <ContentFormPage
+            {...props}
+            initialContent={props.editingContent}
+            onBack={() => setActiveView('content-studio')}
+          />
         ) : (
           <OverviewPage {...props} />
         )}

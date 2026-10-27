@@ -200,4 +200,5 @@ enum HomepageContentType {
   ARTICLE
   VIDEO
   EVENT
+  MIXED
 }
