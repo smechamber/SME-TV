@@ -78,7 +78,7 @@ export function MixedHeadlines({ items }: { items: HomepageItem[] }) {
             <span className="font-mono text-2xl font-black text-slate-300 group-hover:text-[#e11d48]">
               0{index + 1}
             </span>
-            {isVideo(item) && (
+            {/* {isVideo(item) && (
               <div
                 className="relative mt-1 h-12 w-16 shrink-0 rounded bg-slate-200 bg-cover bg-center"
                 style={
@@ -91,7 +91,7 @@ export function MixedHeadlines({ items }: { items: HomepageItem[] }) {
                   ▶
                 </span>
               </div>
-            )}
+            )} */}
             <div className="min-w-0 flex-1">
               <div className="mb-1 flex items-center gap-2">
                 <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#e11d48]">
