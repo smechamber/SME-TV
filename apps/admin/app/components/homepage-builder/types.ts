@@ -25,10 +25,10 @@ export type Option = {
 export type Section = {
   id: string;
   name: string;
-  kind: string;
-  layout: string;
+  kind: 'HERO' | 'TRENDING' | 'LATEST' | 'INTERVIEWS' | 'NEWS' | 'VIDEOS' | 'EVENTS' | 'CUSTOM';
+  layout: 'HERO' | 'GRID' | 'LIST' | 'CAROUSEL';
   design: Design;
-  source: string;
+  source: 'MANUAL' | 'LATEST' | 'TRENDING';
   contentType: ContentType;
   itemCount: number;
   contentIds: string[];

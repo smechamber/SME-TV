@@ -13,6 +13,12 @@ export const designs: { value: Design; label: string; hint: string }[] = [
   { value: 'EVENT_CARDS', label: 'Event cards', hint: 'Date and venue focused cards' },
 ];
 
+export const sectionKinds = [
+  { value: 'CUSTOM', label: 'Custom section' },
+  { value: 'TRENDING', label: 'Trending on SMETV' },
+  { value: 'LATEST', label: 'Latest content' },
+] as const;
+
 export const emptySection = (order: number): Section => ({
   id: '',
   name: 'New section',

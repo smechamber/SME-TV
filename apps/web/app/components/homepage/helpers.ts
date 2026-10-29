@@ -40,7 +40,7 @@ export function mixedMeta(item: HomepageItem) {
 }
 
 export function mixedImage(item: HomepageItem) {
-  return isStory(item) ? item.imageUrl : isVideo(item) ? videoThumbnail(item) : undefined;
+  return isStory(item) ? item.imageUrl : isVideo(item) ? videoThumbnail(item) : item.imageUrl;
 }
 
 export function mixedHref(item: HomepageItem) {

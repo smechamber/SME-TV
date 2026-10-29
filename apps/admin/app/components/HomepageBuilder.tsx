@@ -23,6 +23,21 @@ function emptyHeroSection(): Section {
   };
 }
 
+function emptyTrendingSection(): Section {
+  return {
+    ...emptySection(1),
+    name: 'Trending on SMETV',
+    kind: 'TRENDING',
+    layout: 'GRID',
+    design: 'STANDARD',
+    source: 'MANUAL',
+    contentType: 'MIXED',
+    itemCount: 6,
+    displayOrder: 1,
+    enabled: false,
+  };
+}
+
 export default function HomepageBuilder({
   token,
   onNotice,
@@ -38,9 +53,17 @@ export default function HomepageBuilder({
   });
   const [editing, setEditing] = useState<Section | null>(null);
   const [editingHero, setEditingHero] = useState(false);
+  const [editingTrending, setEditingTrending] = useState(false);
   const [busy, setBusy] = useState(false);
   const heroSection = sections.find((section) => section.kind === 'HERO') ?? emptyHeroSection();
-  const regularSections = sections.filter((section) => section.kind !== 'HERO');
+  const trendingSection =
+    sections.find((section) => section.kind === 'TRENDING') ?? emptyTrendingSection();
+  const orderedSections = [
+    ...sections.filter((section) => section.kind !== 'HERO'),
+    ...(sections.some((section) => section.kind === 'TRENDING') ? [] : [trendingSection]),
+  ]
+    .sort((a, b) => a.displayOrder - b.displayOrder);
+  const regularSections = orderedSections.filter((section) => section.kind !== 'TRENDING');
   const heroMarkerIndex = heroSection.contentIds.indexOf('__HERO_LATEST__');
   const heroVideoSelected = options.VIDEO.some(
     (video) => video.id === heroSection.contentIds[0] && heroSection.contentIds[0] !== '__HERO_LATEST__',
@@ -90,6 +113,16 @@ export default function HomepageBuilder({
               displayOrder: 0,
               enabled: true,
             }
+          : section.kind === 'TRENDING'
+            ? {
+                ...section,
+                name: 'Trending on SMETV',
+                kind: 'TRENDING' as const,
+                layout: 'GRID' as const,
+                design: 'STANDARD' as const,
+                contentType: 'MIXED' as const,
+                displayOrder: Math.max(1, section.displayOrder),
+              }
           : section;
       const { id: _id, ...body } = normalized;
       const response = await fetch(`${API}/api/admin/homepage${isNew ? '' : `/${section.id}`}`, {
@@ -102,6 +135,7 @@ export default function HomepageBuilder({
         throw new Error(payload.message ?? 'Unable to save homepage section');
       setEditing(null);
       setEditingHero(false);
+      setEditingTrending(false);
       onNotice('Homepage configuration saved. Changes are live on the website.');
       await load();
     } catch (error) {
@@ -130,8 +164,8 @@ export default function HomepageBuilder({
   }
 
   async function move(section: Section, direction: -1 | 1) {
-    const index = regularSections.findIndex((item) => item.id === section.id);
-    const target = regularSections[index + direction];
+    const index = orderedSections.findIndex((item) => item.id === section.id);
+    const target = orderedSections[index + direction];
     if (!target) return;
     await Promise.all([
       save({ ...section, displayOrder: target.displayOrder }),
@@ -184,45 +218,75 @@ export default function HomepageBuilder({
       </div>
 
       <div className="mt-4 grid gap-3">
-        {regularSections.map((section, index) => (
-          <div
-            className={`rounded border bg-white p-4 ${section.enabled ? 'border-[#ebe8ef]' : 'border-dashed border-[#c8c3ce] opacity-60'}`}
-            key={section.id}
-          >
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <strong className="text-sm">{section.name}</strong>
-                  <span className="rounded bg-[#f4f2f6] px-2 py-1 text-[9px] font-bold uppercase">
-                    {section.contentType}
-                  </span>
+        {orderedSections.map((section) => {
+          const sectionIndex = orderedSections.findIndex((item) => item.id === section.id);
+          const isTrending = section.kind === 'TRENDING';
+          return (
+            <div
+              className={`rounded border bg-white p-4 ${
+                section.enabled
+                  ? isTrending
+                    ? 'border-2 border-[#28206f]'
+                    : 'border-[#ebe8ef]'
+                  : 'border-dashed border-[#c8c3ce] opacity-60'
+              }`}
+              key={section.id}
+            >
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {isTrending && (
+                      <span className="rounded bg-[#eeedff] px-2 py-1 text-[9px] font-black uppercase tracking-wider text-[#28206f]">
+                        Trending section
+                      </span>
+                    )}
+                    <strong className="text-sm">
+                      {isTrending ? 'Trending on SMETV' : section.name}
+                    </strong>
+                    <span className="rounded bg-[#f4f2f6] px-2 py-1 text-[9px] font-bold uppercase">
+                      {section.contentType}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-[11px] text-[#777283]">
+                    {isTrending
+                      ? `${section.contentIds.length} selected items - image and text layout`
+                      : `${designs.find((item) => item.value === section.design)?.label ?? section.design} - ${section.contentIds.length || section.itemCount} items`}
+                    {' - Position '} {sectionIndex + 1} after Hero
+                  </p>
                 </div>
-                <p className="mt-1 text-[11px] text-[#777283]">
-                  {designs.find((item) => item.value === section.design)?.label ?? section.design} -{' '}
-                  {section.contentIds.length || section.itemCount} items
-                </p>
-              </div>
-              <div className="flex gap-2 text-[11px]">
-                <button disabled={index === 0 || busy} onClick={() => void move(section, -1)}>
-                  Up
-                </button>
-                <button
-                  disabled={index === regularSections.length - 1 || busy}
-                  onClick={() => void move(section, 1)}
-                >
-                  Down
-                </button>
-                <button onClick={() => void toggle(section)}>
-                  {section.enabled ? 'Disable' : 'Enable'}
-                </button>
-                <button onClick={() => setEditing(section)}>Edit section</button>
-                <button className="text-[#d92867]" onClick={() => void remove(section.id)}>
-                  Delete
-                </button>
+                <div className="flex flex-wrap gap-2 text-[11px]">
+                  <button
+                    disabled={sectionIndex === 0 || busy}
+                    onClick={() => void move(section, -1)}
+                  >
+                    Up
+                  </button>
+                  <button
+                    disabled={sectionIndex === orderedSections.length - 1 || busy}
+                    onClick={() => void move(section, 1)}
+                  >
+                    Down
+                  </button>
+                  <button onClick={() => void toggle(section)}>
+                    {section.enabled ? 'Disable' : 'Enable'}
+                  </button>
+                  <button
+                    onClick={() =>
+                      isTrending ? setEditingTrending(true) : setEditing(section)
+                    }
+                  >
+                    {isTrending ? 'Edit trending content' : 'Edit section'}
+                  </button>
+                  {!isTrending && (
+                    <button className="text-[#d92867]" onClick={() => void remove(section.id)}>
+                      Delete
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {editing && (
@@ -241,6 +305,15 @@ export default function HomepageBuilder({
           busy={busy}
           onCancel={() => setEditingHero(false)}
           onSave={(section) => void save(section)}
+        />
+      )}
+      {editingTrending && (
+        <SectionForm
+          section={trendingSection}
+          options={options}
+          busy={busy}
+          onCancel={() => setEditingTrending(false)}
+          onSave={(section) => void save({ ...section, enabled: true })}
         />
       )}
     </div>

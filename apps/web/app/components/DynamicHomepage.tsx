@@ -14,6 +14,7 @@ import {
   MixedContent,
   VideoBand,
   VideoHero,
+  TrendingSection,
 } from './homepage/content';
 
 export default function DynamicHomepage({ sections }: { sections: HomepageSection[] }) {
@@ -90,9 +91,11 @@ export default function DynamicHomepage({ sections }: { sections: HomepageSectio
         const events = section.items.filter(isEvent);
         if (section.items.length === 0)
           return (
-            <div key={section.id} className="pt-12">
-              {index === 0 && filters}
-            </div>
+            index === 0 ? (
+              <div key={section.id} className="pt-12">
+                {filters}
+              </div>
+            ) : null
           );
         if (section.kind === 'HERO')
           return (
@@ -100,6 +103,12 @@ export default function DynamicHomepage({ sections }: { sections: HomepageSectio
               <HeroHeadlines items={section.items} featuredVideoId={section.heroVideoId} />
               {index === 0 && filters}
             </div>
+          );
+        if (section.kind === 'TRENDING')
+          return (
+            <section key={section.id} className={index === 1 ? 'pt-6' : 'pt-12'}>
+              <TrendingSection items={section.items} />
+            </section>
           );
         if (section.contentType === 'MIXED')
           return (

@@ -26,6 +26,7 @@ export type EventItem = {
   slug: string;
   title: string;
   description?: string;
+  imageUrl?: string;
   location?: string;
   startsAt: string;
   tag?: string;

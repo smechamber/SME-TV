@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import type { Design, Option, Section } from './types';
-import { designs, inputClass } from './config';
+import { designs, inputClass, sectionKinds } from './config';
 
 export default function SectionForm({
   section,
@@ -82,6 +82,39 @@ export default function SectionForm({
             required
           />
         </label>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <label className="grid gap-1 text-xs font-bold">
+            Section type
+            <select
+              className={inputClass}
+              value={value.kind}
+              onChange={(event) => {
+                const kind = event.target.value as Section['kind'];
+                update({ kind, source: kind === 'TRENDING' ? 'MANUAL' : value.source });
+              }}
+            >
+              {sectionKinds.map((kind) => (
+                <option key={kind.value} value={kind.value}>
+                  {kind.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="grid gap-1 text-xs font-bold">
+            Content source
+            <select
+              className={inputClass}
+              value={value.source}
+              onChange={(event) =>
+                update({ source: event.target.value as Section['source'] })
+              }
+            >
+              <option value="MANUAL">Selected content</option>
+              <option value="LATEST">Latest published</option>
+              <option value="TRENDING">Featured / trending automatically</option>
+            </select>
+          </label>
+        </div>
         <div className="mt-5">
           <span className="text-xs font-bold">Design preset</span>
           <div className="mt-2 flex gap-2 overflow-x-auto pb-2">

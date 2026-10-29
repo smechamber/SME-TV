@@ -64,7 +64,11 @@ async function resolveSection(section: { id: string; kind: string; contentType: 
 
 router.get('/homepage', asyncRoute(async (_request, response) => {
   const sections = await db.homepageSection.findMany({ where: { enabled: true }, orderBy: { displayOrder: 'asc' } });
-  sections.sort((a, b) => Number(b.kind === 'HERO') - Number(a.kind === 'HERO'));
+  sections.sort((a, b) => {
+    if (a.kind === 'HERO') return -1;
+    if (b.kind === 'HERO') return 1;
+    return a.displayOrder - b.displayOrder;
+  });
   response.json({ success: true, data: await Promise.all(sections.map(resolveSection)) });
 }));
 
@@ -84,8 +88,8 @@ router.get('/admin/homepage/content', authenticate, requireAdmin, asyncRoute(asy
 
 router.post('/admin/homepage', authenticate, requireAdmin, asyncRoute(async (request, response) => {
   const input = sectionSchema.parse(request.body);
-  if (input.kind === 'HERO') {
-    const existing = await db.homepageSection.findFirst({ where: { kind: 'HERO' } });
+  if (input.kind === 'HERO' || input.kind === 'TRENDING') {
+    const existing = await db.homepageSection.findFirst({ where: { kind: input.kind } });
     if (existing) {
       const data = await db.homepageSection.update({ where: { id: existing.id }, data: input });
       return response.json({ success: true, data });
@@ -108,6 +112,14 @@ router.put('/admin/homepage/:id', authenticate, requireAdmin, asyncRoute(async (
     input.displayOrder = 0;
     input.enabled = true;
     input.name = 'Hero + Latest';
+  }
+  if (existing?.kind === 'TRENDING') {
+    input.kind = 'TRENDING';
+    input.layout = 'GRID';
+    input.design = 'STANDARD';
+    input.contentType = 'MIXED';
+    input.displayOrder = Math.max(1, input.displayOrder);
+    input.name = 'Trending on SMETV';
   }
   const data = await db.homepageSection.update({ where: { id }, data: input });
   response.json({ success: true, data });
