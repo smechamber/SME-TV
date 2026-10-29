@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import Link from 'next/link';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import type { HomepageItem, Video } from '../../home-data';
 import { isEvent, isStory, isVideo, mixedHref, mixedImage, mixedMeta } from './helpers';
 import { VideoPlayer } from './videos';
@@ -14,6 +14,7 @@ export default function HeroHeadlines({
   featuredVideoId?: string | null;
 }) {
   const carouselRef = useRef<HTMLDivElement>(null);
+  const [isMainVideoPlaying, setIsMainVideoPlaying] = useState(false);
   const mainVideo =
     featuredVideoId === undefined
       ? items.find(isVideo)
@@ -24,7 +25,10 @@ export default function HeroHeadlines({
   if (!mainVideo && !latestItems.length) return null;
 
   const scrollLatest = (direction: -1 | 1) => {
-    carouselRef.current?.scrollBy({ top: direction * 190, behavior: 'smooth' });
+    carouselRef.current?.scrollBy({
+      left: direction * (carouselRef.current?.clientWidth ?? 320),
+      behavior: 'smooth',
+    });
   };
 
   return (
@@ -35,9 +39,9 @@ export default function HeroHeadlines({
       <article className="relative min-h-[420px] overflow-hidden rounded-2xl bg-slate-950 shadow-md md:min-h-[500px] lg:col-span-2">
         {mainVideo ? (
           <>
-            <VideoPlayer video={mainVideo} />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-slate-950/10" />
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 p-6 md:p-8">
+            <VideoPlayer video={mainVideo} onPlay={() => setIsMainVideoPlaying(true)} />
+            {!isMainVideoPlaying && <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-slate-950/10" />}
+            {!isMainVideoPlaying && <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 p-6 md:p-8">
               <span className="mb-2 inline-flex rounded bg-[#e11d48] px-3 py-1 text-[10px] font-black uppercase tracking-widest text-white">
                 SME TV VIDEO
               </span>
@@ -49,7 +53,7 @@ export default function HeroHeadlines({
                   {mainVideo.description}
                 </p>
               )}
-            </div>
+            </div>}
           </>
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-[#34243f] via-[#1e1b4b] to-slate-950" />
@@ -86,7 +90,7 @@ export default function HeroHeadlines({
 
         <div
           ref={carouselRef}
-          className="min-h-0 flex-1 space-y-3 overflow-y-auto snap-y snap-mandatory pr-1"
+          className="grid min-h-0 flex-1 auto-cols-[100%] grid-flow-col grid-rows-2 gap-3 overflow-x-auto snap-x snap-mandatory pr-1"
         >
           {latestItems.map((item, index) => {
             const image = mixedImage(item);
@@ -94,23 +98,29 @@ export default function HeroHeadlines({
               <Link
                 key={`${mixedMeta(item)}-${item.id}`}
                 href={mixedHref(item)}
-                className="group relative flex min-h-[174px] snap-start items-end overflow-hidden rounded-xl bg-[#1e1b4b]"
+                className="group relative flex min-h-[174px] snap-start items-center gap-3 overflow-hidden rounded-xl bg-[#1e1b4b] p-3"
               >
-                {image && (
-                  <img
-                    src={image}
-                    alt=""
-                    loading={index > 1 ? 'lazy' : 'eager'}
-                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                )}
-                <span className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/25 to-transparent" />
+                <span className="relative h-24 w-2/5 shrink-0 overflow-hidden rounded-lg bg-slate-900 sm:h-28">
+                  {image && (
+                    <img
+                      src={image}
+                      alt=""
+                      loading={index > 1 ? 'lazy' : 'eager'}
+                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  )}
+                  {isVideo(item) && (
+                    <span className="absolute inset-0 flex items-center justify-center bg-slate-950/20">
+                      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#e11d48] text-xs text-white">▶</span>
+                    </span>
+                  )}
+                </span>
                 {isVideo(item) && (
-                  <span className="absolute right-3 top-3 rounded-full bg-[#e11d48] px-2.5 py-1 text-[9px] font-black uppercase text-white">
-                    Play video
+                  <span className="absolute right-3 top-3 rounded-full bg-[#e11d48] px-2 py-1 text-[8px] font-black uppercase text-white">
+                    Video
                   </span>
                 )}
-                <span className="relative z-10 p-4">
+                <span className="min-w-0 flex-1 py-2 pr-1">
                   <small className="mb-1 block text-[9px] font-black uppercase tracking-widest text-rose-200">
                     {mixedMeta(item)}
                     {isStory(item) && item.publishedAt

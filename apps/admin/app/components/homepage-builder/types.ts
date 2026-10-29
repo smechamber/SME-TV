@@ -12,6 +12,9 @@ export type Option = {
   description?: string;
   imageUrl?: string;
   thumbnail?: string;
+  videoType?: 'UPLOAD' | 'YOUTUBE';
+  videoUrl?: string;
+  youtubeId?: string;
   publishedAt?: string;
   startsAt?: string;
   location?: string;

@@ -170,7 +170,7 @@ export default function HomepageBuilder({
             </div>
             <p className="mt-2 text-[11px] text-[#777283]">
               Main video: {heroVideoSelected ? 'selected' : 'not selected'}
-              {' - '}Latest carousel: {heroLatestCount} items
+              {' - '}Latest carousel: {heroLatestCount} items (2 per slide)
               {' - '}This section stays first and cannot be removed.
             </p>
           </div>

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import type { Video } from '../../home-data';
 import { videoThumbnail, youtubeIdForVideo } from './helpers';
 
-export function VideoPlayer({ video }: { video: Video }) {
+export function VideoPlayer({ video, onPlay }: { video: Video; onPlay?: () => void }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const thumbnail = videoThumbnail(video);
   const youtubeId = youtubeIdForVideo(video);
@@ -39,7 +39,11 @@ export function VideoPlayer({ video }: { video: Video }) {
     <button
       type="button"
       className="group absolute inset-0 h-full w-full overflow-hidden bg-gradient-to-br from-[#34243f] via-[#1e1b4b] to-slate-950"
-      onClick={() => canPlay && setIsPlaying(true)}
+      onClick={() => {
+        if (!canPlay) return;
+        setIsPlaying(true);
+        onPlay?.();
+      }}
       disabled={!canPlay}
       aria-label={canPlay ? `Play ${video.title}` : video.title}
     >

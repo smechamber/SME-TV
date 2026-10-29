@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import type { Option, Section } from './homepage-builder/types';
 import { inputClass } from './homepage-builder/config';
 import { optionImage } from './homepage-builder/SectionEditor';
@@ -34,6 +34,7 @@ export default function HeroSectionEditor({
 }) {
   const [value, setValue] = useState(section);
   const [filter, setFilter] = useState<'ALL' | 'ARTICLE' | 'VIDEO' | 'EVENT'>('ALL');
+  const selectedTrackRef = useRef<HTMLDivElement>(null);
   const allOptions = useMemo(
     () =>
       (Object.entries(options) as ['ARTICLE' | 'VIDEO' | 'EVENT', Option[]][]).flatMap(
@@ -44,9 +45,10 @@ export default function HeroSectionEditor({
 const { mainVideoId: storedMainVideoId, latestIds: storedLatestIds } = splitHeroIds(value.contentIds);
   const hasMainVideo = allOptions.some((item) => item.type === 'VIDEO' && item.id === storedMainVideoId);
   const mainVideoId = hasMainVideo ? storedMainVideoId : undefined;
-  const latestIds = hasMainVideo || !storedMainVideoId
+  const latestIds = (hasMainVideo || !storedMainVideoId
     ? storedLatestIds
-    : [storedMainVideoId, ...storedLatestIds];
+    : [storedMainVideoId, ...storedLatestIds]
+  ).slice(0, MAX_LATEST_ITEMS);
   const mainVideo = allOptions.find(
     (item): item is ContentOption => item.type === 'VIDEO' && item.id === mainVideoId,
   );
@@ -54,7 +56,7 @@ const { mainVideoId: storedMainVideoId, latestIds: storedLatestIds } = splitHero
     .map((id) => allOptions.find((item) => item.id === id))
     .filter((item): item is ContentOption => Boolean(item));
   const availableItems = allOptions.filter(
-    (item) => filter === 'ALL' || item.type === filter,
+    (item) => item.type !== 'EVENT' && (filter === 'ALL' || item.type === filter),
   );
   const updateIds = (contentIds: string[]) =>
     setValue((current) => ({ ...current, contentIds, itemCount: MAX_LATEST_ITEMS + 2 }));
@@ -121,10 +123,7 @@ const { mainVideoId: storedMainVideoId, latestIds: storedLatestIds } = splitHero
             </div>
             {mainVideo ? (
               <div className="overflow-hidden rounded border border-[#ebe8ef]">
-                <div
-                  className="aspect-video bg-[#1e1b4b] bg-cover bg-center"
-                  style={optionImage(mainVideo) ? { backgroundImage: `url('${optionImage(mainVideo)}')` } : undefined}
-                />
+                <OptionPreview item={mainVideo} className="aspect-video w-full bg-[#1e1b4b] object-cover" />
                 <p className="p-3 text-xs font-semibold">{mainVideo.title}</p>
               </div>
             ) : (
@@ -156,18 +155,19 @@ const { mainVideoId: storedMainVideoId, latestIds: storedLatestIds } = splitHero
               <div className="mb-3 flex items-center justify-between">
                 <div>
                   <h3 className="text-sm font-bold">Latest carousel</h3>
-                  <p className="mt-1 text-[10px] text-[#777283]">Items display in this order and can be swiped on the website.</p>
+                  <p className="mt-1 text-[10px] text-[#777283]">Two items appear stacked per slide. Add more to continue in horizontal slides.</p>
                 </div>
-                <span className="text-[10px] text-[#777283]">{latestItems.length} selected</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-[#777283]">{latestItems.length} selected</span>
+                  <button type="button" className="rounded border px-2 py-1 text-[10px]" onClick={() => selectedTrackRef.current?.scrollBy({ left: -(selectedTrackRef.current.clientWidth), behavior: 'smooth' })}>‹</button>
+                  <button type="button" className="rounded border px-2 py-1 text-[10px]" onClick={() => selectedTrackRef.current?.scrollBy({ left: selectedTrackRef.current.clientWidth, behavior: 'smooth' })}>›</button>
+                </div>
               </div>
-              <div className="space-y-2">
+              <div ref={selectedTrackRef} className="grid auto-cols-[100%] grid-flow-col grid-rows-2 gap-2 overflow-x-auto snap-x snap-mandatory">
                 {latestItems.map((item, index) => (
                   <div key={`${item.type}-${item.id}`} className="flex items-center gap-2 rounded border border-[#ebe8ef] p-2">
                     <span className="w-6 text-center font-mono text-xs font-bold text-[#d92867]">{String(index + 1).padStart(2, '0')}</span>
-                    <span
-                      className="h-12 w-20 shrink-0 rounded bg-[#eeeaf1] bg-cover bg-center"
-                      style={optionImage(item) ? { backgroundImage: `url('${optionImage(item)}')` } : undefined}
-                    />
+                    <OptionPreview item={item} className="h-12 w-20 shrink-0 rounded bg-[#eeeaf1] object-cover" />
                     <span className="min-w-0 flex-1">
                       <small className="block text-[8px] font-black uppercase tracking-wider text-[#d92867]">{item.type}</small>
                       <span className="line-clamp-2 block text-[10px] font-semibold">{item.title}</span>
@@ -187,7 +187,7 @@ const { mainVideoId: storedMainVideoId, latestIds: storedLatestIds } = splitHero
               <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                 <div>
                   <h3 className="text-sm font-bold">Content Studio library</h3>
-                  <p className="mt-1 text-[10px] text-[#777283]">Add published content to the Latest carousel.</p>
+                  <p className="mt-1 text-[10px] text-[#777283]">Add published articles or videos. Two appear per slide.</p>
                 </div>
                 <div className="flex gap-1">
                   {(['ALL', 'ARTICLE', 'VIDEO', 'EVENT'] as const).map((type) => (
@@ -207,10 +207,7 @@ const { mainVideoId: storedMainVideoId, latestIds: storedLatestIds } = splitHero
                   const added = value.contentIds.includes(item.id);
                   return (
                     <div key={`${item.type}-${item.id}`} className="flex min-w-0 items-center gap-2 rounded border border-[#ebe8ef] p-2">
-                      <span
-                        className="h-12 w-16 shrink-0 rounded bg-[#eeeaf1] bg-cover bg-center"
-                        style={optionImage(item) ? { backgroundImage: `url('${optionImage(item)}')` } : undefined}
-                      />
+                      <OptionPreview item={item} className="h-12 w-16 shrink-0 rounded bg-[#eeeaf1] object-cover" />
                       <span className="min-w-0 flex-1">
                         <small className="block text-[8px] font-black uppercase text-[#d92867]">{item.type}</small>
                         <span className="line-clamp-2 block text-[10px] font-semibold">{item.title}</span>
@@ -241,4 +238,12 @@ const { mainVideoId: storedMainVideoId, latestIds: storedLatestIds } = splitHero
       </form>
     </div>
   );
+}
+
+function OptionPreview({ item, className }: { item: ContentOption; className: string }) {
+  const image = optionImage(item);
+  if (item.type === 'VIDEO' && item.videoUrl && !image) {
+    return <video className={className} src={item.videoUrl} muted autoPlay loop playsInline preload="metadata" />;
+  }
+  return image ? <img className={className} src={image} alt="" /> : <span className={className} />;
 }

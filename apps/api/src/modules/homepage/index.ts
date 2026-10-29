@@ -76,7 +76,7 @@ router.get('/admin/homepage', authenticate, requireAdmin, asyncRoute(async (_req
 router.get('/admin/homepage/content', authenticate, requireAdmin, asyncRoute(async (_request, response) => {
   const [articles, videos, events] = await Promise.all([
     db.article.findMany({ where: publishedWhere(), orderBy: { publishedAt: 'desc' }, take: 100, select: { id: true, title: true, summary: true, imageUrl: true, publishedAt: true, category: { select: { name: true } } } }),
-    db.video.findMany({ where: publishedWhere(), orderBy: { publishedAt: 'desc' }, take: 100, select: { id: true, title: true, description: true, thumbnail: true, publishedAt: true } }),
+    db.video.findMany({ where: publishedWhere(), orderBy: { publishedAt: 'desc' }, take: 100, select: { id: true, title: true, description: true, thumbnail: true, videoType: true, videoUrl: true, youtubeId: true, publishedAt: true } }),
     db.event.findMany({ where: { status: 'PUBLISHED', startsAt: { gte: new Date() } }, orderBy: { startsAt: 'asc' }, take: 100, select: { id: true, title: true, description: true, imageUrl: true, startsAt: true, location: true } }),
   ]);
   response.json({ success: true, data: { ARTICLE: articles, VIDEO: videos, EVENT: events } });
