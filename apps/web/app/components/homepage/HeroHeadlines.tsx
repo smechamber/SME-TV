@@ -19,6 +19,7 @@ export default function HeroHeadlines({
     featuredVideoId === undefined
       ? items.find(isVideo)
       : items.find((item): item is Video => item.id === featuredVideoId && isVideo(item));
+  const mainVideoAutoPlay = Boolean(mainVideo && (youtubeIdForVideo(mainVideo) || mainVideo.videoUrl));
   const latestItems = mainVideo ? items.filter((item) => item !== mainVideo) : items;
 
   if (!mainVideo && featuredVideoId === undefined) return null;
@@ -39,11 +40,11 @@ export default function HeroHeadlines({
       <article className="relative min-h-[420px] overflow-hidden rounded-2xl bg-slate-950 shadow-md md:min-h-[500px] lg:col-span-2">
         {mainVideo ? (
           <>
-            <VideoPlayer video={mainVideo} onPlay={() => setIsMainVideoPlaying(true)} />
-            {!isMainVideoPlaying && (
+            <VideoPlayer video={mainVideo} autoPlay={mainVideoAutoPlay} onPlay={() => setIsMainVideoPlaying(true)} />
+            {!isMainVideoPlaying && !mainVideoAutoPlay && (
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-slate-950/10" />
             )}
-            {!isMainVideoPlaying && (
+            {!isMainVideoPlaying && !mainVideoAutoPlay && (
               <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 p-6 md:p-8">
                 <span className="mb-2 inline-flex rounded bg-[#e11d48] px-3 py-1 text-[10px] font-black uppercase tracking-widest text-white">
                   SME TV VIDEO
@@ -104,22 +105,32 @@ export default function HeroHeadlines({
         >
           {latestItems.map((item, index) => {
             const image = mixedImage(item);
-            const directVideoUrl =
-              isVideo(item) && item.videoType === 'UPLOAD' ? item.videoUrl : undefined;
             const youtubeId = isVideo(item) ? youtubeIdForVideo(item) : undefined;
+            const directVideoUrl =
+              isVideo(item) && item.videoUrl && !youtubeId ? item.videoUrl : undefined;
             return (
               <Link
                 key={`${mixedMeta(item)}-${item.id}`}
                 href={mixedHref(item)}
                 className="group relative flex min-h-[142px] snap-start items-end overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:border-rose-200 hover:shadow-md"
               >
-                <span className="absolute inset-0 bg-slate-100">
+                <span className="absolute inset-0 bg-slate-950">
                   {image && (
                     <img
                       src={image}
                       alt=""
                       loading={index > 1 ? 'lazy' : 'eager'}
                       className="absolute inset-0 h-full w-full object-cover"
+                      onError={(event) => {
+                        const fallback = youtubeId
+                          ? 'https://img.youtube.com/vi/' + youtubeId + '/mqdefault.jpg'
+                          : undefined;
+                        if (fallback && event.currentTarget.src !== fallback) {
+                          event.currentTarget.src = fallback;
+                        } else {
+                          event.currentTarget.style.display = 'none';
+                        }
+                      }}
                     />
                   )}
                   {youtubeId ? (
@@ -127,29 +138,28 @@ export default function HeroHeadlines({
                       className="absolute inset-0 h-full w-full border-0"
                       src={'https://www.youtube-nocookie.com/embed/' + youtubeId + '?autoplay=1&mute=1&controls=0&loop=1&playlist=' + youtubeId + '&playsinline=1&rel=0'}
                       title={item.title + ' video preview'}
-                      loading="lazy"
                       allow="autoplay; encrypted-media; picture-in-picture"
                       referrerPolicy="strict-origin-when-cross-origin"
                     />
                   ) : directVideoUrl ? (
                     <video
-                      className="h-full w-full object-cover"
+                      className="absolute inset-0 h-full w-full object-cover"
                       src={directVideoUrl}
                       poster={image}
                       muted
+                      playsInline
                       autoPlay
                       loop
-                      playsInline
                       preload="auto"
                     />
                   ) : null}
+                  {isVideo(item) && (
+                    <span className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-[#ff0033] text-xs text-white shadow-md">
+                      &#9654;
+                    </span>
+                  )}
                 </span>
                 <span className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/15 to-transparent" />
-                {isVideo(item) && (
-                  <span className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/95 text-sm text-[#d92867] shadow">
-                    ▶
-                  </span>
-                )}
                 <span className="relative z-10 min-w-0 p-3">
                   <small className="mb-1 block text-[9px] font-bold uppercase tracking-widest text-white/80">
                     {mixedMeta(item)}

@@ -5,7 +5,7 @@ export function isStory(item: HomepageItem): item is Story {
 }
 
 export function isVideo(item: HomepageItem): item is Video {
-  return 'thumbnail' in item || 'videoUrl' in item || 'youtubeId' in item;
+  return 'videoType' in item || 'thumbnail' in item || 'videoUrl' in item || 'youtubeId' in item;
 }
 
 export function isEvent(item: HomepageItem): item is EventItem {
@@ -13,8 +13,10 @@ export function isEvent(item: HomepageItem): item is EventItem {
 }
 
 export function videoThumbnail(video: Video) {
-  if (video.thumbnail) return video.thumbnail;
   const youtubeId = youtubeIdForVideo(video);
+  if (video.videoType === 'YOUTUBE' && youtubeId)
+    return `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`;
+  if (video.thumbnail) return video.thumbnail;
   if (youtubeId) return `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`;
   return undefined;
 }
@@ -24,7 +26,7 @@ export function youtubeIdForVideo(video: Video) {
     const normalized = value?.trim();
     if (!normalized) continue;
     const match = normalized.match(
-      /(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/))([\w-]{11})/,
+      /(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/))([\w-]{11})/,
     );
     const id = match?.[1] ?? normalized;
     if (/^[\w-]{11}$/.test(id)) return id;

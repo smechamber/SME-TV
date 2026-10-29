@@ -3,18 +3,27 @@ import { useState } from 'react';
 import type { Video } from '../../home-data';
 import { videoThumbnail, youtubeIdForVideo } from './helpers';
 
-export function VideoPlayer({ video, onPlay }: { video: Video; onPlay?: () => void }) {
+export function VideoPlayer({
+  video,
+  onPlay,
+  autoPlay = false,
+}: {
+  video: Video;
+  onPlay?: () => void;
+  autoPlay?: boolean;
+}) {
   const [isPlaying, setIsPlaying] = useState(false);
   const thumbnail = videoThumbnail(video);
   const youtubeId = youtubeIdForVideo(video);
   const isYoutubeVideo = video.videoType === 'YOUTUBE' || Boolean(youtubeId);
   const canPlay = isYoutubeVideo ? Boolean(youtubeId) : Boolean(video.videoUrl);
+  const shouldPlay = autoPlay || isPlaying;
 
-  if (isPlaying && isYoutubeVideo && youtubeId) {
+  if (shouldPlay && isYoutubeVideo && youtubeId) {
     return (
       <iframe
         className="absolute inset-0 h-full w-full"
-        src={`https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=1&rel=0`}
+        src={`https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=1&mute=1&rel=0`}
         title={video.title}
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         referrerPolicy="strict-origin-when-cross-origin"
@@ -23,11 +32,12 @@ export function VideoPlayer({ video, onPlay }: { video: Video; onPlay?: () => vo
     );
   }
 
-  if (isPlaying && !isYoutubeVideo && video.videoUrl) {
+  if (shouldPlay && !isYoutubeVideo && video.videoUrl) {
     return (
       <video
         className="absolute inset-0 h-full w-full object-cover"
-        autoPlay
+        autoPlay={autoPlay || isPlaying}
+        muted={autoPlay}
         controls
         poster={thumbnail}
         src={video.videoUrl}
