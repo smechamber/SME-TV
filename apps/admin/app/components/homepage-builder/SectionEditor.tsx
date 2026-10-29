@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import type { Design, Option, Section } from './types';
 import { designs, inputClass, sectionKinds } from './config';
+import { optionImage } from './optionImage';
 
 export default function SectionForm({
   section,
@@ -105,9 +106,7 @@ export default function SectionForm({
             <select
               className={inputClass}
               value={value.source}
-              onChange={(event) =>
-                update({ source: event.target.value as Section['source'] })
-              }
+              onChange={(event) => update({ source: event.target.value as Section['source'] })}
             >
               <option value="MANUAL">Selected content</option>
               <option value="LATEST">Latest published</option>
@@ -233,15 +232,6 @@ export default function SectionForm({
       </form>
     </div>
   );
-}
-
-export function optionImage(item: Option) {
-  if (item.imageUrl ?? item.thumbnail) return item.imageUrl ?? item.thumbnail;
-  const videoReference = item.youtubeId ?? item.videoUrl;
-  const youtubeId = videoReference?.match(
-    /(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/))([\w-]{11})/,
-  )?.[1] ?? (videoReference && /^[\w-]{11}$/.test(videoReference) ? videoReference : undefined);
-  return youtubeId ? `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg` : undefined;
 }
 
 export function PreviewLayout({
