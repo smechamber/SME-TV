@@ -34,6 +34,7 @@ export default function HeroSectionEditor({
 }) {
   const [value, setValue] = useState(section);
   const [filter, setFilter] = useState<'ALL' | 'ARTICLE' | 'VIDEO' | 'EVENT'>('ALL');
+  const [selectedPage, setSelectedPage] = useState(0);
   const selectedTrackRef = useRef<HTMLDivElement>(null);
   const allOptions = useMemo(
     () =>
@@ -55,6 +56,11 @@ const { mainVideoId: storedMainVideoId, latestIds: storedLatestIds } = splitHero
   const latestItems = latestIds
     .map((id) => allOptions.find((item) => item.id === id))
     .filter((item): item is ContentOption => Boolean(item));
+  const pageCount = Math.max(1, Math.ceil(latestItems.length / 2));
+  const currentPage = Math.min(selectedPage, pageCount - 1);
+  const latestPages = Array.from({ length: pageCount }, (_, page) =>
+    latestItems.slice(page * 2, page * 2 + 2),
+  );
   const availableItems = allOptions.filter(
     (item) => item.type !== 'EVENT' && (filter === 'ALL' || item.type === filter),
   );
@@ -159,24 +165,38 @@ const { mainVideoId: storedMainVideoId, latestIds: storedLatestIds } = splitHero
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] text-[#777283]">{latestItems.length} selected</span>
-                  <button type="button" className="rounded border px-2 py-1 text-[10px]" onClick={() => selectedTrackRef.current?.scrollBy({ left: -(selectedTrackRef.current.clientWidth), behavior: 'smooth' })}>‹</button>
-                  <button type="button" className="rounded border px-2 py-1 text-[10px]" onClick={() => selectedTrackRef.current?.scrollBy({ left: selectedTrackRef.current.clientWidth, behavior: 'smooth' })}>›</button>
+                  <button type="button" disabled={currentPage === 0} className="rounded border px-2 py-1 text-xs disabled:opacity-40" aria-label="Previous preview page" onClick={() => selectedTrackRef.current?.scrollBy({ left: -(selectedTrackRef.current.clientWidth * 0.82), behavior: 'smooth' })}>&#8249;</button>
+                  <span className="text-[10px] tabular-nums text-[#777283]">{currentPage + 1}/{pageCount}</span>
+                  <button type="button" disabled={currentPage >= pageCount - 1} className="rounded border px-2 py-1 text-xs disabled:opacity-40" aria-label="Next preview page" onClick={() => selectedTrackRef.current?.scrollBy({ left: selectedTrackRef.current.clientWidth * 0.82, behavior: 'smooth' })}>&#8250;</button>
                 </div>
               </div>
-              <div ref={selectedTrackRef} className="grid auto-cols-[100%] grid-flow-col grid-rows-2 gap-2 overflow-x-auto snap-x snap-mandatory">
-                {latestItems.map((item, index) => (
-                  <div key={`${item.type}-${item.id}`} className="flex items-center gap-2 rounded border border-[#ebe8ef] p-2">
-                    <span className="w-6 text-center font-mono text-xs font-bold text-[#d92867]">{String(index + 1).padStart(2, '0')}</span>
-                    <OptionPreview item={item} className="h-12 w-20 shrink-0 rounded bg-[#eeeaf1] object-cover" />
-                    <span className="min-w-0 flex-1">
-                      <small className="block text-[8px] font-black uppercase tracking-wider text-[#d92867]">{item.type}</small>
-                      <span className="line-clamp-2 block text-[10px] font-semibold">{item.title}</span>
-                    </span>
-                    <div className="flex gap-1">
-                      <button type="button" disabled={index === 0} onClick={() => moveLatest(index, -1)} aria-label="Move item up">Up</button>
-                      <button type="button" disabled={index === latestItems.length - 1} onClick={() => moveLatest(index, 1)} aria-label="Move item down">Down</button>
-                      <button type="button" className="text-[#d92867]" onClick={() => removeLatest(item.id)}>Remove</button>
-                    </div>
+              <div
+                ref={selectedTrackRef}
+                className="grid auto-cols-[40%] grid-flow-col gap-2 overflow-x-auto snap-x snap-mandatory pb-1"
+                onScroll={(event) => {
+                  const track = event.currentTarget;
+                  const step = track.clientWidth * 0.82 + 8;
+                  setSelectedPage(Math.min(pageCount - 1, Math.round(track.scrollLeft / step)));
+                }}
+              >
+                {latestPages.map((pageItems, pageIndex) => (
+                  <div key={'page-' + pageIndex} className="grid min-w-0 grid-rows-2 gap-2 snap-start">
+                    {pageItems.map((item, index) => {
+                      const itemIndex = pageIndex * 2 + index;
+                      return <div key={item.type + '-' + item.id} className="group relative h-[118px] min-w-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-100 shadow-sm sm:h-[132px]">
+                        <OptionPreview item={item} className="absolute inset-0 h-full w-full bg-slate-100 object-contain" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/15 to-transparent" />
+                        <span className="absolute bottom-2 left-2 right-20 z-10">
+                          <small className="block text-[8px] font-bold uppercase tracking-wider text-white/75">{item.type}</small>
+                          <span className="block truncate text-xs font-semibold text-white" title={item.title}>{item.title}</span>
+                        </span>
+                        <div className="absolute right-1.5 top-1.5 z-10 flex items-center gap-0.5 rounded-md bg-white/95 p-0.5 shadow-sm">
+                          <button type="button" className="rounded px-1 text-xs text-slate-600 hover:bg-slate-100 disabled:opacity-30" disabled={itemIndex === 0} onClick={() => moveLatest(itemIndex, -1)} aria-label="Move item earlier">&#8593;</button>
+                          <button type="button" className="rounded px-1 text-xs text-slate-600 hover:bg-slate-100 disabled:opacity-30" disabled={itemIndex === latestItems.length - 1} onClick={() => moveLatest(itemIndex, 1)} aria-label="Move item later">&#8595;</button>
+                          <button type="button" className="rounded px-1 text-xs text-slate-500 hover:bg-rose-50 hover:text-rose-600" onClick={() => removeLatest(item.id)} aria-label="Remove item">&#215;</button>
+                        </div>
+                      </div>;
+                    })}
                   </div>
                 ))}
                 {!latestItems.length && <p className="rounded border border-dashed border-[#d8cfdc] p-4 text-center text-xs text-[#777283]">Add articles or videos below to fill the carousel.</p>}
@@ -242,8 +262,8 @@ const { mainVideoId: storedMainVideoId, latestIds: storedLatestIds } = splitHero
 
 function OptionPreview({ item, className }: { item: ContentOption; className: string }) {
   const image = optionImage(item);
-  if (item.type === 'VIDEO' && item.videoUrl && !image) {
-    return <video className={className} src={item.videoUrl} muted autoPlay loop playsInline preload="metadata" />;
+  if (item.type === 'VIDEO' && item.videoType === 'UPLOAD' && item.videoUrl) {
+    return <video className={className} src={item.videoUrl} poster={image} muted autoPlay loop playsInline preload="metadata" />;
   }
   return image ? <img className={className} src={image} alt="" /> : <span className={className} />;
 }
