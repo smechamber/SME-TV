@@ -18,27 +18,33 @@ export function LatestCarousel({ items }: { items: HomepageItem[] }) {
   const scrollLatest = (direction: -1 | 1) => {
     carouselRef.current?.scrollBy({
       left: direction * ((carouselRef.current?.clientWidth ?? 320) * 0.88),
-      behavior: 'smooth',
+      behavior: 'auto', // Smooth hata kar instant/normal slide kar diya hai
     });
   };
 
   return (
-    <aside className="flex min-h-[420px] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:min-h-[500px]">
-      <div className="mb-4 flex items-center justify-between border-b border-slate-200 pb-4">
+    <aside className="flex min-h-[420px] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm md:min-h-[500px]">
+      <div className="mb-4 flex items-center justify-between border-b border-slate-200 pb-3">
         <h2 className="text-2xl font-medium tracking-tight text-[#1e1b4b]">Recent Post</h2>
-        <div className="flex gap-1">
-          {([-1, 1] as const).map((direction) => (
-            <button
-              key={direction}
-              type="button"
-              onClick={() => scrollLatest(direction)}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-lg text-slate-600 shadow-sm hover:border-rose-300 hover:text-[#d92867]"
-              aria-label={direction < 0 ? 'Previous latest items' : 'Next latest items'}
-            >
-              {direction < 0 ? '\u2039' : '\u203a'}
-            </button>
-          ))}
-        </div>
+
+     
+<div className="flex gap-1">
+  {([-1, 1] as const).map((direction) => (
+    <button
+      key={direction}
+      type="button"
+      onClick={() => scrollLatest(direction)}
+      className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-4xl font-light text-slate-600 shadow-sm hover:border-rose-300 hover:text-[#d92867]"
+      aria-label={direction < 0 ? 'Previous latest items' : 'Next latest items'}
+    >
+      <span className="relative -top-1">
+        {direction < 0 ? '\u2039' : '\u203a'}
+      </span>
+    </button>
+  ))}
+</div>
+
+
       </div>
       <div
         ref={carouselRef}
@@ -46,7 +52,7 @@ export function LatestCarousel({ items }: { items: HomepageItem[] }) {
         onWheel={(event) => {
           if (Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
             event.preventDefault();
-            event.currentTarget.scrollBy({ left: event.deltaY, behavior: 'auto' });
+            carouselRef.current?.scrollBy({ left: event.deltaY, behavior: 'auto' });
           }
         }}
       >
@@ -114,7 +120,7 @@ export function LatestCarousel({ items }: { items: HomepageItem[] }) {
                       ? ` | ${new Date(item.startsAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}`
                       : ''}
                 </small>
-                <h3 className="line-clamp-2 text-sm font-bold leading-snug text-white md:text-base">
+                <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-white md:text-[17px]">
                   {item.title}
                 </h3>
               </span>

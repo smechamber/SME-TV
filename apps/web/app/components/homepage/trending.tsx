@@ -10,11 +10,11 @@ export function TrendingSection({ items }: { items: HomepageItem[] }) {
       <div className="flex items-center gap-4">
         <h2
           id="trending-on-smetv"
-          className="shrink-0 bg-[#28206f] px-3 py-2 text-xs font-black uppercase tracking-wide text-white"
+          className="shrink-0 rounded-xl bg-[#1e1b4b] px-6 py-2 text-base font-medium uppercase tracking-wide text-white"
         >
           Trending on SMETV
         </h2>
-        <div className="h-px flex-1 bg-[#28206f]" />
+        {/* <div className="h-px flex-1 bg-[#28206f]" /> */}
       </div>
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         {items.map((item) => {
@@ -34,10 +34,10 @@ export function TrendingSection({ items }: { items: HomepageItem[] }) {
             <Link
               key={item.id}
               href={mixedHref(item)}
-              className="group grid min-h-[132px] grid-cols-[116px_1fr] overflow-hidden rounded border border-slate-100 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-[#d8d3f2] hover:shadow-md sm:grid-cols-[145px_1fr]"
+              className="group grid min-h-[132px] grid-cols-[150px_1fr] overflow-hidden rounded border border-slate-100 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-[#d8d3f2] hover:shadow-md sm:grid-cols-[200px_1fr]"
             >
               <div
-                className="min-h-full bg-slate-200 bg-cover bg-center"
+                className="min-h-full  bg-slate-200 bg-cover bg-center"
                 style={image ? { backgroundImage: `url('${image}')` } : undefined}
               >
                 {!image && (
@@ -47,10 +47,10 @@ export function TrendingSection({ items }: { items: HomepageItem[] }) {
                 )}
               </div>
               <div className="flex flex-col justify-center p-4">
-                <span className="text-[9px] font-black uppercase tracking-widest text-[#d92867]">
+                <span className="text-[10px]  font-semibold uppercase tracking-widest text-[#d92867]">
                   {mixedMeta(item)}
                 </span>
-                <h3 className="mt-2 line-clamp-2 text-sm font-bold uppercase leading-relaxed text-slate-900 group-hover:text-[#28206f]">
+                <h3 className="mt-1.5 line-clamp-2 text-md font-bold uppercase leading-relaxed text-slate-900 group-hover:text-[#28206f]">
                   {item.title}
                 </h3>
                 {(description || metadata) && (

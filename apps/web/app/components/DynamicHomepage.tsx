@@ -57,20 +57,20 @@ export default function DynamicHomepage({ sections }: { sections: HomepageSectio
 
   const filters = (
     <section className="space-y-4" aria-label="Filter homepage content">
-      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+      <div className="flex justify-between gap-4 overflow-x-auto pb-4 pt-4 scrollbar-none">
         {topics.map((item) => (
           <button
             key={item}
             type="button"
             onClick={() => setTopic(item)}
             aria-pressed={topic === item}
-            className={`shrink-0 rounded-lg border px-5 py-2.5 text-xs font-extrabold uppercase tracking-wider transition-all ${topic === item ? 'border-transparent bg-[#1e1b4b] text-white shadow-md' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-100'}`}
+            className={`shrink-0 rounded-xl border px-6 py-2.5 text-base font-bold uppercase tracking-wider transition-all ${topic === item ? 'border-transparent bg-[#1e1b4b] text-white shadow-md' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-100'}`}
           >
             {item}
           </button>
         ))}
       </div>
-      <label htmlFor="homepage-search" className="sr-only">
+      {/* <label htmlFor="homepage-search" className="sr-only">
         Search articles, videos, and events
       </label>
       <input
@@ -79,7 +79,7 @@ export default function DynamicHomepage({ sections }: { sections: HomepageSectio
         onChange={(event) => setQuery(event.target.value)}
         placeholder="Search articles, videos, and events..."
         className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#e11d48] focus:outline-none sm:max-w-md"
-      />
+      /> */}
     </section>
   );
 

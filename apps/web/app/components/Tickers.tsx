@@ -24,8 +24,10 @@ export default function Tickers({ stories }: { stories: Story[] }) {
     const fetchMarketData = async () => {
       try {
         const res = await fetch('http://localhost:4000/api/market-data');
+
         if (res.ok) {
           const data = await res.json();
+
           if (Array.isArray(data) && data.length > 0) {
             setMarketData(data);
           }
@@ -44,6 +46,7 @@ export default function Tickers({ stories }: { stories: Story[] }) {
   return (
     <>
       <style jsx global>{`
+        /* Market Watch: Right to Left */
         @keyframes ticker {
           0% {
             transform: translate3d(0, 0, 0);
@@ -52,19 +55,33 @@ export default function Tickers({ stories }: { stories: Story[] }) {
             transform: translate3d(-50%, 0, 0);
           }
         }
+
         .animate-ticker {
           display: flex;
           width: max-content;
           animation: ticker 35s linear infinite;
         }
+
         .animate-ticker:hover {
           animation-play-state: paused;
         }
+
+        /* Breaking News: Left to Right */
+        @keyframes ticker-reverse {
+          0% {
+            transform: translate3d(-50%, 0, 0);
+          }
+          100% {
+            transform: translate3d(0, 0, 0);
+          }
+        }
+
         .animate-ticker-fast {
           display: flex;
           width: max-content;
-          animation: ticker 25s linear infinite;
+          animation: ticker-reverse 25s linear infinite;
         }
+
         .animate-ticker-fast:hover {
           animation-play-state: paused;
         }
@@ -72,26 +89,40 @@ export default function Tickers({ stories }: { stories: Story[] }) {
 
       {/* Market Watch Ticker */}
       <div
-        className={`${marketData.length ? '' : 'hidden'} bg-slate-900 text-white py-2.5 mt-1.5 overflow-hidden border-b border-slate-800`}
+        className={`${
+          marketData.length ? '' : 'hidden'
+        } mt-1.5 overflow-hidden border-b border-slate-800 bg-slate-900 py-2.5 text-white`}
         id="market"
       >
-        <div className="max-w-7xl mx-auto px-4 flex items-center">
-          <div className="flex items-center gap-2 font-extrabold text-[#e11d48] uppercase tracking-wider text-[11px] flex-shrink-0 z-10 bg-slate-900 pr-4">
+        <div className="mx-auto flex max-w-7xl items-center px-4">
+          <div className="z-10 flex shrink-0 items-center gap-2 bg-slate-900 pr-4 text-xs font-bold uppercase tracking-wider text-[#e11d48]">
             <span>MARKET WATCH</span>
             <span className="text-slate-600">|</span>
           </div>
 
-          <div className="relative overflow-hidden w-full">
-            <div className="animate-ticker text-xs font-mono">
+          <div className="relative w-full overflow-hidden">
+            <div className="animate-ticker font-mono text-xs">
               {[1, 2].map((loopKey) => (
-                <div key={loopKey} className="flex items-center gap-8 pr-8 flex-shrink-0">
+                <div
+                  key={loopKey}
+                  className="flex shrink-0 items-center gap-8 pr-8"
+                >
                   {marketData.map((item, index) => (
-                    <div key={`${loopKey}-${index}`} className="flex items-center gap-1.5">
+                    <div
+                      key={`${loopKey}-${index}`}
+                      className="flex items-center gap-1.5"
+                    >
                       <span className="text-slate-400">{item.name}</span>
-                      <span className="text-white font-semibold">{item.value}</span>
+
+                      <span className="font-semibold text-white">
+                        {item.value}
+                      </span>
+
                       <span
                         className={
-                          item.isUp ? 'text-emerald-400 text-[11px]' : 'text-rose-400 text-[11px]'
+                          item.isUp
+                            ? 'text-[11px] text-emerald-400'
+                            : 'text-[11px] text-rose-400'
                         }
                       >
                         {item.isUp ? '▲' : '▼'} {item.change}
@@ -105,7 +136,7 @@ export default function Tickers({ stories }: { stories: Story[] }) {
 
           <Link
             href="/news"
-            className="text-[11px] font-bold text-indigo-300 hover:text-white uppercase tracking-wider flex-shrink-0 z-10 bg-slate-900 pl-4 hidden sm:block"
+            className="z-10 hidden shrink-0 bg-slate-900 pl-4 text-[11px] font-bold uppercase tracking-wider text-indigo-300 hover:text-white sm:block"
           >
             Market News →
           </Link>
@@ -114,24 +145,29 @@ export default function Tickers({ stories }: { stories: Story[] }) {
 
       {/* Breaking News Ticker */}
       <div
-        className={`${stories.length ? '' : 'hidden'} bg-rose-50/80 border-b border-rose-100 py-2.5 overflow-hidden text-xs`}
+        className={`${
+          stories.length ? '' : 'hidden'
+        } overflow-hidden border-b border-rose-100 bg-rose-50/80 py-2.5 text-xs`}
       >
-        <div className="max-w-7xl mx-auto px-4 flex items-center">
-          <span className="font-extrabold text-white bg-[#e11d48] px-3 py-1 rounded text-[10px] tracking-widest uppercase flex-shrink-0 z-10 shadow-sm mr-4">
+        <div className="mx-auto flex max-w-7xl items-center px-4">
+          <span className="z-10 mr-4 shrink-0 rounded bg-[#e11d48] px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-white shadow-sm">
             BREAKING
           </span>
 
-          <div className="relative overflow-hidden w-full">
-            <div className="animate-ticker-fast text-slate-800 font-medium">
+          <div className="relative w-full overflow-hidden">
+            <div className="animate-ticker-fast font-medium text-slate-800">
               {[1, 2].map((loopKey) => (
-                <div key={loopKey} className="flex items-center gap-8 pr-8 flex-shrink-0">
+                <div
+                  key={loopKey}
+                  className="flex shrink-0 items-center gap-8 pr-8"
+                >
                   {stories.map((s) => (
                     <Link
                       href={`/news/${s.slug}`}
                       key={`${loopKey}-${s.id}`}
-                      className="hover:text-[#e11d48] transition-colors flex items-center gap-3"
+                      className="flex items-center gap-3 transition-colors hover:text-[#e11d48]"
                     >
-                      <span className="text-[#e11d48] font-bold">•</span>
+                      <span className="font-bold text-[#e11d48]">•</span>
                       <span>{s.title}</span>
                     </Link>
                   ))}

@@ -38,14 +38,14 @@ export default function Header() {
           
           {/* Left Side: Mobile par SIRF LIVE NETWORK dikhega */}
           <div className="flex items-center gap-2 font-medium flex-shrink-0">
-            <span className="flex items-center gap-1.5 bg-[#e11d48] text-white text-[10px] font-extrabold px-2 py-0.5 rounded tracking-widest uppercase">
+            <span className="flex items-center gap-1.5 bg-[#e11d48] text-white text-[10px] font-bold px-2 py-0.5 rounded tracking-widest uppercase">
               <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" /> LIVE NETWORK
             </span>
             <span className="text-slate-200 hidden sm:inline">SME TV · Digital Voice of SMEs</span>
           </div>
 
           {/* Right Side: Timer & Date */}
-          <div className="flex items-center gap-1.5 sm:gap-2 text-slate-200 font-semibold text-[10px] sm:text-[12px] tracking-wide font-mono">
+          <div className="flex items-center gap-1.5 sm:gap-2 text-slate-200 font-medium text-[10px] sm:text-[12px] tracking-wide font-mono">
             {time ? (
               <>
                 <span className="text-[#38bdf8] whitespace-nowrap">{time}</span>
