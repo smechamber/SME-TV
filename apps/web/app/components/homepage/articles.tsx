@@ -13,7 +13,7 @@ export function ArticleHero({ item }: { item?: Story }) {
       <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-[#0f172a]/70 to-transparent" />
       <div className="relative z-10 flex h-full min-h-[440px] flex-col justify-end space-y-3 p-6 md:min-h-[500px] md:p-8">
         <div className="flex items-center gap-2">
-          <span className="inline-block rounded bg-[#e11d48] px-3 py-1 text-[10px] font-black uppercase tracking-widest text-white">
+          <span className="inline-block rounded bg-[#e11d48] px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white">
             {item.category?.name ?? 'SME NEWS'}
           </span>
           {item.readTime && (
@@ -22,7 +22,7 @@ export function ArticleHero({ item }: { item?: Story }) {
             </span>
           )}
         </div>
-        <h1 className="text-2xl font-black leading-tight text-white transition-colors group-hover:text-rose-200 md:text-4xl">
+        <h1 className="text-2xl font-bold leading-tight text-white transition-colors group-hover:text-rose-200 md:text-4xl">
           {item.title}
         </h1>
         <p className="max-w-2xl text-sm leading-relaxed text-slate-300 md:text-base">

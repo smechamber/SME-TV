@@ -56,13 +56,13 @@ export function MixedCard({
 
 export function MixedHeadlines({ items }: { items: HomepageItem[] }) {
   return (
-    <aside className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <aside className="rounded-2xl border border-slate-200 bg-white py-6 px-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between border-b border-slate-200 pb-4">
         <div>
-          <small className="block text-[10px] font-black uppercase tracking-widest text-[#e11d48]">
+          <small className="block text-[10px] font-bold uppercase tracking-widest text-[#e11d48]">
             EDITORIAL SPOTLIGHT
           </small>
-          <h2 className="text-xl font-bold text-[#1e1b4b]">Featured Stories</h2>
+          <h2 className="text-2xl font-semibold text-[#1e1b4b]">Featured Stories</h2>
         </div>
         <Link href="/news" className="text-xs font-bold text-[#1e1b4b] hover:text-[#e11d48]">
           View All →
@@ -71,7 +71,7 @@ export function MixedHeadlines({ items }: { items: HomepageItem[] }) {
       <div className="space-y-2">
         {items.slice(0, 3).map((item, index) => (
           <Link
-            className="group flex items-start gap-3 rounded-xl border border-transparent p-3 transition-all hover:border-slate-200 hover:bg-slate-50"
+            className="group flex items-start gap-3 rounded-xl border border-transparent px-2.5 py-4 transition-all hover:border-slate-200 hover:bg-slate-50"
             href={mixedHref(item)}
             key={item.id}
           >
@@ -94,7 +94,7 @@ export function MixedHeadlines({ items }: { items: HomepageItem[] }) {
             )} */}
             <div className="min-w-0 flex-1">
               <div className="mb-1 flex items-center gap-2">
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#e11d48]">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#e11d48]">
                   {mixedMeta(item)}
                 </span>
                 {isVideo(item) && <span className="text-[10px] text-slate-400">▶</span>}
