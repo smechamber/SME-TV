@@ -28,6 +28,7 @@ export type AdminWorkspaceProps = {
   onSignOut: () => void;
   onPublish: (event: FormEvent<HTMLFormElement>) => void;
   onArticleContentChange: (content: string) => void;
+  onVideoDescriptionChange: (content: string) => void;
   onNotice: (message: string) => void;
   editingContent: ManagedContent | null;
   onEditContent: (type: ContentType, item: ManagedContent | null) => void;

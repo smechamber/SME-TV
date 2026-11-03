@@ -15,6 +15,7 @@ export type ContentEditorProps = Pick<
   | 'onVideoChange'
   | 'onPublish'
   | 'onArticleContentChange'
+  | 'onVideoDescriptionChange'
 > & {
   showTabs?: boolean;
   initialContent?: ManagedContent | null;
@@ -76,6 +77,7 @@ export function ContentEditor({
   onVideoChange,
   onPublish,
   onArticleContentChange,
+  onVideoDescriptionChange,
   showTabs = true,
 }: ContentEditorProps) {
   return (
@@ -164,6 +166,7 @@ export function ContentEditor({
             <div className="mt-[18px] grid gap-2 text-xs font-bold text-[#504b5b]">
               <span>Article content *</span>
               <RichTextEditor
+                token={token}
                 initialContent={initialContent?.content}
                 onChange={onArticleContentChange}
               />
@@ -190,15 +193,14 @@ export function ContentEditor({
         )}
         {active === 'video' && (
           <>
-            <Field>
-              Description
-              <textarea
-                className={`${inputClass} resize-y`}
-                name="description"
-                rows={3}
-                defaultValue={initialContent?.description ?? ''}
+            <div className="mt-[18px] grid gap-2 text-xs font-bold text-[#504b5b]">
+              <span>Video description</span>
+              <RichTextEditor
+                token={token}
+                initialContent={initialContent?.description ?? ''}
+                onChange={onVideoDescriptionChange}
               />
-            </Field>
+            </div>
             <div className="grid gap-0 md:grid-cols-2 md:gap-4">
               <Field>
                 Video source

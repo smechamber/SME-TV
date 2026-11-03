@@ -1,89 +1,46 @@
+'use client';
+
 import Link from 'next/link';
-import { useState } from 'react';
 import type { Video } from '../../home-data';
 import { videoThumbnail, youtubeIdForVideo } from './helpers';
 
-export function VideoPlayer({
-  video,
-  onPlay,
-  autoPlay = false,
-}: {
-  video: Video;
-  onPlay?: () => void;
-  autoPlay?: boolean;
-}) {
-  const [isPlaying, setIsPlaying] = useState(false);
+function videoHref(video: Video) {
+  return `/videos/${encodeURIComponent(video.slug || video.id)}`;
+}
+
+export function VideoPlayer({ video, autoPlay = false }: { video: Video; autoPlay?: boolean }) {
   const thumbnail = videoThumbnail(video);
   const youtubeId = youtubeIdForVideo(video);
   const isYoutubeVideo = video.videoType === 'YOUTUBE' || Boolean(youtubeId);
-  const canPlay = isYoutubeVideo ? Boolean(youtubeId) : Boolean(video.videoUrl);
-  const shouldPlay = autoPlay || isPlaying;
 
-  if (shouldPlay && isYoutubeVideo && youtubeId) {
-    return (
-      <iframe
-        className="absolute inset-0 h-full w-full"
-        src={`https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=1&mute=1&rel=0`}
-        title={video.title}
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        referrerPolicy="strict-origin-when-cross-origin"
-        allowFullScreen
-      />
-    );
+  if (autoPlay && isYoutubeVideo && youtubeId) {
+    return <iframe
+      className="absolute inset-0 h-full w-full"
+      src={`https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=1&mute=1&rel=0`}
+      title={video.title}
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      referrerPolicy="strict-origin-when-cross-origin"
+      allowFullScreen
+    />;
   }
 
-  if (shouldPlay && !isYoutubeVideo && video.videoUrl) {
-    return (
-      <video
-        className="absolute inset-0 h-full w-full object-cover"
-        autoPlay={autoPlay || isPlaying}
-        muted={autoPlay}
-        controls
-        poster={thumbnail}
-        src={video.videoUrl}
-      />
-    );
+  if (autoPlay && !isYoutubeVideo && video.videoUrl) {
+    return <video
+      className="absolute inset-0 h-full w-full object-cover"
+      autoPlay
+      muted
+      controls
+      poster={thumbnail}
+      src={video.videoUrl}
+    />;
   }
 
-  return (
-    <button
-      type="button"
-      className="group absolute inset-0 h-full w-full overflow-hidden bg-gradient-to-br from-[#34243f] via-[#1e1b4b] to-slate-950"
-      onClick={() => {
-        if (!canPlay) return;
-        setIsPlaying(true);
-        onPlay?.();
-      }}
-      disabled={!canPlay}
-      aria-label={canPlay ? `Play ${video.title}` : video.title}
-    >
-      {thumbnail ? (
-        <img
-          className="absolute inset-0 h-full w-full object-cover"
-          src={thumbnail}
-          alt={`${video.title} video preview`}
-          onError={(event) => {
-            event.currentTarget.style.opacity = '0';
-          }}
-        />
-      ) : (
-        <span className="absolute inset-0 flex items-center justify-center text-sm font-bold uppercase tracking-[0.2em] text-white/80">
-          {isYoutubeVideo ? 'YouTube video' : 'Video preview'}
-        </span>
-      )}
-      <span className="absolute inset-0 bg-slate-950/30 transition-colors group-hover:bg-slate-950/15" />
-      {canPlay && (
-        <span className="absolute left-1/2 top-1/2 z-10 flex h-14 w-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-xl bg-[#ff0033] text-2xl text-white shadow-lg transition-transform hover:scale-105">
-          ▶
-        </span>
-      )}
-      {isYoutubeVideo && (
-        <span className="absolute bottom-4 left-4 rounded bg-black/75 px-3 py-1.5 text-xs font-bold text-white">
-          YouTube
-        </span>
-      )}
-    </button>
-  );
+  return <Link href={videoHref(video)} className="group absolute inset-0 block h-full w-full overflow-hidden bg-gradient-to-br from-[#34243f] via-[#1e1b4b] to-slate-950" aria-label={`Open video: ${video.title}`}>
+    {thumbnail ? <img className="absolute inset-0 h-full w-full object-cover" src={thumbnail} alt="" /> : <span className="absolute inset-0 flex items-center justify-center text-sm font-bold uppercase tracking-[0.2em] text-white/80">Video preview</span>}
+    <span className="absolute inset-0 bg-slate-950/30 transition-colors group-hover:bg-slate-950/15" />
+    <span className="absolute left-1/2 top-1/2 z-10 flex h-14 w-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-xl bg-[#ff0033] text-2xl text-white shadow-lg transition-transform group-hover:scale-105">▶</span>
+    <span className="sr-only">{video.title}</span>
+  </Link>;
 }
 
 export function VideoHero({ items }: { items: Video[] }) {
@@ -106,7 +63,7 @@ export function VideoHero({ items }: { items: Video[] }) {
         <div className="space-y-4">
           {sideVideos.slice(0, 3).map((video) => (
             <Link
-              href="/videos"
+              href={videoHref(video)}
               className="group block rounded-xl border border-transparent p-3 transition-all hover:border-slate-200 hover:bg-slate-50"
               key={video.id}
             >
@@ -134,7 +91,7 @@ export function VideoBand({ items }: { items: Video[] }) {
     <section className="space-y-6 rounded-2xl bg-slate-900 p-6 text-white md:p-8">
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
-          <small className="block text-[10px] font-black uppercase tracking-widest text-[#e11d48]">
+          <small className="block text-[10px] font-semibold uppercase tracking-widest text-[#e11d48]">
             SME TV ORIGINALS
           </small>
           <h2 className="text-2xl font-bold">Business Talks &amp; Insights</h2>
@@ -148,7 +105,8 @@ export function VideoBand({ items }: { items: Video[] }) {
       </div>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         {items.map((video) => (
-          <article
+          <Link
+            href={videoHref(video)}
             className="overflow-hidden rounded-xl border border-slate-700/60 bg-slate-800/80 p-3 shadow-md transition-all hover:border-slate-500"
             key={video.id}
           >
@@ -179,7 +137,7 @@ export function VideoBand({ items }: { items: Video[] }) {
                 {video.title}
               </h3>
             </div>
-          </article>
+          </Link>
         ))}
       </div>
     </section>

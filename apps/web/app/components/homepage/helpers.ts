@@ -1,7 +1,7 @@
 import type { EventItem, HomepageItem, Story, Video } from '../../home-data';
 
 export function isStory(item: HomepageItem): item is Story {
-  return 'slug' in item;
+  return 'slug' in item && !isVideo(item) && !isEvent(item);
 }
 
 export function isVideo(item: HomepageItem): item is Video {
@@ -44,5 +44,7 @@ export function mixedImage(item: HomepageItem) {
 }
 
 export function mixedHref(item: HomepageItem) {
-  return isStory(item) ? `/news/${item.slug}` : isEvent(item) ? `/events/${item.slug}` : '/videos';
+  if (isVideo(item)) return `/videos/${encodeURIComponent(item.slug || item.id)}`;
+  if (isStory(item)) return `/news/${encodeURIComponent(item.slug)}`;
+  return `/events/${encodeURIComponent(item.slug)}`;
 }

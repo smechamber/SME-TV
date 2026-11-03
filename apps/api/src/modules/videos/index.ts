@@ -2,7 +2,7 @@ import { randomBytes } from 'node:crypto';
 import { Router } from 'express';
 import { db } from '@sme-tv/db';
 import { asyncRoute, authenticate, requireAdmin } from '../../middleware/auth.js';
-import { slugify } from '../../lib/content.js';
+import { sanitizeArticleHtml, slugify } from '../../lib/content.js';
 import { videoForm } from './schemas.js';
 
 const router = Router();
@@ -15,6 +15,26 @@ router.get(
       orderBy: { publishedAt: 'desc' },
       take: 30,
     });
+    response.json({ success: true, data });
+  }),
+);
+
+router.get(
+  '/videos/:slug',
+  asyncRoute(async (request, response) => {
+    const data = await db.video.findFirst({
+      where: {
+        OR: [
+          { slug: String(request.params.slug) },
+          { id: String(request.params.slug) },
+        ],
+        status: 'PUBLISHED',
+        publishedAt: { lte: new Date() },
+      },
+      include: { category: true },
+    });
+    if (!data) return response.status(404).json({ success: false, message: 'Video not found' });
+    data.description = data.description ? sanitizeArticleHtml(data.description) : data.description;
     response.json({ success: true, data });
   }),
 );
@@ -50,7 +70,7 @@ router.post(
       data: {
         title: input.title,
         slug: `${slugify(input.title)}-${randomBytes(3).toString('hex')}`,
-        description: input.description,
+        description: input.description ? sanitizeArticleHtml(input.description) : input.description,
         videoType: input.videoType,
         videoUrl: input.videoType === 'UPLOAD' ? input.videoUrl : null,
         youtubeId,
@@ -84,7 +104,7 @@ router.patch(
       where: { id: String(request.params.id) },
       data: {
         title: input.title,
-        description: input.description,
+        description: input.description ? sanitizeArticleHtml(input.description) : input.description,
         videoType: input.videoType,
         videoUrl: input.videoType === 'UPLOAD' ? input.videoUrl : null,
         youtubeId,

@@ -11,6 +11,7 @@ export type Story = {
 
 export type Video = {
   id: string;
+  slug: string;
   title: string;
   description?: string;
   thumbnail?: string;

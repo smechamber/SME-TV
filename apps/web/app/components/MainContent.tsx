@@ -33,7 +33,6 @@ export default function MainContent({
 }: MainContentProps) {
   const [query, setQuery] = useState('');
   const [topic, setTopic] = useState('All');
-  const [playingVideoId, setPlayingVideoId] = useState<string | null>(null);
   const matches = (text: string) => {
     const normalized = text.toLowerCase();
     return (
@@ -107,8 +106,6 @@ export default function MainContent({
         videos={videos}
         filtered={filteredVideos}
         loading={loadingVideos}
-        playingVideoId={playingVideoId}
-        onPlay={setPlayingVideoId}
       />
       <EventsSection events={events} filtered={filteredEvents} loading={loadingEvents} />
       <SubscribeBanner />

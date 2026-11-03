@@ -18,6 +18,7 @@ export default function AdminPage() {
   const [busy, setBusy] = useState(false);
   const [active, setActive] = useState<ContentType>('news');
   const [articleContent, setArticleContent] = useState('');
+  const [videoDescription, setVideoDescription] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
   const [editingContent, setEditingContent] = useState<ManagedContent | null>(null);
@@ -35,6 +36,7 @@ export default function AdminPage() {
   useEffect(() => {
     setVideoUrl(editingContent?.videoUrl ?? '');
     setArticleContent(editingContent?.content ?? '');
+    setVideoDescription(editingContent?.description ?? '');
     setImageUrl(editingContent?.imageUrl ?? '');
   }, [editingContent]);
 
@@ -89,7 +91,7 @@ export default function AdminPage() {
     const form = new FormData(formElement);
     const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
     const status = submitter?.value === 'yes' ? 'PUBLISHED' : 'DRAFT';
-    const request = createContentRequest(active, form, { articleContent, imageUrl, videoUrl });
+    const request = createContentRequest(active, form, { articleContent, videoDescription, imageUrl, videoUrl });
 
     try {
       const response = await fetch(
@@ -119,7 +121,10 @@ export default function AdminPage() {
             status === 'PUBLISHED' ? previous.publishedArticles + 1 : previous.publishedArticles,
         }));
       }
-      if (active === 'video') setVideoUrl('');
+      if (active === 'video') {
+        setVideoUrl('');
+        setVideoDescription('');
+      }
     } catch (error) {
       setNotice(error instanceof Error ? error.message : 'Unable to save content');
     } finally {
@@ -172,6 +177,7 @@ export default function AdminPage() {
       onSignOut={signOut}
       onPublish={publish}
       onArticleContentChange={setArticleContent}
+      onVideoDescriptionChange={setVideoDescription}
       onNotice={setNotice}
       editingContent={editingContent}
       onEditContent={(type, item) => {
@@ -185,7 +191,7 @@ export default function AdminPage() {
 function createContentRequest(
   type: ContentType,
   form: FormData,
-  media: { articleContent: string; imageUrl: string; videoUrl: string },
+  media: { articleContent: string; videoDescription: string; imageUrl: string; videoUrl: string },
 ) {
   if (type === 'news') {
     return {
@@ -207,7 +213,7 @@ function createContentRequest(
       path: '/api/admin/videos',
       body: {
         title: form.get('title'),
-        description: form.get('description'),
+        description: media.videoDescription,
         videoType: form.get('videoType'),
         videoUrl: media.videoUrl || undefined,
         youtubeId: form.get('youtubeId') || undefined,
