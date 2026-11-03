@@ -39,7 +39,7 @@ export default function RegistrationForm({ eventId }: { eventId: string }) {
     }
   }
   return (
-    <form className="registration-form" onSubmit={submit}>
+    <form className="mt-8 max-w-[650px] border-t-2 border-[#d92867] bg-[#fffaf8] p-6 sm:p-8 [&_h2]:text-2xl [&_h2]:font-extrabold [&_p]:mt-2 [&_p]:text-xs [&_p]:text-[#6e6b7c] [&_label]:mt-4 [&_label]:grid [&_label]:gap-2 [&_label]:text-xs [&_label]:font-bold [&_input:not([type=checkbox])]:rounded [&_input:not([type=checkbox])]:border [&_input:not([type=checkbox])]:border-[#eeeaf0] [&_input:not([type=checkbox])]:px-3 [&_input:not([type=checkbox])]:py-3" onSubmit={submit}>
       <h2>Register your interest</h2>
       <p>Fields marked * are required.</p>
       {fields.map(([name, label]) => (
@@ -53,16 +53,16 @@ export default function RegistrationForm({ eventId }: { eventId: string }) {
           />
         </label>
       ))}
-      <label className="consent-line">
+      <label className="mt-4 flex items-start gap-3 text-xs font-normal leading-5">
         <input required type="checkbox" name="consent" /> I agree to be contacted about this event
         and accept the privacy notice.
       </label>
       {notice && (
-        <p className={notice.startsWith('Thank') ? 'form-success' : 'form-error'} role="status">
+        <p className={notice.startsWith('Thank') ? 'mt-4 text-sm font-semibold text-[#28744f]' : 'mt-4 text-sm font-semibold text-[#a33232]'} role="status">
           {notice}
         </p>
       )}
-      <button className="primary-button" disabled={busy}>
+      <button className="mt-5 inline-flex items-center justify-center rounded bg-[#d92867] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#b81d53] disabled:cursor-not-allowed disabled:opacity-60" disabled={busy}>
         {busy ? 'Submitting…' : 'Submit registration ?'}
       </button>
     </form>

@@ -25,7 +25,7 @@ export default function Footer() {
             <Link href="/about" className="hover:text-[#e11d48] transition-colors">About Us</Link>
             <Link href="/news" className="hover:text-[#e11d48] transition-colors">News</Link>
             <Link href="/events" className="hover:text-[#e11d48] transition-colors">Events &amp; Opportunities</Link>
-            <a href="https://smetv.in/activities/" target="_blank" rel="noreferrer" className="hover:text-[#e11d48] transition-colors">Activities</a>
+            <Link href="/activities" className="hover:text-[#e11d48] transition-colors">Activities</Link>
             <Link href="/videos" className="hover:text-[#e11d48] transition-colors">Videos</Link>
             <Link href="/about#contact" className="hover:text-[#e11d48] transition-colors">Contact Us</Link>
             <Link href="/register" className="hover:text-[#e11d48] transition-colors">Register</Link>

@@ -45,47 +45,6 @@ export default function Tickers({ stories }: { stories: Story[] }) {
 
   return (
     <>
-      <style jsx global>{`
-        /* Market Watch: Right to Left */
-        @keyframes ticker {
-          0% {
-            transform: translate3d(0, 0, 0);
-          }
-          100% {
-            transform: translate3d(-50%, 0, 0);
-          }
-        }
-
-        .animate-ticker {
-          display: flex;
-          width: max-content;
-          animation: ticker 35s linear infinite;
-        }
-
-        .animate-ticker:hover {
-          animation-play-state: paused;
-        }
-
-        /* Breaking News: Left to Right */
-        @keyframes ticker-reverse {
-          0% {
-            transform: translate3d(-50%, 0, 0);
-          }
-          100% {
-            transform: translate3d(0, 0, 0);
-          }
-        }
-
-        .animate-ticker-fast {
-          display: flex;
-          width: max-content;
-          animation: ticker-reverse 25s linear infinite;
-        }
-
-        .animate-ticker-fast:hover {
-          animation-play-state: paused;
-        }
-      `}</style>
 
       {/* Market Watch Ticker */}
       <div
@@ -101,7 +60,7 @@ export default function Tickers({ stories }: { stories: Story[] }) {
           </div>
 
           <div className="relative w-full overflow-hidden">
-            <div className="animate-ticker font-mono text-xs">
+            <div className="flex w-max animate-ticker font-mono text-xs hover:[animation-play-state:paused]">
               {[1, 2].map((loopKey) => (
                 <div
                   key={loopKey}
@@ -155,7 +114,7 @@ export default function Tickers({ stories }: { stories: Story[] }) {
           </span>
 
           <div className="relative w-full overflow-hidden">
-            <div className="animate-ticker-fast font-medium text-slate-800">
+            <div className="flex w-max animate-ticker-fast font-medium text-slate-800 hover:[animation-play-state:paused]">
               {[1, 2].map((loopKey) => (
                 <div
                   key={loopKey}

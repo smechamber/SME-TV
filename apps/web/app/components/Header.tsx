@@ -14,9 +14,7 @@ import {
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [newsOpen, setNewsOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
-  const newsCategories = ['Business', 'Finance', 'Startups', 'MSME', 'Economy'];
   const [time, setTime] = useState<string>('');
   const [date, setDate] = useState<string>('');
 
@@ -139,17 +137,12 @@ export default function Header() {
           <div className="flex flex-col md:flex-row md:items-center gap-1">
             <Link className="text-xs font-bold uppercase tracking-wider transition-all py-3 px-3 rounded-md hover:text-[#e11d48] text-[#e11d48] border-b-2 border-[#e11d48]" href="/" onClick={() => setMenuOpen(false)}>Home</Link>
 
-            <div className="group relative">
-              <button type="button" aria-expanded={newsOpen} onClick={() => setNewsOpen(value => !value)} className="flex items-center gap-1 text-xs font-bold uppercase tracking-wider transition-all py-3 px-3 rounded-md text-slate-700 hover:text-[#e11d48]">News <span>▼</span></button>
-              <div className={`ml-3 border-l border-slate-200 md:absolute md:left-0 md:top-full md:z-50 md:ml-0 md:min-w-44 md:rounded md:border md:border-slate-200 md:bg-white md:py-1 md:shadow-lg ${newsOpen ? 'block' : 'hidden'} md:group-hover:block md:group-focus-within:block`}>
-                {newsCategories.map(category => <Link key={category} href={`/news?category=${encodeURIComponent(category)}`} onClick={() => { setNewsOpen(false); setMenuOpen(false); }} className="block px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-rose-50 hover:text-[#e11d48]">{category}</Link>)}
-              </div>
-            </div>
+            <Link className="text-xs font-bold uppercase tracking-wider transition-all py-3 px-3 rounded-md text-slate-700 hover:text-[#e11d48]" href="/news" onClick={() => setMenuOpen(false)}>News</Link>
 
             <Link className="text-xs font-bold uppercase tracking-wider transition-all py-3 px-3 rounded-md text-slate-700 hover:text-[#e11d48]" href="/videos" onClick={() => setMenuOpen(false)}>Videos</Link>
             <Link className="text-xs font-bold uppercase tracking-wider transition-all py-3 px-3 rounded-md text-slate-700 hover:text-[#e11d48]" href="/events" onClick={() => setMenuOpen(false)}>Events</Link>
             <Link className="text-xs font-bold uppercase tracking-wider transition-all py-3 px-3 rounded-md text-slate-700 hover:text-[#e11d48]" href="/events" onClick={() => setMenuOpen(false)}>Opportunities</Link>
-            <a className="text-xs font-bold uppercase tracking-wider transition-all py-3 px-3 rounded-md text-slate-700 hover:text-[#e11d48]" href="https://smetv.in/activities/" target="_blank" rel="noreferrer" onClick={() => setMenuOpen(false)}>Activities</a>
+            <Link className="text-xs font-bold uppercase tracking-wider transition-all py-3 px-3 rounded-md text-slate-700 hover:text-[#e11d48]" href="/activities" onClick={() => setMenuOpen(false)}>Activities</Link>
 
             <div className="group relative">
               <button type="button" aria-expanded={aboutOpen} onClick={() => setAboutOpen(value => !value)} className="flex items-center gap-1 text-xs font-bold uppercase tracking-wider transition-all py-3 px-3 rounded-md text-slate-700 hover:text-[#e11d48]">About Us <span>▼</span></button>

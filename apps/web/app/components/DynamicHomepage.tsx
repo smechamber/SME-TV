@@ -57,7 +57,7 @@ export default function DynamicHomepage({ sections }: { sections: HomepageSectio
 
   const filters = (
     <section className="space-y-4" aria-label="Filter homepage content">
-      <div className="flex justify-between gap-4 overflow-x-auto pb-4 pt-4 scrollbar-none">
+      <div className="flex justify-between gap-4 overflow-x-auto pb-4 pt-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {topics.map((item) => (
           <button
             key={item}

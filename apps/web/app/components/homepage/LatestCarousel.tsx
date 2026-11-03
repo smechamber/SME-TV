@@ -48,7 +48,7 @@ export function LatestCarousel({ items }: { items: HomepageItem[] }) {
       </div>
       <div
         ref={carouselRef}
-        className="hero-latest-track grid min-h-0 flex-1 auto-cols-[88%] grid-flow-col grid-rows-2 gap-3 overflow-x-auto snap-x snap-mandatory pr-1"
+        className="grid min-h-0 flex-1 auto-cols-[88%] grid-flow-col grid-rows-2 gap-3 overflow-x-auto snap-x snap-mandatory pr-1"
         onWheel={(event) => {
           if (Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
             event.preventDefault();

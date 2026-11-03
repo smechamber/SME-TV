@@ -9,7 +9,7 @@ export default function TopicsBar({
 }) {
   return (
     <section
-      className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none"
+      className="flex items-center gap-2 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       aria-label="Filter news by topic"
     >
       {TOPICS.map((item) => (

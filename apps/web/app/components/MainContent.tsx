@@ -63,7 +63,7 @@ export default function MainContent({
   if (homepageSections?.length) {
     const hasFixedHero = homepageSections.some((section) => section.kind === 'HERO');
     return (
-      <main className="news-width news-main">
+      <main className="mx-auto w-full max-w-[1240px] px-4 pb-16 pt-6 sm:px-6">
         {!hasFixedHero && (
           <div className="pt-6">
             <HeroHeadlines items={heroItems} />
