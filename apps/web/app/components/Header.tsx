@@ -14,6 +14,9 @@ import {
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [newsOpen, setNewsOpen] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
+  const newsCategories = ['Business', 'Finance', 'Startups', 'MSME', 'Economy'];
   const [time, setTime] = useState<string>('');
   const [date, setDate] = useState<string>('');
 
@@ -31,7 +34,7 @@ export default function Header() {
   }, []);
 
   return (
-    <>
+    <div className="sticky top-0 z-50">
       {/* Top Bar */}
       <div className="bg-[#1e1b4b] text-white text-xs py-2 px-3 sm:px-4 shadow-sm border-b border-[#312e81]">
         <div className="max-w-7xl mx-auto flex justify-between items-center gap-2">
@@ -61,7 +64,7 @@ export default function Header() {
       </div>
 
       {/* Main Header */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
+      <header className="bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-3 sm:py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <button
@@ -124,41 +127,45 @@ export default function Header() {
               <FaSearch />
             </button>
             <Link href="/register" className="hidden sm:inline-flex px-5 py-2.5 rounded-lg bg-[#1e1b4b] hover:bg-[#2e2a72] text-white font-bold text-xs tracking-wider uppercase transition-all shadow-md">
-              Subscribe
+              Register
             </Link>
           </div>
         </div>
       </header>
 
       {/* Navigation Bar */}
-      <nav className={`bg-white border-b border-slate-200 shadow-sm md:block ${menuOpen ? 'block' : 'hidden'}`}>
-        <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row md:items-center justify-between py-2 md:py-0 overflow-x-auto scrollbar-none">
+      <nav className={`relative z-50 bg-white border-b border-slate-200 shadow-sm md:block ${menuOpen ? 'block' : 'hidden'}`}>
+        <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row md:items-center justify-between py-2 md:py-0">
           <div className="flex flex-col md:flex-row md:items-center gap-1">
-            {[
-              ['Home', '/'],
-              ['News', '/news'],
-              ['Markets', '#market'],
-              ['Videos', '/videos'],
-              ['Events', '/events'],
-              ['Business', '/news'],
-              ['Finance', '/news'],
-              ['Startups', '/news'],
-              ['About', '/about'],
-            ].map(([label, href], i) => (
-              <Link
-                key={label}
-                className={`text-xs font-bold uppercase tracking-wider transition-all py-3 px-3 rounded-md hover:text-[#e11d48] ${
-                  i === 0 ? 'text-[#e11d48] border-b-2 border-[#e11d48]' : 'text-slate-700'
-                }`}
-                href={href}
-                onClick={() => setMenuOpen(false)}
-              >
-                {label}
-              </Link>
-            ))}
+            <Link className="text-xs font-bold uppercase tracking-wider transition-all py-3 px-3 rounded-md hover:text-[#e11d48] text-[#e11d48] border-b-2 border-[#e11d48]" href="/" onClick={() => setMenuOpen(false)}>Home</Link>
+
+            <div className="group relative">
+              <button type="button" aria-expanded={newsOpen} onClick={() => setNewsOpen(value => !value)} className="flex items-center gap-1 text-xs font-bold uppercase tracking-wider transition-all py-3 px-3 rounded-md text-slate-700 hover:text-[#e11d48]">News <span>▼</span></button>
+              <div className={`ml-3 border-l border-slate-200 md:absolute md:left-0 md:top-full md:z-50 md:ml-0 md:min-w-44 md:rounded md:border md:border-slate-200 md:bg-white md:py-1 md:shadow-lg ${newsOpen ? 'block' : 'hidden'} md:group-hover:block md:group-focus-within:block`}>
+                {newsCategories.map(category => <Link key={category} href={`/news?category=${encodeURIComponent(category)}`} onClick={() => { setNewsOpen(false); setMenuOpen(false); }} className="block px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-rose-50 hover:text-[#e11d48]">{category}</Link>)}
+              </div>
+            </div>
+
+            <Link className="text-xs font-bold uppercase tracking-wider transition-all py-3 px-3 rounded-md text-slate-700 hover:text-[#e11d48]" href="/videos" onClick={() => setMenuOpen(false)}>Videos</Link>
+            <Link className="text-xs font-bold uppercase tracking-wider transition-all py-3 px-3 rounded-md text-slate-700 hover:text-[#e11d48]" href="/events" onClick={() => setMenuOpen(false)}>Events</Link>
+            <Link className="text-xs font-bold uppercase tracking-wider transition-all py-3 px-3 rounded-md text-slate-700 hover:text-[#e11d48]" href="/events" onClick={() => setMenuOpen(false)}>Opportunities</Link>
+            <a className="text-xs font-bold uppercase tracking-wider transition-all py-3 px-3 rounded-md text-slate-700 hover:text-[#e11d48]" href="https://smetv.in/activities/" target="_blank" rel="noreferrer" onClick={() => setMenuOpen(false)}>Activities</a>
+
+            <div className="group relative">
+              <button type="button" aria-expanded={aboutOpen} onClick={() => setAboutOpen(value => !value)} className="flex items-center gap-1 text-xs font-bold uppercase tracking-wider transition-all py-3 px-3 rounded-md text-slate-700 hover:text-[#e11d48]">About Us <span>▼</span></button>
+              <div className={`ml-3 border-l border-slate-200 md:absolute md:left-0 md:top-full md:z-50 md:ml-0 md:min-w-44 md:rounded md:border md:border-slate-200 md:bg-white md:py-1 md:shadow-lg ${aboutOpen ? 'block' : 'hidden'} md:group-hover:block md:group-focus-within:block`}>
+                <Link href="/about" onClick={() => { setAboutOpen(false); setMenuOpen(false); }} className="block px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-rose-50 hover:text-[#e11d48]">About SME TV</Link>
+                <a href="https://smetv.in/initiated-by/" target="_blank" rel="noreferrer" onClick={() => setMenuOpen(false)} className="block px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-rose-50 hover:text-[#e11d48]">Initiated By</a>
+                <a href="https://smetv.in/partnership/" target="_blank" rel="noreferrer" onClick={() => setMenuOpen(false)} className="block px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-rose-50 hover:text-[#e11d48]">Our Partners</a>
+                <a href="https://smetv.in/partnership/" target="_blank" rel="noreferrer" onClick={() => setMenuOpen(false)} className="block px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-rose-50 hover:text-[#e11d48]">Partnership</a>
+              </div>
+            </div>
+
+            <Link className="text-xs font-bold uppercase tracking-wider transition-all py-3 px-3 rounded-md text-slate-700 hover:text-[#e11d48]" href="/about#contact" onClick={() => setMenuOpen(false)}>Contact Us</Link>
+            <Link className="md:hidden inline-flex w-max rounded-lg bg-[#1e1b4b] px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-md" href="/register" onClick={() => setMenuOpen(false)}>Register</Link>
           </div>
         </div>
       </nav>
-    </>
+    </div>
   );
 }
