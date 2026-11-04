@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { 
   FaFacebookF, 
   FaYoutube, 
@@ -13,6 +14,11 @@ import {
 } from 'react-icons/fa';
 
 export default function Header() {
+  const pathname = usePathname();
+  const navLinkClass = (href: string) => {
+    const active = href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`);
+    return `text-xs font-bold uppercase tracking-wider transition-all py-3 px-3 rounded-md ${active ? 'text-[#e11d48] border-b-2 border-[#e11d48]' : 'text-slate-700 hover:text-[#e11d48]'}`;
+  };
   const [menuOpen, setMenuOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [time, setTime] = useState<string>('');
@@ -135,17 +141,17 @@ export default function Header() {
       <nav className={`relative z-50 bg-white border-b border-slate-200 shadow-sm md:block ${menuOpen ? 'block' : 'hidden'}`}>
         <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row md:items-center justify-between py-2 md:py-0">
           <div className="flex flex-col md:flex-row md:items-center gap-1">
-            <Link className="text-xs font-bold uppercase tracking-wider transition-all py-3 px-3 rounded-md hover:text-[#e11d48] text-[#e11d48] border-b-2 border-[#e11d48]" href="/" onClick={() => setMenuOpen(false)}>Home</Link>
+            <Link className={navLinkClass("/")} href="/" onClick={() => setMenuOpen(false)}>Home</Link>
 
-            <Link className="text-xs font-bold uppercase tracking-wider transition-all py-3 px-3 rounded-md text-slate-700 hover:text-[#e11d48]" href="/news" onClick={() => setMenuOpen(false)}>News</Link>
+            <Link className={navLinkClass("/news")} href="/news" onClick={() => setMenuOpen(false)}>News</Link>
 
-            <Link className="text-xs font-bold uppercase tracking-wider transition-all py-3 px-3 rounded-md text-slate-700 hover:text-[#e11d48]" href="/videos" onClick={() => setMenuOpen(false)}>Videos</Link>
-            <Link className="text-xs font-bold uppercase tracking-wider transition-all py-3 px-3 rounded-md text-slate-700 hover:text-[#e11d48]" href="/events" onClick={() => setMenuOpen(false)}>Events</Link>
-            <Link className="text-xs font-bold uppercase tracking-wider transition-all py-3 px-3 rounded-md text-slate-700 hover:text-[#e11d48]" href="/events" onClick={() => setMenuOpen(false)}>Opportunities</Link>
-            <Link className="text-xs font-bold uppercase tracking-wider transition-all py-3 px-3 rounded-md text-slate-700 hover:text-[#e11d48]" href="/activities" onClick={() => setMenuOpen(false)}>Activities</Link>
+            <Link className={navLinkClass("/videos")} href="/videos" onClick={() => setMenuOpen(false)}>Videos</Link>
+            <Link className={navLinkClass("/events")} href="/events" onClick={() => setMenuOpen(false)}>Events</Link>
+            <Link className={navLinkClass("/events")} href="/events" onClick={() => setMenuOpen(false)}>Opportunities</Link>
+            <Link className={navLinkClass("/activities")} href="/activities" onClick={() => setMenuOpen(false)}>Activities</Link>
 
             <div className="group relative">
-              <button type="button" aria-expanded={aboutOpen} onClick={() => setAboutOpen(value => !value)} className="flex items-center gap-1 text-xs font-bold uppercase tracking-wider transition-all py-3 px-3 rounded-md text-slate-700 hover:text-[#e11d48]">About Us <span>▼</span></button>
+              <button type="button" aria-expanded={aboutOpen} onClick={() => setAboutOpen(value => !value)} className={`flex items-center gap-1 ${navLinkClass('/about')}`}>About Us <span>▼</span></button>
               <div className={`ml-3 border-l border-slate-200 md:absolute md:left-0 md:top-full md:z-50 md:ml-0 md:min-w-44 md:rounded md:border md:border-slate-200 md:bg-white md:py-1 md:shadow-lg ${aboutOpen ? 'block' : 'hidden'} md:group-hover:block md:group-focus-within:block`}>
                 <Link href="/about" onClick={() => { setAboutOpen(false); setMenuOpen(false); }} className="block px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-rose-50 hover:text-[#e11d48]">About SME TV</Link>
                 <a href="https://smetv.in/initiated-by/" target="_blank" rel="noreferrer" onClick={() => setMenuOpen(false)} className="block px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-rose-50 hover:text-[#e11d48]">Initiated By</a>
@@ -154,7 +160,7 @@ export default function Header() {
               </div>
             </div>
 
-            <Link className="text-xs font-bold uppercase tracking-wider transition-all py-3 px-3 rounded-md text-slate-700 hover:text-[#e11d48]" href="/about#contact" onClick={() => setMenuOpen(false)}>Contact Us</Link>
+            <Link className={navLinkClass('/about')} href="/about#contact" onClick={() => setMenuOpen(false)}>Contact Us</Link>
             <Link className="md:hidden inline-flex w-max rounded-lg bg-[#1e1b4b] px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-md" href="/register" onClick={() => setMenuOpen(false)}>Register</Link>
           </div>
         </div>

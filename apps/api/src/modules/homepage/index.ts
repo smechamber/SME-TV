@@ -4,6 +4,24 @@ import { db } from '@sme-tv/db';
 import { asyncRoute, authenticate, requireAdmin } from '../../middleware/auth.js';
 
 const router = Router();
+const NEWS_PAGE_CONFIG_NAME = '__NEWS_PAGE_BUILDER_CONFIG__';
+const newsPageConfigSchema = z.object({
+  imageUrl: z.union([z.string().url(), z.literal('')]),
+  placement: z.enum(['ARTICLE_LIST', 'BELOW_SEARCH', 'BELOW_EVENTS']),
+});
+
+function presentNewsPageConfig(section: {
+  contentIds: string[];
+  displayOrder: number;
+  enabled: boolean;
+} | null) {
+  const placements = ['ARTICLE_LIST', 'BELOW_SEARCH', 'BELOW_EVENTS'] as const;
+  return {
+    imageUrl: section?.enabled ? section.contentIds[0] ?? '' : '',
+    placement: placements[section?.displayOrder ?? 0] ?? 'ARTICLE_LIST',
+  };
+}
+
 const sectionSchema = z.object({
   name: z.string().trim().min(1).max(80),
   kind: z.enum(['HERO', 'TRENDING', 'LATEST', 'INTERVIEWS', 'NEWS', 'VIDEOS', 'EVENTS', 'CUSTOM']),
@@ -115,7 +133,7 @@ router.get(
   '/homepage',
   asyncRoute(async (_request, response) => {
     const sections = await db.homepageSection.findMany({
-      where: { enabled: true },
+      where: { enabled: true, NOT: { name: NEWS_PAGE_CONFIG_NAME } },
       orderBy: { displayOrder: 'asc' },
     });
     sections.sort((a, b) => {
@@ -132,8 +150,57 @@ router.get(
   authenticate,
   requireAdmin,
   asyncRoute(async (_request, response) => {
-    const sections = await db.homepageSection.findMany({ orderBy: { displayOrder: 'asc' } });
+    const sections = await db.homepageSection.findMany({
+      where: { NOT: { name: NEWS_PAGE_CONFIG_NAME } },
+      orderBy: { displayOrder: 'asc' },
+    });
     response.json({ success: true, data: sections });
+  }),
+);
+
+router.get(
+  '/news-page',
+  asyncRoute(async (_request, response) => {
+    const section = await db.homepageSection.findFirst({ where: { name: NEWS_PAGE_CONFIG_NAME } });
+    response.json({ success: true, data: presentNewsPageConfig(section) });
+  }),
+);
+
+router.get(
+  '/admin/news-page',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (_request, response) => {
+    const section = await db.homepageSection.findFirst({ where: { name: NEWS_PAGE_CONFIG_NAME } });
+    response.json({ success: true, data: presentNewsPageConfig(section) });
+  }),
+);
+
+router.put(
+  '/admin/news-page',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (request, response) => {
+    const input = newsPageConfigSchema.parse(request.body);
+    const existing = await db.homepageSection.findFirst({ where: { name: NEWS_PAGE_CONFIG_NAME } });
+    const placement = ['ARTICLE_LIST', 'BELOW_SEARCH', 'BELOW_EVENTS'].indexOf(input.placement);
+    const data = {
+      name: NEWS_PAGE_CONFIG_NAME,
+      kind: 'NEWS' as const,
+      layout: 'LIST' as const,
+      design: 'STANDARD' as const,
+      source: 'MANUAL' as const,
+      contentType: 'ARTICLE' as const,
+      itemCount: 1,
+      contentIds: input.imageUrl ? [input.imageUrl] : [],
+      displayFields: ['IMAGE'],
+      displayOrder: placement,
+      enabled: Boolean(input.imageUrl),
+    };
+    const saved = existing
+      ? await db.homepageSection.update({ where: { id: existing.id }, data })
+      : await db.homepageSection.create({ data });
+    response.json({ success: true, data: presentNewsPageConfig(saved) });
   }),
 );
 

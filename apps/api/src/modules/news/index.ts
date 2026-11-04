@@ -10,10 +10,12 @@ router.get(
   '/news',
   asyncRoute(async (request, response) => {
     const limit = Math.max(1, Math.min(50, Number(request.query.limit) || 12));
+    const offset = Math.max(0, Number(request.query.offset) || 0);
     const where = { status: 'PUBLISHED' as const, publishedAt: { lte: new Date() } };
     const [data, total] = await Promise.all([
       db.article.findMany({
         where,
+        skip: offset,
         take: limit,
         orderBy: { publishedAt: 'desc' },
         include: { category: { select: { name: true } } },
