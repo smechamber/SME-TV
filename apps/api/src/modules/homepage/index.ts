@@ -1,25 +1,78 @@
 import { Router } from 'express';
+import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { db } from '@sme-tv/db';
 import { asyncRoute, authenticate, requireAdmin } from '../../middleware/auth.js';
 
 const router = Router();
 const NEWS_PAGE_CONFIG_NAME = '__NEWS_PAGE_BUILDER_CONFIG__';
+const NEWS_PAGE_AD_PREFIX = '__NEWS_PAGE_AD__:';
 const newsPageConfigSchema = z.object({
   imageUrl: z.union([z.string().url(), z.literal('')]),
   placement: z.enum(['ARTICLE_LIST', 'BELOW_SEARCH', 'BELOW_EVENTS']),
 });
+const newsPageAdSchema = z.object({
+  name: z.string().trim().min(1).max(80),
+  imageUrl: z.string().url(),
+  clickUrl: z
+    .string()
+    .trim()
+    .min(1)
+    .max(2048)
+    .refine((value) =>
+      value.startsWith('/') ? !value.startsWith('//') : /^https?:\/\//i.test(value),
+    ),
+  placement: z.enum(['ARTICLE_LIST', 'BELOW_SEARCH', 'BELOW_EVENTS']),
+  articlePosition: z.number().int().min(1).max(100).default(1),
+});
 
-function presentNewsPageConfig(section: {
-  contentIds: string[];
-  displayOrder: number;
-  enabled: boolean;
-} | null) {
+function placementFromOrder(order: number) {
   const placements = ['ARTICLE_LIST', 'BELOW_SEARCH', 'BELOW_EVENTS'] as const;
+  return placements[order] ?? 'ARTICLE_LIST';
+}
+
+function presentNewsPageConfig(
+  section: {
+    contentIds: string[];
+    displayOrder: number;
+    enabled: boolean;
+  } | null,
+) {
   return {
-    imageUrl: section?.enabled ? section.contentIds[0] ?? '' : '',
-    placement: placements[section?.displayOrder ?? 0] ?? 'ARTICLE_LIST',
+    imageUrl: section?.enabled ? (section.contentIds[0] ?? '') : '',
+    placement: placementFromOrder(section?.displayOrder ?? 0),
   };
+}
+
+async function getNewsPageAds() {
+  const [sections, legacy] = await Promise.all([
+    db.homepageSection.findMany({
+      where: { name: { startsWith: NEWS_PAGE_AD_PREFIX }, enabled: true },
+      orderBy: { createdAt: 'asc' },
+    }),
+    db.homepageSection.findFirst({ where: { name: NEWS_PAGE_CONFIG_NAME, enabled: true } }),
+  ]);
+  const ads = sections
+    .filter((section) => Boolean(section.contentIds[0]))
+    .map((section) => ({
+      id: section.id,
+      name: section.displayFields[0] ?? 'Untitled ad',
+      imageUrl: section.contentIds[0]!,
+      clickUrl: section.contentIds[1] ?? '/news',
+      placement: placementFromOrder(section.displayOrder),
+      articlePosition: Number(section.contentIds[2]) || 1,
+    }));
+  if (legacy?.contentIds[0]) {
+    ads.unshift({
+      id: legacy.id,
+      name: 'News page image',
+      imageUrl: legacy.contentIds[0]!,
+      clickUrl: '/news',
+      placement: placementFromOrder(legacy.displayOrder),
+      articlePosition: 1,
+    });
+  }
+  return ads;
 }
 
 const sectionSchema = z.object({
@@ -133,7 +186,10 @@ router.get(
   '/homepage',
   asyncRoute(async (_request, response) => {
     const sections = await db.homepageSection.findMany({
-      where: { enabled: true, NOT: { name: NEWS_PAGE_CONFIG_NAME } },
+      where: {
+        enabled: true,
+        NOT: [{ name: NEWS_PAGE_CONFIG_NAME }, { name: { startsWith: NEWS_PAGE_AD_PREFIX } }],
+      },
       orderBy: { displayOrder: 'asc' },
     });
     sections.sort((a, b) => {
@@ -151,7 +207,9 @@ router.get(
   requireAdmin,
   asyncRoute(async (_request, response) => {
     const sections = await db.homepageSection.findMany({
-      where: { NOT: { name: NEWS_PAGE_CONFIG_NAME } },
+      where: {
+        NOT: [{ name: NEWS_PAGE_CONFIG_NAME }, { name: { startsWith: NEWS_PAGE_AD_PREFIX } }],
+      },
       orderBy: { displayOrder: 'asc' },
     });
     response.json({ success: true, data: sections });
@@ -161,8 +219,104 @@ router.get(
 router.get(
   '/news-page',
   asyncRoute(async (_request, response) => {
-    const section = await db.homepageSection.findFirst({ where: { name: NEWS_PAGE_CONFIG_NAME } });
-    response.json({ success: true, data: presentNewsPageConfig(section) });
+    response.json({ success: true, data: await getNewsPageAds() });
+  }),
+);
+
+router.get(
+  '/admin/news-page/ads',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (_request, response) => {
+    response.json({ success: true, data: await getNewsPageAds() });
+  }),
+);
+
+router.post(
+  '/admin/news-page/ads',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (request, response) => {
+    const input = newsPageAdSchema.parse(request.body);
+    const placement = ['ARTICLE_LIST', 'BELOW_SEARCH', 'BELOW_EVENTS'].indexOf(input.placement);
+    const data = await db.homepageSection.create({
+      data: {
+        name: `${NEWS_PAGE_AD_PREFIX}${randomUUID()}`,
+        kind: 'NEWS',
+        layout: 'LIST',
+        design: 'STANDARD',
+        source: 'MANUAL',
+        contentType: 'ARTICLE',
+        itemCount: 1,
+        contentIds: [input.imageUrl, input.clickUrl, String(input.articlePosition)],
+        displayFields: [input.name],
+        displayOrder: placement,
+        enabled: true,
+      },
+    });
+    response.status(201).json({
+      success: true,
+      data: {
+        id: data.id,
+        name: input.name,
+        imageUrl: input.imageUrl,
+        clickUrl: input.clickUrl,
+        placement: input.placement,
+        articlePosition: input.articlePosition,
+      },
+    });
+  }),
+);
+
+router.put(
+  '/admin/news-page/ads/:id',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (request, response) => {
+    const input = newsPageAdSchema.parse(request.body);
+    const id = String(request.params.id);
+    const section = await db.homepageSection.findUnique({ where: { id } });
+    if (!section || !section.name.startsWith(NEWS_PAGE_AD_PREFIX)) {
+      return response.status(404).json({ success: false, message: 'Ad not found' });
+    }
+    const placement = ['ARTICLE_LIST', 'BELOW_SEARCH', 'BELOW_EVENTS'].indexOf(input.placement);
+    const data = await db.homepageSection.update({
+      where: { id },
+      data: {
+        contentIds: [input.imageUrl, input.clickUrl, String(input.articlePosition)],
+        displayFields: [input.name],
+        displayOrder: placement,
+      },
+    });
+    response.json({
+      success: true,
+      data: {
+        id: data.id,
+        name: input.name,
+        imageUrl: input.imageUrl,
+        clickUrl: input.clickUrl,
+        placement: input.placement,
+        articlePosition: input.articlePosition,
+      },
+    });
+  }),
+);
+
+router.delete(
+  '/admin/news-page/ads/:id',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (request, response) => {
+    const id = String(request.params.id);
+    const section = await db.homepageSection.findUnique({ where: { id } });
+    if (
+      !section ||
+      (!section.name.startsWith(NEWS_PAGE_AD_PREFIX) && section.name !== NEWS_PAGE_CONFIG_NAME)
+    ) {
+      return response.status(404).json({ success: false, message: 'Ad not found' });
+    }
+    await db.homepageSection.delete({ where: { id } });
+    response.status(204).send();
   }),
 );
 

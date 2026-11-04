@@ -1,10 +1,13 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+
 type AdminSidebarProps = {
-  activeView: 'overview' | 'content-studio' | 'content-form' | 'homepage';
+  activeView: 'overview' | 'content-studio' | 'content-form' | 'homepage' | 'news-page-builder';
   onOverview: () => void;
   onContentStudio: () => void;
   onHomepage: () => void;
+  onNewsPage: () => void;
   onRegistrations: () => void;
   onSignOut: () => void;
 };
@@ -14,9 +17,14 @@ export default function AdminSidebar({
   onOverview,
   onContentStudio,
   onHomepage,
+  onNewsPage,
   onRegistrations,
   onSignOut,
 }: AdminSidebarProps) {
+  const [pagesOpen, setPagesOpen] = useState(activeView === 'homepage' || activeView === 'news-page-builder');
+  useEffect(() => {
+    if (activeView === 'homepage' || activeView === 'news-page-builder') setPagesOpen(true);
+  }, [activeView]);
   const itemClass = (selected = false) =>
     `w-full rounded px-3 py-3 text-left text-xs transition ${
       selected ? 'bg-white/10 text-white' : 'text-[#c8c3ce] hover:bg-white/10 hover:text-white'
@@ -30,7 +38,19 @@ export default function AdminSidebar({
       <span className="px-2 pb-2 text-[9px] font-bold tracking-[.14em] text-[#a8a1b1]">WORKSPACE</span>
       <button className={itemClass(activeView === 'overview')} onClick={onOverview}>Overview</button>
       <button className={itemClass(activeView === 'content-studio' || activeView === 'content-form')} onClick={onContentStudio}>Content studio</button>
-      <button className={itemClass(activeView === 'homepage')} onClick={onHomepage}>Homepage builder</button>
+      <button
+        className={itemClass(activeView === 'homepage' || activeView === 'news-page-builder')}
+        onClick={() => setPagesOpen((open) => !open)}
+        aria-expanded={pagesOpen}
+      >
+        Pages Builder
+      </button>
+      {pagesOpen && (
+        <div className="ml-3 grid border-l border-white/15 pl-2">
+          <button className={itemClass(activeView === 'homepage')} onClick={onHomepage}>Homepage Builder</button>
+          <button className={itemClass(activeView === 'news-page-builder')} onClick={onNewsPage}>News Page Builder</button>
+        </div>
+      )}
       <button className={itemClass()} onClick={onRegistrations}>Registrations</button>
       <div className="mt-auto flex items-center gap-2 border-t border-white/10 px-1 pt-4">
         <span className="grid h-[30px] w-[30px] place-items-center rounded-full bg-[#ad4275] text-xs font-bold">A</span>

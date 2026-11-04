@@ -1,4 +1,5 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
+import Breadcrumbs from '../../components/Breadcrumbs';
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
 type Article = {
@@ -17,6 +18,25 @@ type EventItem = {
   startsAt: string;
   location?: string | null;
 };
+type NewsPageAd = {
+  id: string;
+  name: string;
+  imageUrl: string;
+  clickUrl: string;
+  placement: 'ARTICLE_LIST' | 'BELOW_SEARCH' | 'BELOW_EVENTS';
+  articlePosition: number;
+};
+
+async function getNewsPageAds(): Promise<NewsPageAd[]> {
+  try {
+    const response = await fetch(`${API}/api/news-page`, { cache: 'no-store' });
+    if (!response.ok) return [];
+    const payload = (await response.json()) as { data?: NewsPageAd[] };
+    return payload.data ?? [];
+  } catch {
+    return [];
+  }
+}
 
 async function getArticles(): Promise<Article[]> {
   const articles: Article[] = [];
@@ -68,37 +88,61 @@ function monthLabel(key: string) {
   });
 }
 
+function NewsPagePromo({ ad }: { ad: NewsPageAd }) {
+  return (
+    <a
+      href={ad.clickUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={ad.name}
+      className="block aspect-video w-full overflow-hidden rounded bg-slate-100"
+    >
+      <img src={ad.imageUrl} alt={ad.name} className="h-full w-full object-contain" />
+    </a>
+  );
+}
+
 export default async function NewsPage({
   searchParams,
 }: {
   searchParams?: { category?: string; q?: string; archive?: string };
 }) {
-  const [articles, events] = await Promise.all([getArticles(), getEvents()]);
+  const [articles, events, newsPageAds] = await Promise.all([
+    getArticles(),
+    getEvents(),
+    getNewsPageAds(),
+  ]);
   const category = searchParams?.category?.trim();
   const query = searchParams?.q?.trim() ?? '';
   const archive = searchParams?.archive?.trim() ?? '';
   const filtered = articles.filter((item) => {
     const matchesCategory =
       !category || item.category?.name?.toLowerCase() === category.toLowerCase();
-    const searchableText = `${item.title} ${item.summary} ${item.category?.name ?? ''}`.toLowerCase();
+    const searchableText =
+      `${item.title} ${item.summary} ${item.category?.name ?? ''}`.toLowerCase();
     const matchesQuery = !query || searchableText.includes(query.toLowerCase());
     const matchesArchive = !archive || (item.publishedAt && monthKey(item.publishedAt) === archive);
     return matchesCategory && matchesQuery && matchesArchive;
   });
 
   const currentMonth = new Date().toISOString().slice(0, 7);
-  const archives = [...new Set(
-    articles
-      .map((item) => item.publishedAt)
-      .filter((date): date is string => Boolean(date))
-      .map(monthKey)
-      .filter((month) => month < currentMonth),
-  )].sort((a, b) => b.localeCompare(a));
+  const archives = [
+    ...new Set(
+      articles
+        .map((item) => item.publishedAt)
+        .filter((date): date is string => Boolean(date))
+        .map(monthKey)
+        .filter((month) => month < currentMonth),
+    ),
+  ].sort((a, b) => b.localeCompare(a));
 
   return (
-    <main className="mx-auto w-full max-w-[1180px] px-4 py-8 sm:px-6 sm:py-10">
-      <span className="text-[10px] font-extrabold tracking-[.16em] text-[#d92867]">SME TV NEWS</span>
-      <h1 className="my-3 text-4xl font-black leading-tight tracking-[-.05em] text-[#1b1930] sm:text-5xl">
+    <main className="mx-auto w-full max-w-[1180px] px-4 py-6 sm:px-6 ">
+      <Breadcrumbs items={[{ label: 'News' }]} />
+      <span className="text-[12px] font-extrabold tracking-[.16em] text-[#d92867]">
+        SME TV NEWS
+      </span>
+      <h1 className="my-3 text-4xl font-bold leading-tight tracking-[-.05em] text-[#1b1930] sm:text-4xl">
         {category ? `${category} news` : 'Latest news'}
       </h1>
       <p className="mb-6 max-w-3xl text-sm leading-6 text-[#6e6b7c] sm:text-base">
@@ -108,43 +152,50 @@ export default async function NewsPage({
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
         <section aria-label="News articles" className="space-y-5">
           {filtered.length ? (
-            filtered.map((item) => (
-              <article
-                className="grid gap-4 border-b border-slate-200 pb-5 sm:grid-cols-[minmax(0,1fr)_minmax(190px,42%)] sm:items-start"
-                key={item.id}
-              >
-                <div>
-                  {item.publishedAt && (
-                    <time className="text-[11px] font-medium uppercase tracking-wide text-[#777386]">
-                      Updated: {new Date(item.publishedAt).toLocaleString('en-IN', {
-                        month: 'long',
-                        day: 'numeric',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </time>
-                  )}
-                  <h2 className="mt-1 text-xl font-bold leading-tight text-[#17152b] sm:text-2xl">
-                    <Link href={`/news/${item.slug}`} className="hover:text-[#d92867]">
-                      {item.title}
+            filtered.map((item, index) => (
+              <div key={item.id} className="space-y-5">
+                <article className="grid gap-4 border-b border-slate-200 pb-5 sm:grid-cols-[minmax(0,1fr)_minmax(190px,42%)] sm:items-start">
+                  <div>
+                    {item.publishedAt && (
+                      <time className="text-[11px] font-medium uppercase tracking-wide text-[#777386]">
+                        Updated:{' '}
+                        {new Date(item.publishedAt).toLocaleString('en-IN', {
+                          month: 'long',
+                          day: 'numeric',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </time>
+                    )}
+                    <h2 className="mt-1 text-xl font-bold leading-tight text-[#17152b] sm:text-2xl">
+                      <Link href={`/news/${item.slug}`} className="hover:text-[#d92867]">
+                        {item.title}
+                      </Link>
+                    </h2>
+                    <p className="mt-3 text-sm leading-6 text-[#393746]">{item.summary}</p>
+                    <span className="mt-2 block text-[11px] font-bold uppercase tracking-wide text-[#d92867]">
+                      {item.category?.name ?? 'SME News'}
+                    </span>
+                  </div>
+                  {item.imageUrl && (
+                    <Link href={`/news/${item.slug}`} className="block overflow-hidden sm:mt-1">
+                      <img
+                        src={item.imageUrl}
+                        alt=""
+                        className="aspect-[16/9] w-full object-cover"
+                      />
                     </Link>
-                  </h2>
-                  <p className="mt-3 text-sm leading-6 text-[#393746]">{item.summary}</p>
-                  <span className="mt-2 block text-[11px] font-bold uppercase tracking-wide text-[#d92867]">
-                    {item.category?.name ?? 'SME News'}
-                  </span>
-                </div>
-                {item.imageUrl && (
-                  <Link href={`/news/${item.slug}`} className="block overflow-hidden sm:mt-1">
-                    <img
-                      src={item.imageUrl}
-                      alt=""
-                      className="aspect-[16/9] w-full object-cover"
-                    />
-                  </Link>
-                )}
-              </article>
+                  )}
+                </article>
+                {newsPageAds
+                  .filter(
+                    (ad) => ad.placement === 'ARTICLE_LIST' && ad.articlePosition === index + 1,
+                  )
+                  .map((ad) => (
+                    <NewsPagePromo key={ad.id} ad={ad} />
+                  ))}
+              </div>
             ))
           ) : (
             <p className="rounded border border-slate-200 p-5 text-sm text-[#6e6b7c]">
@@ -175,11 +226,19 @@ export default async function NewsPage({
                 placeholder="Search articles..."
                 className="min-w-0 flex-1 border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#d92867]"
               />
-              <button type="submit" className="bg-[#1e1b4b] px-4 text-sm font-bold text-white hover:bg-[#302b70]">
+              <button
+                type="submit"
+                className="bg-[#1e1b4b] px-4 text-sm font-bold text-white hover:bg-[#302b70]"
+              >
                 Search
               </button>
             </div>
           </form>
+          {newsPageAds
+            .filter((ad) => ad.placement === 'BELOW_SEARCH')
+            .map((ad) => (
+              <NewsPagePromo key={ad.id} ad={ad} />
+            ))}
 
           <section>
             <h2 className="border-b-2 border-[#d92867] pb-2 text-base font-extrabold text-[#1b1930]">
@@ -196,20 +255,33 @@ export default async function NewsPage({
                         year: 'numeric',
                       })}
                     </time>
-                    <Link href={`/events/${event.slug}`} className="mt-1 block text-sm font-bold leading-snug text-[#1b1930] hover:text-[#d92867]">
+                    <Link
+                      href={`/events/${event.slug}`}
+                      className="mt-1 block text-sm font-bold leading-snug text-[#1b1930] hover:text-[#d92867]"
+                    >
                       {event.title}
                     </Link>
-                    {event.location && <span className="mt-1 block text-xs text-[#777386]">{event.location}</span>}
+                    {event.location && (
+                      <span className="mt-1 block text-xs text-[#777386]">{event.location}</span>
+                    )}
                   </li>
                 ))}
               </ul>
             ) : (
               <p className="py-3 text-sm text-[#6e6b7c]">No upcoming events at the moment.</p>
             )}
-            <Link href="/events" className="mt-2 inline-block text-xs font-bold text-[#d92867] hover:underline">
+            <Link
+              href="/events"
+              className="mt-2 inline-block text-xs font-bold text-[#d92867] hover:underline"
+            >
               View all events
             </Link>
           </section>
+          {newsPageAds
+            .filter((ad) => ad.placement === 'BELOW_EVENTS')
+            .map((ad) => (
+              <NewsPagePromo key={ad.id} ad={ad} />
+            ))}
 
           <section>
             <h2 className="border-b-2 border-[#d92867] pb-2 text-base font-extrabold text-[#1b1930]">

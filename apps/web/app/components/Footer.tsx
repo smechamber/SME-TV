@@ -19,34 +19,64 @@ export default function Footer() {
             />
           </Link>
           <p className="max-w-md text-slate-400 leading-relaxed">
-            SME TV is India’s premier digital news platform dedicated to micro, small, and medium enterprises, startups, and economic growth stories.
+            SME TV is India’s premier digital news platform dedicated to micro, small, and medium
+            enterprises, startups, and economic growth stories.
           </p>
           <div className="flex flex-wrap justify-center gap-6 font-bold uppercase tracking-wider text-slate-300">
-            <Link href="/about" className="hover:text-[#e11d48] transition-colors">About Us</Link>
-            <Link href="/news" className="hover:text-[#e11d48] transition-colors">News</Link>
-            <Link href="/events" className="hover:text-[#e11d48] transition-colors">Events &amp; Opportunities</Link>
-            <Link href="/activities" className="hover:text-[#e11d48] transition-colors">Activities</Link>
-            <Link href="/videos" className="hover:text-[#e11d48] transition-colors">Videos</Link>
-            <Link href="/about#contact" className="hover:text-[#e11d48] transition-colors">Contact Us</Link>
-            <Link href="/register" className="hover:text-[#e11d48] transition-colors">Register</Link>
+            <Link href="/about" className="hover:text-[#e11d48] transition-colors">
+              About Us
+            </Link>
+            <Link href="/news" className="hover:text-[#e11d48] transition-colors">
+              News
+            </Link>
+            <Link href="/events" className="hover:text-[#e11d48] transition-colors">
+              Events &amp; Opportunities
+            </Link>
+            <Link href="/activities" className="hover:text-[#e11d48] transition-colors">
+              Activities
+            </Link>
+            <Link href="/videos" className="hover:text-[#e11d48] transition-colors">
+              Videos
+            </Link>
+            <Link href="/contact" className="hover:text-[#e11d48] transition-colors">
+              Contact Us
+            </Link>
+            <Link href="/register" className="hover:text-[#e11d48] transition-colors">
+              Register
+            </Link>
           </div>
-          <small className="text-slate-500">© {new Date().getFullYear()} SME TV Network. All rights reserved.</small>
+          <small className="text-slate-500">
+            © {new Date().getFullYear()} SME TV Network. All rights reserved.
+          </small>
         </div>
       </footer>
 
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex items-center justify-around py-2 px-2 z-50 text-[10px] font-bold uppercase tracking-wider shadow-lg">
         <Link className="flex flex-col items-center gap-0.5 text-[#e11d48]" href="/">
-          <span className="text-base">⌂</span><span>Home</span>
+          <span className="text-base">⌂</span>
+          <span>Home</span>
         </Link>
-        <Link href="/news" className="flex flex-col items-center gap-0.5 text-slate-600 hover:text-[#e11d48]">
-          <span className="text-base">▤</span><span>News</span>
+        <Link
+          href="/news"
+          className="flex flex-col items-center gap-0.5 text-slate-600 hover:text-[#e11d48]"
+        >
+          <span className="text-base">▤</span>
+          <span>News</span>
         </Link>
-        <Link href="/videos" className="flex flex-col items-center gap-0.5 text-slate-600 hover:text-[#e11d48]">
-          <span className="text-base">▶</span><span>Watch</span>
+        <Link
+          href="/videos"
+          className="flex flex-col items-center gap-0.5 text-slate-600 hover:text-[#e11d48]"
+        >
+          <span className="text-base">▶</span>
+          <span>Watch</span>
         </Link>
-        <Link href="#market" className="flex flex-col items-center gap-0.5 text-slate-600 hover:text-[#e11d48]">
-          <span className="text-base">⌁</span><span>Markets</span>
+        <Link
+          href="#market"
+          className="flex flex-col items-center gap-0.5 text-slate-600 hover:text-[#e11d48]"
+        >
+          <span className="text-base">⌁</span>
+          <span>Markets</span>
         </Link>
       </nav>
     </>

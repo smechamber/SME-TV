@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import Link from 'next/link';
+import Breadcrumbs from '../../../components/Breadcrumbs';
 import { notFound } from 'next/navigation';
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
 type Article = {
@@ -28,9 +28,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
   if (!item) notFound();
   return (
     <main className="mx-auto w-full max-w-[820px] px-4 py-10 sm:px-6 sm:py-16">
-      <Link className="mb-6 inline-block text-xs font-bold text-[#d92867] hover:underline" href="/news">
-        &lt;- All news
-      </Link>
+      <Breadcrumbs items={[{ label: 'News', href: '/news' }, { label: item.title }]} />
       <span className="text-[10px] font-extrabold tracking-[.16em] text-[#d92867]">{item.category?.name ?? 'SME TV NEWS'}</span>
       <h1 className="mt-3 text-4xl font-black leading-tight tracking-[-.05em] text-[#1b1930] sm:text-5xl">{item.title}</h1>
       <p className="mt-4 text-lg leading-relaxed text-[#6e6b7c]">{item.summary}</p>

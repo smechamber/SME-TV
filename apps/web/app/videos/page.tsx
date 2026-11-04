@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Breadcrumbs from '../../components/Breadcrumbs';
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
 type Video = { id: string; slug: string; title: string; description?: string | null; videoType: 'UPLOAD' | 'YOUTUBE'; youtubeId?: string | null; thumbnail?: string | null };
@@ -15,9 +16,9 @@ async function getVideos(): Promise<Video[]> {
 export default async function VideosPage() {
   const videos = await getVideos();
   return <main className="mx-auto w-full max-w-[1180px] px-4 py-8 sm:px-6 sm:py-10">
-    <Link className="mb-6 inline-block text-xs font-bold text-[#d92867] hover:underline" href="/">← Home</Link>
-    <span className="text-[10px] font-extrabold tracking-[.16em] text-[#d92867]">WATCH SME TV</span>
-    <h1 className="my-3 text-4xl font-black leading-tight tracking-[-.05em] text-[#1b1930] sm:text-5xl">Videos &amp; interviews</h1>
+    <Breadcrumbs items={[{ label: 'Videos' }]} />
+    <span className="text-[12px] font-extrabold tracking-[.16em] text-[#d92867]">SME TV VIDEOS</span>
+    <h1 className="my-3 text-4xl font-bold leading-tight tracking-[-.05em] text-[#1b1930] sm:text-4xl">Videos &amp; interviews</h1>
     <p className="mb-6 max-w-3xl text-sm leading-6 text-[#6e6b7c] sm:text-base">Business stories and conversations from across the SME community.</p>
     {videos.length ? <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2">
       {videos.map(video => {

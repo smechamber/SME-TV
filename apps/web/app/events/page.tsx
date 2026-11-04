@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Breadcrumbs from '../../components/Breadcrumbs';
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
 type EventItem = {
   id: string;
@@ -22,11 +23,9 @@ export default async function EventsPage() {
   const events = await getEvents();
   return (
     <main className="mx-auto w-full max-w-[1180px] px-4 py-8 sm:px-6 sm:py-10">
-      <Link className="mb-6 inline-block text-xs font-bold text-[#d92867] hover:underline" href="/">
-        ? Home
-      </Link>
-      <span className="text-[10px] font-extrabold tracking-[.16em] text-[#d92867]">CONNECT WITH THE COMMUNITY</span>
-      <h1 className="my-3 text-4xl font-black leading-tight tracking-[-.05em] text-[#1b1930] sm:text-5xl">Upcoming events</h1>
+      <Breadcrumbs items={[{ label: 'Events' }]} />
+      <span className="text-[12px] font-extrabold tracking-[.16em] text-[#d92867]">SME TV EVENTS &amp; OPPORTUNITIES</span>
+      <h1 className="my-3 text-4xl font-bold leading-tight tracking-[-.05em] text-[#1b1930] sm:text-4xl">Business events &amp; opportunities</h1>
       <p className="mb-6 max-w-3xl text-sm leading-6 text-[#6e6b7c] sm:text-base">Meet the people and ideas shaping India’s SME ecosystem.</p>
       {events.length ? (
         <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2">

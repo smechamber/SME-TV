@@ -4,19 +4,13 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { 
-  FaFacebookF, 
-  FaYoutube, 
-  FaLinkedinIn, 
-  FaSearch, 
-  FaBars, 
-  FaTimes 
-} from 'react-icons/fa';
+import { FaFacebookF, FaYoutube, FaLinkedinIn, FaSearch, FaBars, FaTimes } from 'react-icons/fa';
 
 export default function Header() {
   const pathname = usePathname();
   const navLinkClass = (href: string) => {
-    const active = href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`);
+    const active =
+      href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`);
     return `text-xs font-bold uppercase tracking-wider transition-all py-3 px-3 rounded-md ${active ? 'text-[#e11d48] border-b-2 border-[#e11d48]' : 'text-slate-700 hover:text-[#e11d48]'}`;
   };
   const [menuOpen, setMenuOpen] = useState(false);
@@ -28,7 +22,9 @@ export default function Header() {
   useEffect(() => {
     const updateDateTime = () => {
       const now = new Date();
-      setTime(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+      setTime(
+        now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+      );
       setDate(now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }));
     };
 
@@ -42,7 +38,6 @@ export default function Header() {
       {/* Top Bar */}
       <div className="bg-[#1e1b4b] text-white text-xs py-2 px-3 sm:px-4 shadow-sm border-b border-[#312e81]">
         <div className="max-w-7xl mx-auto flex justify-between items-center gap-2">
-          
           {/* Left Side: Mobile par SIRF LIVE NETWORK dikhega */}
           <div className="flex items-center gap-2 font-medium flex-shrink-0">
             <span className="flex items-center gap-1.5 bg-[#e11d48] text-white text-[10px] font-bold px-2 py-0.5 rounded tracking-widest uppercase">
@@ -63,7 +58,6 @@ export default function Header() {
               <span className="opacity-0">Loading...</span>
             )}
           </div>
-
         </div>
       </div>
 
@@ -79,29 +73,29 @@ export default function Header() {
               {menuOpen ? <FaTimes /> : <FaBars />}
             </button>
             <div className="hidden lg:flex items-center gap-2.5">
-              <a 
-                href="https://www.facebook.com/SMEtvIndia/" 
-                target="_blank" 
+              <a
+                href="https://www.facebook.com/SMEtvIndia/"
+                target="_blank"
                 rel="noopener noreferrer"
-                aria-label="Facebook" 
+                aria-label="Facebook"
                 className="w-8 h-8 rounded-full bg-slate-100 text-[#1e1b4b] hover:bg-[#1e1b4b] hover:text-white flex items-center justify-center text-xs transition-all shadow-sm"
               >
                 <FaFacebookF />
               </a>
-              <a 
-                href="https://www.youtube.com/@smetvindia" 
-                target="_blank" 
+              <a
+                href="https://www.youtube.com/@smetvindia"
+                target="_blank"
                 rel="noopener noreferrer"
-                aria-label="YouTube" 
+                aria-label="YouTube"
                 className="w-8 h-8 rounded-full bg-slate-100 text-[#1e1b4b] hover:bg-[#e11d48] hover:text-white flex items-center justify-center text-xs transition-all shadow-sm"
               >
                 <FaYoutube />
               </a>
-              <a 
-                href="https://www.linkedin.com/company/sme-tv/" 
-                target="_blank" 
+              <a
+                href="https://www.linkedin.com/company/sme-tv/"
+                target="_blank"
                 rel="noopener noreferrer"
-                aria-label="LinkedIn" 
+                aria-label="LinkedIn"
                 className="w-8 h-8 rounded-full bg-slate-100 text-[#1e1b4b] hover:bg-[#1e1b4b] hover:text-white flex items-center justify-center text-xs transition-all shadow-sm"
               >
                 <FaLinkedinIn />
@@ -130,7 +124,10 @@ export default function Header() {
             >
               <FaSearch />
             </button>
-            <Link href="/register" className="hidden sm:inline-flex px-5 py-2.5 rounded-lg bg-[#1e1b4b] hover:bg-[#2e2a72] text-white font-bold text-xs tracking-wider uppercase transition-all shadow-md">
+            <Link
+              href="/register"
+              className="hidden sm:inline-flex px-5 py-2.5 rounded-lg bg-[#1e1b4b] hover:bg-[#2e2a72] text-white font-bold text-xs tracking-wider uppercase transition-all shadow-md"
+            >
               Register
             </Link>
           </div>
@@ -138,30 +135,124 @@ export default function Header() {
       </header>
 
       {/* Navigation Bar */}
-      <nav className={`relative z-50 bg-white border-b border-slate-200 shadow-sm md:block ${menuOpen ? 'block' : 'hidden'}`}>
+      <nav
+        className={`relative z-50 bg-white border-b border-slate-200 shadow-sm md:block ${menuOpen ? 'block' : 'hidden'}`}
+      >
         <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row md:items-center justify-between py-2 md:py-0">
           <div className="flex flex-col md:flex-row md:items-center gap-1">
-            <Link className={navLinkClass("/")} href="/" onClick={() => setMenuOpen(false)}>Home</Link>
+            <Link className={navLinkClass('/')} href="/" onClick={() => setMenuOpen(false)}>
+              Home
+            </Link>
 
-            <Link className={navLinkClass("/news")} href="/news" onClick={() => setMenuOpen(false)}>News</Link>
+            <Link className={navLinkClass('/news')} href="/news" onClick={() => setMenuOpen(false)}>
+              News
+            </Link>
 
-            <Link className={navLinkClass("/videos")} href="/videos" onClick={() => setMenuOpen(false)}>Videos</Link>
-            <Link className={navLinkClass("/events")} href="/events" onClick={() => setMenuOpen(false)}>Events</Link>
-            <Link className={navLinkClass("/events")} href="/events" onClick={() => setMenuOpen(false)}>Opportunities</Link>
-            <Link className={navLinkClass("/activities")} href="/activities" onClick={() => setMenuOpen(false)}>Activities</Link>
+            <Link
+              className={navLinkClass('/videos')}
+              href="/videos"
+              onClick={() => setMenuOpen(false)}
+            >
+              Videos
+            </Link>
+            <Link
+              className={navLinkClass('/events')}
+              href="/events"
+              onClick={() => setMenuOpen(false)}
+            >
+              Events
+            </Link>
+            <Link
+              className={navLinkClass('/events')}
+              href="/events"
+              onClick={() => setMenuOpen(false)}
+            >
+              Opportunities
+            </Link>
+            <Link
+              className={navLinkClass('/activities')}
+              href="/activities"
+              onClick={() => setMenuOpen(false)}
+            >
+              Activities
+            </Link>
 
             <div className="group relative">
-              <button type="button" aria-expanded={aboutOpen} onClick={() => setAboutOpen(value => !value)} className={`flex items-center gap-1 ${navLinkClass('/about')}`}>About Us <span>▼</span></button>
-              <div className={`ml-3 border-l border-slate-200 md:absolute md:left-0 md:top-full md:z-50 md:ml-0 md:min-w-44 md:rounded md:border md:border-slate-200 md:bg-white md:py-1 md:shadow-lg ${aboutOpen ? 'block' : 'hidden'} md:group-hover:block md:group-focus-within:block`}>
-                <Link href="/about" onClick={() => { setAboutOpen(false); setMenuOpen(false); }} className="block px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-rose-50 hover:text-[#e11d48]">About SME TV</Link>
-                <a href="https://smetv.in/initiated-by/" target="_blank" rel="noreferrer" onClick={() => setMenuOpen(false)} className="block px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-rose-50 hover:text-[#e11d48]">Initiated By</a>
-                <a href="https://smetv.in/partnership/" target="_blank" rel="noreferrer" onClick={() => setMenuOpen(false)} className="block px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-rose-50 hover:text-[#e11d48]">Our Partners</a>
-                <a href="https://smetv.in/partnership/" target="_blank" rel="noreferrer" onClick={() => setMenuOpen(false)} className="block px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-rose-50 hover:text-[#e11d48]">Partnership</a>
+              <button
+                type="button"
+                aria-expanded={aboutOpen}
+                onClick={() => setAboutOpen((value) => !value)}
+                className={`flex items-center gap-1 ${navLinkClass('/about')}`}
+              >
+                About Us <span>▼</span>
+              </button>
+              <div
+                className={`ml-3 border-l border-slate-200 md:absolute md:left-0 md:top-full md:z-50 md:ml-0 md:min-w-44 md:rounded md:border md:border-slate-200 md:bg-white md:py-1 md:shadow-lg ${aboutOpen ? 'block' : 'hidden'} md:group-hover:block md:group-focus-within:block`}
+              >
+                <Link
+                  href="/about"
+                  onClick={() => {
+                    setAboutOpen(false);
+                    setMenuOpen(false);
+                  }}
+                  className="block px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-rose-50 hover:text-[#e11d48]"
+                >
+                  About SME TV
+                </Link>
+                <Link
+                  href="/founder"
+                  onClick={() => {
+                    setAboutOpen(false);
+                    setMenuOpen(false);
+                  }}
+                  className="block px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-rose-50 hover:text-[#e11d48]"
+                >
+                  Founder                
+                </Link>
+                 <a
+                  href="https://smetv.in/initiated-by/"
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => setMenuOpen(false)}
+                  className="block px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-rose-50 hover:text-[#e11d48]"
+                >
+                  Initiated By
+                </a>
+                <a
+                  href="https://smetv.in/partnership/"
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => setMenuOpen(false)}
+                  className="block px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-rose-50 hover:text-[#e11d48]"
+                >
+                  Our Partners
+                </a>
+                <a
+                  href="https://smetv.in/partnership/"
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => setMenuOpen(false)}
+                  className="block px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-rose-50 hover:text-[#e11d48]"
+                >
+                  Partnership
+                </a>
               </div>
             </div>
 
-            <Link className={navLinkClass('/about')} href="/about#contact" onClick={() => setMenuOpen(false)}>Contact Us</Link>
-            <Link className="md:hidden inline-flex w-max rounded-lg bg-[#1e1b4b] px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-md" href="/register" onClick={() => setMenuOpen(false)}>Register</Link>
+            <Link
+              className={navLinkClass('/contact')}
+              href="/contact"
+              onClick={() => setMenuOpen(false)}
+            >
+              Contact Us
+            </Link>
+            <Link
+              className="md:hidden inline-flex w-max rounded-lg bg-[#1e1b4b] px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-md"
+              href="/register"
+              onClick={() => setMenuOpen(false)}
+            >
+              Register
+            </Link>
           </div>
         </div>
       </nav>
