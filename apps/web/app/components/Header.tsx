@@ -171,8 +171,8 @@ export default function Header() {
               Events
             </Link>
             <Link
-              className={navLinkClass('/events')}
-              href="/events"
+              className={navLinkClass('/opportunities')}
+              href="/opportunities"
               onClick={() => setMenuOpen(false)}
             >
               Opportunities
