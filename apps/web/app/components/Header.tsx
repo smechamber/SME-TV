@@ -1,10 +1,18 @@
-'use client';
+﻿'use client';
 
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { FaFacebookF, FaYoutube, FaLinkedinIn, FaSearch, FaBars, FaTimes } from 'react-icons/fa';
+import {
+  FaFacebookF,
+  FaYoutube,
+  FaLinkedinIn,
+  FaSearch,
+  FaBars,
+  FaTimes,
+  FaChevronDown,
+} from 'react-icons/fa';
 
 export default function Header() {
   const pathname = usePathname();
@@ -43,7 +51,7 @@ export default function Header() {
             <span className="flex items-center gap-1.5 bg-[#e11d48] text-white text-[10px] font-bold px-2 py-0.5 rounded tracking-widest uppercase">
               <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" /> LIVE NETWORK
             </span>
-            <span className="text-slate-200 hidden sm:inline">SME TV · Digital Voice of SMEs</span>
+            <span className="text-slate-200 hidden sm:inline">SME TV Â· Digital Voice of SMEs</span>
           </div>
 
           {/* Right Side: Timer & Date */}
@@ -51,7 +59,7 @@ export default function Header() {
             {time ? (
               <>
                 <span className="text-[#38bdf8] whitespace-nowrap">{time}</span>
-                <span className="text-slate-500">•</span>
+                <span className="text-slate-500">â€¢</span>
                 <span className="whitespace-nowrap">{date}</span>
               </>
             ) : (
@@ -132,7 +140,7 @@ export default function Header() {
             </Link>
           </div>
         </div>
-      </header>
+      </header>        
 
       {/* Navigation Bar */}
       <nav
@@ -184,7 +192,13 @@ export default function Header() {
                 onClick={() => setAboutOpen((value) => !value)}
                 className={`flex items-center gap-1 ${navLinkClass('/about')}`}
               >
-                About Us <span>▼</span>
+                About Us
+                <FaChevronDown
+                  aria-hidden="true"
+                  className={`text-[10px] transition-transform duration-200 ${
+                    aboutOpen ? 'rotate-180' : ''
+                  }`}
+                />
               </button>
               <div
                 className={`ml-3 border-l border-slate-200 md:absolute md:left-0 md:top-full md:z-50 md:ml-0 md:min-w-44 md:rounded md:border md:border-slate-200 md:bg-white md:py-1 md:shadow-lg ${aboutOpen ? 'block' : 'hidden'} md:group-hover:block md:group-focus-within:block`}
@@ -209,33 +223,36 @@ export default function Header() {
                 >
                   Founder                
                 </Link>
-                 <a
-                  href="https://smetv.in/initiated-by/"
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={() => setMenuOpen(false)}
+                <Link
+                  href="/initiated-by"
+                  onClick={() => {
+                    setAboutOpen(false);
+                    setMenuOpen(false);
+                  }}
                   className="block px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-rose-50 hover:text-[#e11d48]"
                 >
                   Initiated By
-                </a>
-                <a
-                  href="https://smetv.in/partnership/"
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={() => setMenuOpen(false)}
+                </Link>
+                                <Link
+                  href="/partners"
+                  onClick={() => {
+                    setAboutOpen(false);
+                    setMenuOpen(false);
+                  }}
                   className="block px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-rose-50 hover:text-[#e11d48]"
                 >
                   Our Partners
-                </a>
-                <a
-                  href="https://smetv.in/partnership/"
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={() => setMenuOpen(false)}
+                </Link>  
+                                <Link
+                  href="/partnership"
+                  onClick={() => {
+                    setAboutOpen(false);
+                    setMenuOpen(false);
+                  }}
                   className="block px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-rose-50 hover:text-[#e11d48]"
                 >
                   Partnership
-                </a>
+                </Link>
               </div>
             </div>
 
