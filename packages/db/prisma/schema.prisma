@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
 }
 
 model User {
@@ -90,6 +90,7 @@ model Event {
   slug              String        @unique
   description       String        @db.Text
   imageUrl          String?
+  clickUrl          String?
   startsAt          DateTime
   endsAt            DateTime?
   location          String?

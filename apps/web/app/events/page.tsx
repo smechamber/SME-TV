@@ -1,53 +1,88 @@
-import Link from 'next/link';
 import Breadcrumbs from '../../components/Breadcrumbs';
+
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+
 type EventItem = {
   id: string;
   slug: string;
   title: string;
-  description: string;
+  imageUrl?: string | null;
+  clickUrl?: string | null;
   startsAt: string;
-  location?: string;
+  location?: string | null;
 };
+
 async function getEvents(): Promise<EventItem[]> {
   try {
-    const r = await fetch(`${API}/api/events`, { next: { revalidate: 60 } });
-    if (!r.ok) return [];
-    const p = (await r.json()) as { data?: EventItem[] };
-    return p.data ?? [];
+    const response = await fetch(`${API}/api/events`, { next: { revalidate: 60 } });
+    if (!response.ok) return [];
+    const payload = (await response.json()) as { data?: EventItem[] };
+    return payload.data ?? [];
   } catch {
     return [];
   }
 }
+
 export default async function EventsPage() {
   const events = await getEvents();
+
   return (
     <main className="mx-auto w-full max-w-[1180px] px-4 py-8 sm:px-6 sm:py-10">
       <Breadcrumbs items={[{ label: 'Events' }]} />
-      <span className="text-[12px] font-extrabold tracking-[.16em] text-[#d92867]">SME TV EVENTS &amp; OPPORTUNITIES</span>
-      <h1 className="my-3 text-4xl font-bold leading-tight tracking-[-.05em] text-[#1b1930] sm:text-4xl">Business events &amp; opportunities</h1>
-      <p className="mb-6 max-w-3xl text-sm leading-6 text-[#6e6b7c] sm:text-base">Meet the people and ideas shaping India’s SME ecosystem.</p>
+      <span className="text-[12px] font-extrabold tracking-[.16em] text-[#d92867]">
+        SME TV EVENTS &amp; OPPORTUNITIES
+      </span>
+      <h1 className="my-3 text-4xl font-bold leading-tight tracking-[-.05em] text-[#1b1930]">
+        Business events &amp; opportunities
+      </h1>
       {events.length ? (
-        <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2">
-          {events.map((item) => (
-            <article className="border-t-2 border-[#d92867] bg-[#fffaf8] p-6" key={item.id}>
-              <time className="text-xs font-bold text-[#d92867]">
-                {new Date(item.startsAt).toLocaleDateString('en-IN', {
-                  day: 'numeric',
-                  month: 'long',
-                  year: 'numeric',
-                })}
-              </time>
-              <h2 className="mt-3 text-xl font-bold leading-snug text-[#1b1930]">
-                <Link href={`/events/${item.slug}`}>{item.title}</Link>
-              </h2>
-              <p className="mt-2 text-sm font-semibold text-[#6e6b7c]">{item.location ?? 'Location to be announced'}</p>
-              <p className="mt-3 text-sm leading-6 text-[#6e6b7c]">{item.description}</p>
-              <Link className="mt-4 inline-flex items-center justify-center gap-2 rounded bg-[#d92867] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#b81d53] disabled:cursor-not-allowed disabled:opacity-60" href={`/events/${item.slug}`}>
-                Event details ?
-              </Link>
-            </article>
-          ))}
+        <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {events.map((item) => {
+            const startsAt = new Date(item.startsAt);
+            return (
+              <a
+                aria-label={`Know more about ${item.title}`}
+                className="group block overflow-hidden bg-[#f0f0f0] transition-shadow hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#d92867]"
+                href={item.clickUrl || `/events/${item.slug}`}
+                key={item.id}
+              >
+                <div className="aspect-[1.55] overflow-hidden bg-[#e6e6e6]">
+                  {item.imageUrl ? (
+                    <img
+                      alt={item.title}
+                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                      src={item.imageUrl}
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center px-6 text-center text-lg font-bold text-[#777283]">
+                      {item.title}
+                    </div>
+                  )}
+                </div>
+                <div className="p-4 sm:p-5">
+                  <h2 className="font-serif text-lg leading-snug text-[#171717]">{item.title}</h2>
+                  <div className="mt-5 flex items-center gap-3 border-t border-white/80 pt-4">
+                    <time className="flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-lg border border-white bg-white text-[#202020]">
+                      <span className="text-2xl leading-none">
+                        {startsAt.toLocaleDateString('en-IN', { day: '2-digit' })}
+                      </span>
+                      <span className="mt-1 text-[9px] font-semibold uppercase leading-none text-[#666]">
+                        {startsAt.toLocaleDateString('en-IN', { month: 'short' })}
+                      </span>
+                    </time>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm text-[#171717]">
+                        {item.location || startsAt.toLocaleDateString('en-IN', { year: 'numeric' })}
+                      </p>
+                      <span className="mt-2 block text-[10px] font-extrabold text-black">
+                        KNOW MORE
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </a>
+            );
+          })}
         </div>
       ) : (
         <div className="mt-6 flex items-center gap-4 rounded-lg bg-[#fffaf8] p-6 text-sm text-[#6e6b7c]">

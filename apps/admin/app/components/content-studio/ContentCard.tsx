@@ -7,14 +7,14 @@ export default function ContentCard({
   onDelete,
 }: {
   item: ManagedContent;
-  type: 'news' | 'video';
+  type: 'news' | 'video' | 'event';
   onEdit: () => void;
   onDelete: () => void;
 }) {
   const youtubeThumbnail = item.youtubeId
     ? `https://img.youtube.com/vi/${item.youtubeId}/hqdefault.jpg`
     : null;
-  const previewUrl = type === 'news' ? item.imageUrl : youtubeThumbnail;
+  const previewUrl = type === 'video' ? youtubeThumbnail : item.imageUrl;
 
   return (
     <article className="overflow-hidden rounded-lg border border-[#ebe8ef] bg-white shadow-[0_6px_18px_rgba(56,34,70,.04)]">
@@ -30,7 +30,7 @@ export default function ContentCard({
           <img
             className="h-full w-full object-cover"
             src={previewUrl}
-            alt={type === 'news' ? item.title : `${item.title} video thumbnail`}
+            alt={type === 'video' ? `${item.title} video thumbnail` : item.title}
           />
         ) : (
           <div className="grid h-full place-items-center text-xs font-bold text-[#aaa5b1]">
@@ -43,14 +43,21 @@ export default function ContentCard({
       </div>
       <div className="p-4">
         <h2 className="line-clamp-2 min-h-[40px] text-sm font-bold leading-5">{item.title}</h2>
-        <p className="mt-2 line-clamp-2 min-h-[32px] text-[11px] leading-4 text-[#777283]">
-          {type === 'news'
-            ? item.summary || 'No article summary added.'
-            : item.description || 'No video description added.'}
-        </p>
+        {type === 'event' ? (
+          <p className="mt-2 line-clamp-2 min-h-[32px] text-[11px] leading-4 text-[#777283]">
+            {item.startsAt ? new Date(item.startsAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : 'Date not set'}
+            {item.location ? ` · ${item.location}` : ''}
+          </p>
+        ) : (
+          <p className="mt-2 line-clamp-2 min-h-[32px] text-[11px] leading-4 text-[#777283]">
+            {type === 'news'
+              ? item.summary || 'No article summary added.'
+              : item.description || 'No video description added.'}
+          </p>
+        )}
         <div className="mt-4 flex items-center justify-between border-t border-[#ebe8ef] pt-3">
           <span className="text-[10px] text-[#aaa5b1]">
-            {new Date(item.createdAt).toLocaleDateString('en-IN')}
+            {new Date(type === 'event' ? item.startsAt ?? item.createdAt : item.createdAt).toLocaleDateString('en-IN')}
           </span>
           <div className="flex gap-2">
             <button

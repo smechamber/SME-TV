@@ -57,14 +57,22 @@ type ContentStudioPageProps = {
 };
 
 export default function ContentStudioPage(props: ContentStudioPageProps) {
-  const [selected, setSelected] = useState<ContentType | null>(null);
+  const [selected, setSelected] = useState<ContentType | null>(() =>
+    props.active === 'event' ? 'event' : null,
+  );
   const [items, setItems] = useState<ManagedContent[]>([]);
   const [loading, setLoading] = useState(false);
+  const [eventFilter, setEventFilter] = useState<'upcoming' | 'past'>('upcoming');
 
   useEffect(() => {
-    if (!selected || (selected !== 'video' && selected !== 'news')) return;
+    if (!selected) return;
     setLoading(true);
-    const path = selected === 'video' ? '/api/admin/videos' : '/api/admin/news';
+    const path =
+      selected === 'video'
+        ? '/api/admin/videos'
+        : selected === 'event'
+          ? '/api/admin/events'
+          : '/api/admin/news';
     fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000'}${path}`, {
       headers: { Authorization: 'Bearer ' + props.token },
     })
@@ -81,7 +89,7 @@ export default function ContentStudioPage(props: ContentStudioPageProps) {
 
   async function remove(item: ManagedContent) {
     if (!window.confirm(`Delete "${item.title}"? This cannot be undone.`)) return;
-    const type = selected === 'video' ? 'videos' : 'news';
+    const type = selected === 'video' ? 'videos' : selected === 'event' ? 'events' : 'news';
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000'}/api/admin/${type}/${item.id}`,
       {
@@ -95,11 +103,26 @@ export default function ContentStudioPage(props: ContentStudioPageProps) {
       return;
     }
     setItems((current) => current.filter((entry) => entry.id !== item.id));
-    props.onNotice(`${selected === 'video' ? 'Video' : 'Article'} deleted successfully.`);
+    props.onNotice(
+      `${selected === 'video' ? 'Video' : selected === 'event' ? 'Event' : 'Article'} deleted successfully.`,
+    );
   }
 
-  if (selected === 'video' || selected === 'news') {
-    const label = selected === 'video' ? 'Video' : 'Article';
+  if (selected) {
+    const label = selected === 'video' ? 'Video' : selected === 'event' ? 'Event' : 'Article';
+    const filteredItems =
+      selected === 'event'
+        ? items
+            .filter((item) => {
+              const isPast = Boolean(item.startsAt && new Date(item.startsAt).getTime() < Date.now());
+              return eventFilter === 'past' ? isPast : !isPast;
+            })
+            .sort((left, right) => {
+              const first = new Date(left.startsAt ?? 0).getTime();
+              const second = new Date(right.startsAt ?? 0).getTime();
+              return eventFilter === 'past' ? second - first : first - second;
+            })
+        : items;
     return (
       <div className="mx-auto min-h-[calc(100vh-58px)] max-w-[1200px] p-[22px] md:p-[34px]">
         <button
@@ -127,16 +150,23 @@ export default function ContentStudioPage(props: ContentStudioPageProps) {
             + Add {label}
           </button>
         </div>
-        <div className="mt-6 overflow-hidden rounded border border-[#ebe8ef] bg-white">
+        <div
+          className={
+            selected === 'event'
+              ? 'mt-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_220px]'
+              : 'mt-6'
+          }
+        >
+          <div className="overflow-hidden rounded border border-[#ebe8ef] bg-white">
           {loading ? (
             <p className="p-6 text-xs text-[#777283]">Loading {label.toLowerCase()}s…</p>
-          ) : items.length === 0 ? (
+          ) : filteredItems.length === 0 ? (
             <p className="p-6 text-xs text-[#777283]">
               No {label.toLowerCase()}s added yet. Use “Add {label}” to create one.
             </p>
           ) : (
-            <div className="grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-3">
-              {items.map((item) => (
+            <div className="grid gap-4 p-4 sm:grid-cols-2 xl:grid-cols-3">
+              {filteredItems.map((item) => (
                 <ContentCard
                   item={item}
                   type={selected}
@@ -146,6 +176,26 @@ export default function ContentStudioPage(props: ContentStudioPageProps) {
                 />
               ))}
             </div>
+          )}
+          </div>
+          {selected === 'event' && (
+          <aside className="h-fit rounded border border-[#ebe8ef] bg-white p-4">
+            <h2 className="text-xs font-extrabold text-[#504b5b]">Filter events</h2>
+            <label className="mt-3 grid gap-2 text-[11px] font-bold text-[#777283]">
+              Show
+              <select
+                className="w-full rounded border border-[#dedbe3] bg-white p-3 text-xs font-normal text-[#282338]"
+                value={eventFilter}
+                onChange={(event) => setEventFilter(event.target.value as 'upcoming' | 'past')}
+              >
+                <option value="upcoming">Upcoming Events</option>
+                <option value="past">Past Events</option>
+              </select>
+            </label>
+            <p className="mt-3 text-[10px] leading-5 text-[#777283]">
+              Showing {filteredItems.length} {eventFilter} event{filteredItems.length === 1 ? '' : 's'}.
+            </p>
+          </aside>
           )}
         </div>
       </div>
@@ -187,8 +237,7 @@ export default function ContentStudioPage(props: ContentStudioPageProps) {
               className="relative min-h-[215px] overflow-hidden rounded-lg border border-[#ebe8ef] bg-white p-6 text-left shadow-[0_8px_20px_rgba(56,34,70,.02)] transition hover:-translate-y-0.5 hover:shadow-md"
               key={section.label}
               onClick={() => {
-                if (section.type === 'video' || section.type === 'news') setSelected(section.type);
-                else props.onOpenForm(section.type);
+                setSelected(section.type);
               }}
               type="button"
             >

@@ -121,6 +121,7 @@ export default function AdminPage() {
             status === 'PUBLISHED' ? previous.publishedArticles + 1 : previous.publishedArticles,
         }));
       }
+      if (active === 'event') setImageUrl('');
       if (active === 'video') {
         setVideoUrl('');
         setVideoDescription('');
@@ -171,7 +172,10 @@ export default function AdminPage() {
       active={active}
       imageUrl={imageUrl}
       videoUrl={videoUrl}
-      onActiveChange={setActive}
+      onActiveChange={(next) => {
+        setActive(next);
+        if (next === 'event') setImageUrl('');
+      }}
       onImageChange={setImageUrl}
       onVideoChange={setVideoUrl}
       onSignOut={signOut}
@@ -226,7 +230,9 @@ function createContentRequest(
     path: '/api/admin/events',
     body: {
       title: form.get('title'),
-      description: form.get('description'),
+      description: '',
+      imageUrl: media.imageUrl || undefined,
+      clickUrl: form.get('clickUrl') || undefined,
       startsAt: new Date(String(form.get('startsAt'))).toISOString(),
       location: form.get('location'),
       capacity: form.get('capacity') ? Number(form.get('capacity')) : undefined,

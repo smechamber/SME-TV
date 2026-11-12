@@ -39,6 +39,13 @@ function youtubeIdFromValue(value: string) {
   );
 }
 
+function localDateTimeValue(value?: string) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
+}
+
 function VideoPreview({ url, youtubeId }: { url: string; youtubeId: string }) {
   const id = youtubeIdFromValue(youtubeId) || youtubeIdFromValue(url);
   if (id) {
@@ -266,19 +273,50 @@ export function ContentEditor({
         )}
         {active === 'event' && (
           <>
-            <Field>
-              Event description
-              <textarea className={`${inputClass} resize-y`} required name="description" rows={4} />
-            </Field>
             <div className="grid gap-0 md:grid-cols-2 md:gap-4">
               <Field>
                 Date and time
-                <input className={inputClass} required name="startsAt" type="datetime-local" />
+                <input
+                  className={inputClass}
+                  required
+                  name="startsAt"
+                  type="datetime-local"
+                  defaultValue={localDateTimeValue(initialContent?.startsAt)}
+                />
               </Field>
               <Field>
                 Location
-                <input className={inputClass} name="location" placeholder="Venue or online" />
+                <input
+                  className={inputClass}
+                  name="location"
+                  defaultValue={initialContent?.location ?? ''}
+                  placeholder="Venue or online"
+                />
               </Field>
+            </div>
+            <Field>
+              Card redirect URL
+              <input
+                className={inputClass}
+                name="clickUrl"
+                type="url"
+                defaultValue={initialContent?.clickUrl ?? ''}
+                placeholder="https://example.com/event"
+              />
+              <span className="text-[10px] font-normal text-[#777283]">
+                Clicking the event card opens this URL. Leave blank to open the event page.
+              </span>
+            </Field>
+            <div className="mt-[18px]">
+              <MediaUpload
+                token={token}
+                accept="image/*"
+                label="Event card image / poster"
+                initialUrl={imageUrl}
+                onUploaded={(media) => onImageChange(media.url)}
+                onClear={() => onImageChange('')}
+              />
+              {imageUrl && <input type="hidden" name="imageUrl" value={imageUrl} readOnly />}
             </div>
             <Field>
               Registration capacity
@@ -287,17 +325,10 @@ export function ContentEditor({
                 name="capacity"
                 type="number"
                 min="1"
+                defaultValue={initialContent?.capacity ?? ''}
                 placeholder="No limit"
               />
             </Field>
-            <div className="mt-[18px]">
-              <MediaUpload
-                token={token}
-                accept="image/*,video/*,.pdf,.doc,.docx,.txt"
-                label="Upload event media or document"
-                onUploaded={() => undefined}
-              />
-            </div>
           </>
         )}
         <div className="mt-[21px] flex flex-wrap items-center gap-2 border-t border-[#ebe8ef] pt-4 text-[11px] text-[#777283]">

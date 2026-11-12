@@ -19,6 +19,16 @@ router.get(
   }),
 );
 
+router.get(
+  '/admin/events',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (_request, response) => {
+    const data = await db.event.findMany({ orderBy: { startsAt: 'asc' }, take: 200 });
+    response.json({ success: true, data });
+  }),
+);
+
 router.post(
   '/admin/events',
   authenticate,
@@ -30,12 +40,48 @@ router.post(
         ...input,
         slug: `${slugify(input.title)}-${randomBytes(3).toString('hex')}`,
         imageUrl: input.imageUrl || null,
+        clickUrl: input.clickUrl || null,
         startsAt: new Date(input.startsAt),
         endsAt: input.endsAt ? new Date(input.endsAt) : null,
         registrationClose: input.registrationClose ? new Date(input.registrationClose) : null,
       },
     });
     response.status(201).json({ success: true, data });
+  }),
+);
+
+router.patch(
+  '/admin/events/:id',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (request, response) => {
+    const input = eventForm.parse(request.body);
+    const data = await db.event.update({
+      where: { id: String(request.params.id) },
+      data: {
+        title: input.title,
+        description: input.description,
+        imageUrl: input.imageUrl || null,
+        clickUrl: input.clickUrl || null,
+        startsAt: new Date(input.startsAt),
+        endsAt: input.endsAt ? new Date(input.endsAt) : null,
+        location: input.location || null,
+        status: input.status,
+        registrationClose: input.registrationClose ? new Date(input.registrationClose) : null,
+        capacity: input.capacity ?? null,
+      },
+    });
+    response.json({ success: true, data });
+  }),
+);
+
+router.delete(
+  '/admin/events/:id',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (request, response) => {
+    await db.event.delete({ where: { id: String(request.params.id) } });
+    response.status(204).send();
   }),
 );
 

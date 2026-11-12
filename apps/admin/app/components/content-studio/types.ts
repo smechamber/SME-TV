@@ -10,6 +10,11 @@ export type ManagedContent = {
   videoUrl?: string | null;
   youtubeId?: string | null;
   imageUrl?: string | null;
+  clickUrl?: string | null;
+  slug?: string;
+  startsAt?: string;
+  location?: string | null;
+  capacity?: number | null;
   isFeatured?: boolean;
   isBreaking?: boolean;
   category?: { name: string } | null;
