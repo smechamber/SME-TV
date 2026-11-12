@@ -27,6 +27,7 @@ export default function OpportunitiesPage() {
   return (
     <main className="min-h-screen bg-[#faf9fb]">
       <div className="mx-auto max-w-[1240px] px-4 py-8 sm:px-6 lg:px-8">
+        
         <Breadcrumbs items={[{ label: 'Opportunities' }]} />
 
         <section className="mt-6 rounded-2xl border border-[#eeeaf0] bg-white px-6 py-8 shadow-sm sm:px-10 sm:py-10">
