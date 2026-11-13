@@ -140,7 +140,7 @@ export default function Header() {
             </Link>
           </div>
         </div>
-      </header>        
+      </header>
 
       {/* Navigation Bar */}
       <nav
@@ -221,7 +221,7 @@ export default function Header() {
                   }}
                   className="block px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-rose-50 hover:text-[#e11d48]"
                 >
-                  Founder                
+                  Founder
                 </Link>
                 <Link
                   href="/initiated-by"
@@ -233,7 +233,7 @@ export default function Header() {
                 >
                   Initiated By
                 </Link>
-                                <Link
+                <Link
                   href="/partners"
                   onClick={() => {
                     setAboutOpen(false);
@@ -242,8 +242,8 @@ export default function Header() {
                   className="block px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-rose-50 hover:text-[#e11d48]"
                 >
                   Our Partners
-                </Link>  
-                                <Link
+                </Link>
+                <Link
                   href="/partnership"
                   onClick={() => {
                     setAboutOpen(false);

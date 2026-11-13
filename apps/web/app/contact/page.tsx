@@ -12,7 +12,6 @@ export default function ContactPage() {
       <Breadcrumbs items={[{ label: 'Contact Us' }]} />
 
       <section className="rounded-2xl border border-[#e7e4eb] bg-white px-5 py-8 shadow-[0_12px_35px_rgba(30,27,75,0.05)] sm:px-12 sm:py-12">
-
         {/* Header */}
         <header className="mb-9 border-b border-[#eeeaf0] pb-7 text-center">
           <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#d92867]">
@@ -24,14 +23,13 @@ export default function ContactPage() {
           </h1>
 
           <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-[#77717e] sm:text-base">
-            We would love to hear from you. Reach out to SME TV for queries,
-            partnerships, collaborations and business opportunities.
+            We would love to hear from you. Reach out to SME TV for queries, partnerships,
+            collaborations and business opportunities.
           </p>
         </header>
 
         {/* Contact Details */}
         <div className="mx-auto max-w-3xl">
-
           <h2 className="mb-6 text-xl font-bold text-[#211b2b] sm:text-2xl">
             Registered &amp; Head Office
           </h2>
@@ -142,15 +140,11 @@ export default function ContactPage() {
               </div>
             </div>
           </div>
-
         </div>
 
         {/* Footer Links */}
         <div className="mt-10 flex flex-wrap justify-center gap-x-8 gap-y-3 border-t border-[#eeeaf0] pt-7 text-sm font-semibold">
-          <a
-            href="/about"
-            className="text-[#d92867] transition-colors hover:text-[#b51c51]"
-          >
+          <a href="/about" className="text-[#d92867] transition-colors hover:text-[#b51c51]">
             About SME TV →
           </a>
 
@@ -163,7 +157,6 @@ export default function ContactPage() {
             Official Website →
           </a>
         </div>
-
       </section>
     </main>
   );

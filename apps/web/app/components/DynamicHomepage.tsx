@@ -90,13 +90,11 @@ export default function DynamicHomepage({ sections }: { sections: HomepageSectio
         const videos = section.items.filter(isVideo);
         const events = section.items.filter(isEvent);
         if (section.items.length === 0)
-          return (
-            index === 0 ? (
-              <div key={section.id} className="pt-12">
-                {filters}
-              </div>
-            ) : null
-          );
+          return index === 0 ? (
+            <div key={section.id} className="pt-12">
+              {filters}
+            </div>
+          ) : null;
         if (section.kind === 'HERO')
           return (
             <div key={section.id} className="space-y-8 pt-6">

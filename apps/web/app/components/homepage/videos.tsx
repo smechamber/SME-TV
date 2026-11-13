@@ -14,33 +14,51 @@ export function VideoPlayer({ video, autoPlay = false }: { video: Video; autoPla
   const isYoutubeVideo = video.videoType === 'YOUTUBE' || Boolean(youtubeId);
 
   if (autoPlay && isYoutubeVideo && youtubeId) {
-    return <iframe
-      className="absolute inset-0 h-full w-full"
-      src={`https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=1&mute=1&rel=0`}
-      title={video.title}
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-      referrerPolicy="strict-origin-when-cross-origin"
-      allowFullScreen
-    />;
+    return (
+      <iframe
+        className="absolute inset-0 h-full w-full"
+        src={`https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=1&mute=1&rel=0`}
+        title={video.title}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerPolicy="strict-origin-when-cross-origin"
+        allowFullScreen
+      />
+    );
   }
 
   if (autoPlay && !isYoutubeVideo && video.videoUrl) {
-    return <video
-      className="absolute inset-0 h-full w-full object-cover"
-      autoPlay
-      muted
-      controls
-      poster={thumbnail}
-      src={video.videoUrl}
-    />;
+    return (
+      <video
+        className="absolute inset-0 h-full w-full object-cover"
+        autoPlay
+        muted
+        controls
+        poster={thumbnail}
+        src={video.videoUrl}
+      />
+    );
   }
 
-  return <Link href={videoHref(video)} className="group absolute inset-0 block h-full w-full overflow-hidden bg-gradient-to-br from-[#34243f] via-[#1e1b4b] to-slate-950" aria-label={`Open video: ${video.title}`}>
-    {thumbnail ? <img className="absolute inset-0 h-full w-full object-cover" src={thumbnail} alt="" /> : <span className="absolute inset-0 flex items-center justify-center text-sm font-bold uppercase tracking-[0.2em] text-white/80">Video preview</span>}
-    <span className="absolute inset-0 bg-slate-950/30 transition-colors group-hover:bg-slate-950/15" />
-    <span className="absolute left-1/2 top-1/2 z-10 flex h-14 w-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-xl bg-[#ff0033] text-2xl text-white shadow-lg transition-transform group-hover:scale-105">▶</span>
-    <span className="sr-only">{video.title}</span>
-  </Link>;
+  return (
+    <Link
+      href={videoHref(video)}
+      className="group absolute inset-0 block h-full w-full overflow-hidden bg-gradient-to-br from-[#34243f] via-[#1e1b4b] to-slate-950"
+      aria-label={`Open video: ${video.title}`}
+    >
+      {thumbnail ? (
+        <img className="absolute inset-0 h-full w-full object-cover" src={thumbnail} alt="" />
+      ) : (
+        <span className="absolute inset-0 flex items-center justify-center text-sm font-bold uppercase tracking-[0.2em] text-white/80">
+          Video preview
+        </span>
+      )}
+      <span className="absolute inset-0 bg-slate-950/30 transition-colors group-hover:bg-slate-950/15" />
+      <span className="absolute left-1/2 top-1/2 z-10 flex h-14 w-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-xl bg-[#ff0033] text-2xl text-white shadow-lg transition-transform group-hover:scale-105">
+        ▶
+      </span>
+      <span className="sr-only">{video.title}</span>
+    </Link>
+  );
 }
 
 export function VideoHero({ items }: { items: Video[] }) {

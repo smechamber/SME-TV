@@ -10,7 +10,10 @@ export function UpcomingEventCards({ items }: { items: EventItem[] }) {
         <h2 id="upcoming-events" className="text-2xl font-bold text-[#1e1b4b]">
           Upcoming Events
         </h2>
-        <Link href="/events" className="shrink-0 text-sm font-semibold text-[#1e1b4b] hover:text-[#e11d48]">
+        <Link
+          href="/events"
+          className="shrink-0 text-sm font-semibold text-[#1e1b4b] hover:text-[#e11d48]"
+        >
           View all <span aria-hidden="true">→</span>
         </Link>
       </div>

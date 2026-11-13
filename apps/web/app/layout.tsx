@@ -9,9 +9,13 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en" className="scroll-smooth motion-reduce:scroll-auto"><body className="flex min-h-screen flex-col bg-white font-[Arial,Helvetica,sans-serif] text-[#1b1930] antialiased">
-    <Header />
-    <div className="flex-1">{children}</div>
-    <Footer />
-  </body></html>;
+  return (
+    <html lang="en" className="scroll-smooth motion-reduce:scroll-auto">
+      <body className="flex min-h-screen flex-col bg-white font-[Arial,Helvetica,sans-serif] text-[#1b1930] antialiased">
+        <Header />
+        <div className="flex-1">{children}</div>
+        <Footer />
+      </body>
+    </html>
+  );
 }

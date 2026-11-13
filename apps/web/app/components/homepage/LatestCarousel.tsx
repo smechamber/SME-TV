@@ -27,24 +27,19 @@ export function LatestCarousel({ items }: { items: HomepageItem[] }) {
       <div className="mb-4 flex items-center justify-between border-b border-slate-200 pb-3">
         <h2 className="text-2xl font-medium tracking-tight text-[#1e1b4b]">Recent Post</h2>
 
-     
-<div className="flex gap-1">
-  {([-1, 1] as const).map((direction) => (
-    <button
-      key={direction}
-      type="button"
-      onClick={() => scrollLatest(direction)}
-      className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-4xl font-light text-slate-600 shadow-sm hover:border-rose-300 hover:text-[#d92867]"
-      aria-label={direction < 0 ? 'Previous latest items' : 'Next latest items'}
-    >
-      <span className="relative -top-1">
-        {direction < 0 ? '\u2039' : '\u203a'}
-      </span>
-    </button>
-  ))}
-</div>
-
-
+        <div className="flex gap-1">
+          {([-1, 1] as const).map((direction) => (
+            <button
+              key={direction}
+              type="button"
+              onClick={() => scrollLatest(direction)}
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-4xl font-light text-slate-600 shadow-sm hover:border-rose-300 hover:text-[#d92867]"
+              aria-label={direction < 0 ? 'Previous latest items' : 'Next latest items'}
+            >
+              <span className="relative -top-1">{direction < 0 ? '\u2039' : '\u203a'}</span>
+            </button>
+          ))}
+        </div>
       </div>
       <div
         ref={carouselRef}

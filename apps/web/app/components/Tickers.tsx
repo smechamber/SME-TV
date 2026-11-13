@@ -45,7 +45,6 @@ export default function Tickers({ stories }: { stories: Story[] }) {
 
   return (
     <>
-
       {/* Market Watch Ticker */}
       <div
         className={`${
@@ -62,26 +61,16 @@ export default function Tickers({ stories }: { stories: Story[] }) {
           <div className="relative w-full overflow-hidden">
             <div className="flex w-max animate-ticker font-mono text-xs hover:[animation-play-state:paused]">
               {[1, 2].map((loopKey) => (
-                <div
-                  key={loopKey}
-                  className="flex shrink-0 items-center gap-8 pr-8"
-                >
+                <div key={loopKey} className="flex shrink-0 items-center gap-8 pr-8">
                   {marketData.map((item, index) => (
-                    <div
-                      key={`${loopKey}-${index}`}
-                      className="flex items-center gap-1.5"
-                    >
+                    <div key={`${loopKey}-${index}`} className="flex items-center gap-1.5">
                       <span className="text-slate-400">{item.name}</span>
 
-                      <span className="font-semibold text-white">
-                        {item.value}
-                      </span>
+                      <span className="font-semibold text-white">{item.value}</span>
 
                       <span
                         className={
-                          item.isUp
-                            ? 'text-[11px] text-emerald-400'
-                            : 'text-[11px] text-rose-400'
+                          item.isUp ? 'text-[11px] text-emerald-400' : 'text-[11px] text-rose-400'
                         }
                       >
                         {item.isUp ? '▲' : '▼'} {item.change}
@@ -116,10 +105,7 @@ export default function Tickers({ stories }: { stories: Story[] }) {
           <div className="relative w-full overflow-hidden">
             <div className="flex w-max animate-ticker-fast font-medium text-slate-800 hover:[animation-play-state:paused]">
               {[1, 2].map((loopKey) => (
-                <div
-                  key={loopKey}
-                  className="flex shrink-0 items-center gap-8 pr-8"
-                >
+                <div key={loopKey} className="flex shrink-0 items-center gap-8 pr-8">
                   {stories.map((s) => (
                     <Link
                       href={`/news/${s.slug}`}

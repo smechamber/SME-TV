@@ -1,4 +1,3 @@
-
 import Breadcrumbs from '../../components/Breadcrumbs';
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
@@ -56,22 +55,21 @@ export default async function EventsPage({
   return (
     <main className="min-h-screen bg-[#fafafd]">
       <div className="mx-auto w-full max-w-[1180px] px-4 py-4 sm:px-6 sm:py-6">
-
         <Breadcrumbs items={[{ label: 'Events' }]} />
 
         {/* Header */}
         <section>
           <span className="text-[12px] font-extrabold tracking-[.16em] text-[#d92867]">
-            SME EVENTS 
+            SME EVENTS
           </span>
 
           <h1 className="my-3 text-4xl font-bold leading-tight tracking-[-.05em] text-[#1b1930] sm:text-4xl">
-            Business Events 
+            Business Events
           </h1>
 
           <p className="mb-6 max-w-3xl text-sm leading-6 text-[#6e6b7c] sm:text-base">
-            Explore upcoming business events, networking opportunities
-            and initiatives from the SME community.
+            Explore upcoming business events, networking opportunities and initiatives from the SME
+            community.
           </p>
         </section>
 
@@ -130,9 +128,10 @@ export default async function EventsPage({
             {filteredEvents.map((item) => {
               const startsAt = new Date(item.startsAt);
               const validDate = !Number.isNaN(startsAt.getTime());
-              const eventUrl = validDate && startsAt < now
-                ? 'https://smeevents.in/events/past-events'
-                : item.clickUrl;
+              const eventUrl =
+                validDate && startsAt < now
+                  ? 'https://smeevents.in/events/past-events'
+                  : item.clickUrl;
 
               return (
                 <a
@@ -161,7 +160,6 @@ export default async function EventsPage({
 
                   {/* Content */}
                   <div className="flex flex-1 flex-col px-4 py-3">
-
                     {/* Business Type */}
                     <div className="mb-2">
                       <span className="inline-flex max-w-full items-center gap-2 rounded-full border border-rose-100 bg-gradient-to-r from-rose-50 to-pink-50 px-3.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#c0265b]">
@@ -179,7 +177,6 @@ export default async function EventsPage({
                     {/* Date & Location */}
                     <div className="mt-auto pt-5">
                       <div className="flex items-center gap-3 border-t border-slate-100 pt-4">
-
                         {/* Date */}
                         <div className="flex h-[58px] w-[58px] shrink-0 flex-col items-center justify-center rounded-xl bg-[#fff1f4]">
                           {validDate ? (
@@ -197,9 +194,7 @@ export default async function EventsPage({
                               </span>
                             </>
                           ) : (
-                            <span className="text-[10px] font-bold text-[#d92867]">
-                              TBA
-                            </span>
+                            <span className="text-[10px] font-bold text-[#d92867]">TBA</span>
                           )}
                         </div>
 
@@ -262,9 +257,7 @@ export default async function EventsPage({
             </div>
 
             <h2 className="mt-5 text-xl font-bold text-[#1e1b4b]">
-              {activeFilter === 'upcoming'
-                ? 'No upcoming events'
-                : 'No past events'}
+              {activeFilter === 'upcoming' ? 'No upcoming events' : 'No past events'}
             </h2>
 
             <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-500">

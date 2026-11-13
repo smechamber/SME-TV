@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useMemo, useState } from 'react';
 import type { HomepageItem, HomepageSection } from '../home-data';
@@ -102,11 +102,7 @@ export default function MainContent({
         query={query}
         onQueryChange={setQuery}
       />
-      <VideosSection
-        videos={videos}
-        filtered={filteredVideos}
-        loading={loadingVideos}
-      />
+      <VideosSection videos={videos} filtered={filteredVideos} loading={loadingVideos} />
       <EventsSection events={events} filtered={filteredEvents} loading={loadingEvents} />
       <SubscribeBanner />
     </main>

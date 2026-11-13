@@ -36,9 +36,7 @@ export default function EventCard({
       <div className="flex flex-1 flex-col px-4 py-3">
         <div className="mb-2">
           <span className="inline-flex max-w-full items-center gap-2 rounded-full border border-rose-100 bg-gradient-to-r from-rose-50 to-pink-50 px-3.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#c0265b]">
-            <span className="break-words leading-relaxed">
-              {item.eventType || 'SME TV EVENT'}
-            </span>
+            <span className="break-words leading-relaxed">{item.eventType || 'SME TV EVENT'}</span>
           </span>
         </div>
 
