@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { EventItem } from '../../home-data';
+import EventCard from '../EventCard';
 
 export function UpcomingEventCards({ items }: { items: EventItem[] }) {
   if (!items.length) return null;
@@ -14,47 +15,9 @@ export function UpcomingEventCards({ items }: { items: EventItem[] }) {
         </Link>
       </div>
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {items.slice(0, 3).map((event) => {
-          const startsAt = new Date(event.startsAt);
-          return (
-            <a
-              aria-label={`Know more about ${event.title}`}
-              className="group block overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition duration-200 hover:-translate-y-1 hover:border-rose-200 hover:shadow-lg"
-              href={event.clickUrl}
-              key={event.id}
-            >
-              <div className="relative aspect-[1.55] overflow-hidden bg-slate-100">
-                {event.imageUrl ? (
-                  <img alt={event.title} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.04]" src={event.imageUrl} />
-                ) : (
-                  <div className="flex h-full flex-col items-center justify-center bg-gradient-to-br from-[#1e1b4b] via-[#312e81] to-[#e11d48] px-6 text-center text-white">
-                    <span className="text-[10px] font-black uppercase tracking-[.2em] text-rose-100">{event.eventType || 'SME TV EVENTS'}</span>
-                    <span className="mt-3 line-clamp-3 text-xl font-extrabold leading-snug">{event.title}</span>
-                  </div>
-                )}
-                <span className="absolute left-3 top-3 rounded-md bg-[#1e1b4b]/95 px-3 py-1.5 text-[9px] font-black uppercase tracking-[.15em] text-white shadow-sm">
-                  {event.eventType || 'SME TV EVENT'}
-                </span>
-              </div>
-              <div className="p-4 sm:p-5">
-                <h3 className="line-clamp-2 min-h-[3.5rem] text-lg font-extrabold leading-7 text-[#1e1b4b] transition-colors group-hover:text-[#d92867]">{event.title}</h3>
-                <div className="mt-4 flex items-center gap-3 border-t border-slate-100 pt-4">
-                  <time className="flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-lg bg-[#fff1f2] text-[#1e1b4b] ring-1 ring-inset ring-rose-100">
-                    <span className="text-2xl font-black leading-none">{startsAt.toLocaleDateString('en-IN', { day: '2-digit' })}</span>
-                    <span className="mt-1 text-[9px] font-extrabold uppercase leading-none tracking-wider text-[#e11d48]">{startsAt.toLocaleDateString('en-IN', { month: 'short' })}</span>
-                  </time>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-[#282338]">{event.location || 'Location to be announced'}</p>
-                    <p className="mt-1 text-[11px] font-medium text-slate-500">{startsAt.toLocaleDateString('en-IN', { year: 'numeric' })}</p>
-                  </div>
-                  <span className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-[#e11d48] px-3 py-2.5 text-[10px] font-extrabold uppercase tracking-wider text-white transition-colors group-hover:bg-[#c91d42]">
-                    Know more <span aria-hidden="true">→</span>
-                  </span>
-                </div>
-              </div>
-            </a>
-          );
-        })}
+        {items.slice(0, 3).map((event) => (
+          <EventCard item={event} key={event.id} />
+        ))}
       </div>
     </section>
   );
