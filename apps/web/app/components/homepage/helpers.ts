@@ -46,5 +46,5 @@ export function mixedImage(item: HomepageItem) {
 export function mixedHref(item: HomepageItem) {
   if (isVideo(item)) return `/videos/${encodeURIComponent(item.slug || item.id)}`;
   if (isStory(item)) return `/news/${encodeURIComponent(item.slug)}`;
-  return `/events/${encodeURIComponent(item.slug)}`;
+  return item.clickUrl;
 }

@@ -17,6 +17,7 @@ type EventItem = {
   slug: string;
   startsAt: string;
   location?: string | null;
+  clickUrl: string;
 };
 type NewsPageAd = {
   id: string;
@@ -255,12 +256,12 @@ export default async function NewsPage({
                         year: 'numeric',
                       })}
                     </time>
-                    <Link
-                      href={`/events/${event.slug}`}
+                    <a
+                      href={event.clickUrl}
                       className="mt-1 block text-sm font-bold leading-snug text-[#1b1930] hover:text-[#d92867]"
                     >
                       {event.title}
-                    </Link>
+                    </a>
                     {event.location && (
                       <span className="mt-1 block text-xs text-[#777386]">{event.location}</span>
                     )}

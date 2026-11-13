@@ -230,6 +230,7 @@ function createContentRequest(
     path: '/api/admin/events',
     body: {
       title: form.get('title'),
+      eventType: form.get('eventType'),
       description: '',
       imageUrl: media.imageUrl || undefined,
       clickUrl: form.get('clickUrl') || undefined,

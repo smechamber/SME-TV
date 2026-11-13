@@ -28,7 +28,7 @@ export type EventItem = {
   title: string;
   description?: string;
   imageUrl?: string;
-  clickUrl?: string;
+  clickUrl: string;
   location?: string;
   startsAt: string;
   tag?: string;

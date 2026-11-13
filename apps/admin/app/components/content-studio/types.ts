@@ -1,6 +1,7 @@
 export type ManagedContent = {
   id: string;
   title: string;
+  eventType?: string | null;
   status: string;
   createdAt: string;
   description?: string | null;

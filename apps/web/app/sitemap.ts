@@ -18,16 +18,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: path === '/' ? 1 : 0.6,
   }));
   try {
-    const [newsResponse, videoResponse, eventResponse] = await Promise.all([
+    const [newsResponse, videoResponse] = await Promise.all([
       fetch(`${API}/api/news?limit=50`, { next: { revalidate: 3600 } }),
       fetch(`${API}/api/videos`, { next: { revalidate: 3600 } }),
-      fetch(`${API}/api/events`, { next: { revalidate: 3600 } }),
     ]);
-    const [news, videos, events] = (await Promise.all([
+    const [news, videos] = (await Promise.all([
       newsResponse.ok ? newsResponse.json() : Promise.resolve({ data: [] }),
       videoResponse.ok ? videoResponse.json() : Promise.resolve({ data: [] }),
-      eventResponse.ok ? eventResponse.json() : Promise.resolve({ data: [] }),
-    ])) as [{ data?: Entry[] }, { data?: Entry[] }, { data?: Entry[] }];
+    ])) as [{ data?: Entry[] }, { data?: Entry[] }];
     return [
       ...base,
       ...(news.data ?? []).map((item) => ({
@@ -41,12 +39,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         lastModified: item.publishedAt ? new Date(item.publishedAt) : undefined,
         changeFrequency: 'weekly' as const,
         priority: 0.7,
-      })),
-      ...(events.data ?? []).map((item) => ({
-        url: `${SITE}/events/${item.slug}`,
-        lastModified: item.startsAt ? new Date(item.startsAt) : undefined,
-        changeFrequency: 'weekly' as const,
-        priority: 0.6,
       })),
     ];
   } catch {

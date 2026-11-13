@@ -26,9 +26,10 @@ export type EventItem = {
   id: string;
   slug: string;
   title: string;
+  eventType?: string;
   description?: string;
   imageUrl?: string;
-  clickUrl?: string;
+  clickUrl: string;
   location?: string;
   startsAt: string;
   tag?: string;

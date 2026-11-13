@@ -87,6 +87,7 @@ model Video {
 model Event {
   id                String        @id @default(cuid())
   title             String
+  eventType         String?
   slug              String        @unique
   description       String        @db.Text
   imageUrl          String?

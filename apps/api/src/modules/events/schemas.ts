@@ -18,14 +18,14 @@ export const registrationForm = z.object({
 
 export const eventForm = z.object({
   title: z.string().trim().min(3).max(180),
+  eventType: z.string().trim().max(120).optional().or(z.literal('')),
   description: z.string().max(20000).default(''),
   imageUrl: z.string().url().optional().or(z.literal('')),
   clickUrl: z
     .string()
     .url()
     .refine((value) => /^https?:\/\//i.test(value), 'URL must use HTTP or HTTPS')
-    .optional()
-    .or(z.literal('')),
+    .refine((value) => value.trim().length > 0, 'Redirect URL is required'),
   startsAt: z.string().datetime(),
   endsAt: z.string().datetime().optional(),
   location: z.string().max(300).optional(),

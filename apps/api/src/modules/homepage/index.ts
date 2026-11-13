@@ -99,6 +99,48 @@ const sectionSchema = z.object({
 const publishedWhere = () => ({ status: 'PUBLISHED' as const, publishedAt: { lte: new Date() } });
 const present = <T>(item: T | undefined): item is T => Boolean(item);
 
+function keepSingleTrendingSection<T extends {
+  id: string;
+  kind: string;
+  enabled: boolean;
+  contentIds: string[];
+  displayOrder: number;
+  createdAt: Date;
+}>(sections: T[]): T[] {
+  const trending = sections
+    .filter((section) => section.kind === 'TRENDING')
+    .sort(
+      (a, b) =>
+        Number(b.enabled) - Number(a.enabled) ||
+        b.contentIds.length - a.contentIds.length ||
+        a.displayOrder - b.displayOrder ||
+        a.createdAt.getTime() - b.createdAt.getTime(),
+    );
+  const retainedId = trending[0]?.id;
+  return sections.filter((section) => section.kind !== 'TRENDING' || section.id === retainedId);
+}
+
+async function removeDuplicateTrendingSections<T extends {
+  id: string;
+  kind: string;
+  enabled: boolean;
+  contentIds: string[];
+  displayOrder: number;
+  createdAt: Date;
+}>(sections: T[]): Promise<T[]> {
+  const retainedSections = keepSingleTrendingSection(sections);
+  const retainedIds = new Set(retainedSections.map((section) => section.id));
+  const duplicateIds = sections
+    .filter((section) => section.kind === 'TRENDING' && !retainedIds.has(section.id))
+    .map((section) => section.id);
+
+  if (duplicateIds.length) {
+    await db.homepageSection.deleteMany({ where: { id: { in: duplicateIds } } });
+  }
+
+  return retainedSections;
+}
+
 async function getContent(
   contentType: 'ARTICLE' | 'VIDEO' | 'EVENT' | 'MIXED',
   source: 'MANUAL' | 'LATEST' | 'TRENDING',
@@ -147,8 +189,8 @@ async function getContent(
   }
   const where =
     source === 'MANUAL'
-      ? { status: 'PUBLISHED' as const, startsAt: { gte: new Date() }, id: { in: ids } }
-      : { status: 'PUBLISHED' as const, startsAt: { gte: new Date() } };
+      ? { status: 'PUBLISHED' as const, startsAt: { gte: new Date() }, id: { in: ids }, clickUrl: { not: null } }
+      : { status: 'PUBLISHED' as const, startsAt: { gte: new Date() }, clickUrl: { not: null } };
   const data = await db.event.findMany({ where, take: itemCount, orderBy: { startsAt: 'asc' } });
   return source === 'MANUAL'
     ? ids.map((id) => data.find((item) => item.id === id)).filter(present)
@@ -185,13 +227,13 @@ async function resolveSection(section: {
 router.get(
   '/homepage',
   asyncRoute(async (_request, response) => {
-    const sections = await db.homepageSection.findMany({
+    const sections = keepSingleTrendingSection(await db.homepageSection.findMany({
       where: {
         enabled: true,
         NOT: [{ name: NEWS_PAGE_CONFIG_NAME }, { name: { startsWith: NEWS_PAGE_AD_PREFIX } }],
       },
       orderBy: { displayOrder: 'asc' },
-    });
+    }));
     sections.sort((a, b) => {
       if (a.kind === 'HERO') return -1;
       if (b.kind === 'HERO') return 1;
@@ -206,12 +248,12 @@ router.get(
   authenticate,
   requireAdmin,
   asyncRoute(async (_request, response) => {
-    const sections = await db.homepageSection.findMany({
+    const sections = await removeDuplicateTrendingSections(await db.homepageSection.findMany({
       where: {
         NOT: [{ name: NEWS_PAGE_CONFIG_NAME }, { name: { startsWith: NEWS_PAGE_AD_PREFIX } }],
       },
       orderBy: { displayOrder: 'asc' },
-    });
+    }));
     response.json({ success: true, data: sections });
   }),
 );
@@ -393,7 +435,7 @@ router.get(
         },
       }),
       db.event.findMany({
-        where: { status: 'PUBLISHED', startsAt: { gte: new Date() } },
+        where: { status: 'PUBLISHED', startsAt: { gte: new Date() }, clickUrl: { not: null } },
         orderBy: { startsAt: 'asc' },
         take: 100,
         select: {
@@ -401,6 +443,8 @@ router.get(
           title: true,
           description: true,
           imageUrl: true,
+          eventType: true,
+          clickUrl: true,
           startsAt: true,
           location: true,
         },
@@ -416,6 +460,22 @@ router.post(
   requireAdmin,
   asyncRoute(async (request, response) => {
     const input = sectionSchema.parse(request.body);
+    if (input.kind === 'EVENTS') {
+      const existing = await db.homepageSection.findFirst({ where: { kind: 'EVENTS' } });
+      Object.assign(input, {
+        name: 'Upcoming Events',
+        layout: 'GRID',
+        design: 'EVENT_CARDS',
+        source: 'LATEST',
+        contentType: 'EVENT',
+        itemCount: 3,
+        contentIds: [],
+      });
+      if (existing) {
+        const data = await db.homepageSection.update({ where: { id: existing.id }, data: input });
+        return response.json({ success: true, data });
+      }
+    }
     if (input.kind === 'HERO' || input.kind === 'TRENDING') {
       const existing = await db.homepageSection.findFirst({ where: { kind: input.kind } });
       if (existing) {
@@ -454,6 +514,16 @@ router.put(
       input.displayOrder = Math.max(1, input.displayOrder);
       input.name = 'Trending on SMETV';
     }
+    if (existing?.kind === 'EVENTS') {
+      input.kind = 'EVENTS';
+      input.name = 'Upcoming Events';
+      input.layout = 'GRID';
+      input.design = 'EVENT_CARDS';
+      input.source = 'LATEST';
+      input.contentType = 'EVENT';
+      input.itemCount = 3;
+      input.contentIds = [];
+    }
     const data = await db.homepageSection.update({ where: { id }, data: input });
     response.json({ success: true, data });
   }),
@@ -470,6 +540,8 @@ router.delete(
       return response
         .status(409)
         .json({ success: false, message: 'The fixed hero section cannot be deleted.' });
+    if (section?.kind === 'EVENTS')
+      return response.status(409).json({ success: false, message: 'The Upcoming Events section can be disabled instead.' });
     await db.homepageSection.delete({ where: { id } });
     response.status(204).send();
   }),

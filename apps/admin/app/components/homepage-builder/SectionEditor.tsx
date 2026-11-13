@@ -91,7 +91,20 @@ export default function SectionForm({
               value={value.kind}
               onChange={(event) => {
                 const kind = event.target.value as Section['kind'];
-                update({ kind, source: kind === 'TRENDING' ? 'MANUAL' : value.source });
+                if (kind === 'EVENTS') {
+                  update({
+                    kind,
+                    name: 'Upcoming Events',
+                    layout: 'GRID',
+                    design: 'EVENT_CARDS',
+                    source: 'LATEST',
+                    contentType: 'EVENT',
+                    itemCount: 3,
+                    contentIds: [],
+                  });
+                } else {
+                  update({ kind, source: kind === 'TRENDING' ? 'MANUAL' : value.source });
+                }
               }}
             >
               {sectionKinds.map((kind) => (

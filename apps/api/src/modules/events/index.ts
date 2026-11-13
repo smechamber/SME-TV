@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { Router } from 'express';
+import { Router, type Request } from 'express';
 import { db } from '@sme-tv/db';
 import { asyncRoute, authRateLimit, authenticate, requireAdmin } from '../../middleware/auth.js';
 import { slugify } from '../../lib/content.js';
@@ -9,11 +9,16 @@ const router = Router();
 
 router.get(
   '/events',
-  asyncRoute(async (_request, response) => {
+  asyncRoute(async (request: Request, response) => {
+    const includePast = request.query.includePast === 'true';
     const data = await db.event.findMany({
-      where: { status: 'PUBLISHED', startsAt: { gte: new Date() } },
-      orderBy: { startsAt: 'asc' },
-      take: 30,
+      where: {
+        status: 'PUBLISHED',
+        clickUrl: { not: null },
+        ...(includePast ? {} : { startsAt: { gte: new Date() } }),
+      },
+      orderBy: { startsAt: includePast ? 'desc' : 'asc' },
+      ...(!includePast ? { take: 30 } : {}),
     });
     response.json({ success: true, data });
   }),
@@ -38,6 +43,7 @@ router.post(
     const data = await db.event.create({
       data: {
         ...input,
+        eventType: input.eventType || null,
         slug: `${slugify(input.title)}-${randomBytes(3).toString('hex')}`,
         imageUrl: input.imageUrl || null,
         clickUrl: input.clickUrl || null,
@@ -60,6 +66,7 @@ router.patch(
       where: { id: String(request.params.id) },
       data: {
         title: input.title,
+        eventType: input.eventType || null,
         description: input.description,
         imageUrl: input.imageUrl || null,
         clickUrl: input.clickUrl || null,

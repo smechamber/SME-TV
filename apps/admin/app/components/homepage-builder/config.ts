@@ -17,6 +17,7 @@ export const sectionKinds = [
   { value: 'CUSTOM', label: 'Custom section' },
   { value: 'TRENDING', label: 'Trending on SMETV' },
   { value: 'LATEST', label: 'Latest content' },
+  { value: 'EVENTS', label: 'Upcoming Events (automatic)' },
 ] as const;
 
 export const emptySection = (order: number): Section => ({

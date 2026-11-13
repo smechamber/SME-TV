@@ -61,12 +61,12 @@ export default function EventsSection({
                 <h3 className="text-base font-bold leading-snug text-slate-900">{event.title}</h3>
                 <p className="text-xs leading-relaxed text-slate-600">{event.description}</p>
               </div>
-              <Link
-                href={`/events/${event.slug}`}
+              <a
+                href={event.clickUrl}
                 className="text-xs font-bold uppercase tracking-wider text-[#1e1b4b] transition-colors hover:text-[#e11d48]"
               >
                 Event Details &amp; Registration →
-              </Link>
+              </a>
             </article>
           ))}
         </div>

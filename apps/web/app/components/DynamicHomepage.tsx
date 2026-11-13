@@ -6,7 +6,7 @@ import HeroHeadlines from './homepage/HeroHeadlines';
 import {
   ArticleCards,
   ArticleHero,
-  EventCards,
+  UpcomingEventCards,
   Headlines,
   isEvent,
   isStory,
@@ -144,7 +144,7 @@ export default function DynamicHomepage({ sections }: { sections: HomepageSectio
         if (section.contentType === 'EVENT')
           return (
             <div key={section.id} className={`space-y-10 ${index === 1 ? 'pt-6' : 'pt-12'}`}>
-              <EventCards items={events} />
+              <UpcomingEventCards items={section.kind === 'EVENTS' ? events.slice(0, 3) : events} />
               {index === 0 && filters}
             </div>
           );

@@ -275,6 +275,15 @@ export function ContentEditor({
           <>
             <div className="grid gap-0 md:grid-cols-2 md:gap-4">
               <Field>
+                Event type
+                <input
+                  className={inputClass}
+                  name="eventType"
+                  defaultValue={initialContent?.eventType ?? ''}
+                  placeholder="e.g. Networking, Workshop, Expo"
+                />
+              </Field>
+              <Field>
                 Date and time
                 <input
                   className={inputClass}
@@ -300,11 +309,12 @@ export function ContentEditor({
                 className={inputClass}
                 name="clickUrl"
                 type="url"
+                required
                 defaultValue={initialContent?.clickUrl ?? ''}
                 placeholder="https://example.com/event"
               />
               <span className="text-[10px] font-normal text-[#777283]">
-                Clicking the event card opens this URL. Leave blank to open the event page.
+                Clicking the event card opens this URL. Every event needs a redirect URL.
               </span>
             </Field>
             <div className="mt-[18px]">
