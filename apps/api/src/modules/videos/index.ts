@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { Router } from 'express';
+import { Router, type Request } from 'express';
 import { db } from '@sme-tv/db';
 import { asyncRoute, authenticate, requireAdmin } from '../../middleware/auth.js';
 import { sanitizeArticleHtml, slugify } from '../../lib/content.js';
@@ -9,13 +9,17 @@ const router = Router();
 
 router.get(
   '/videos',
-  asyncRoute(async (_request, response) => {
-    const data = await db.video.findMany({
-      where: { status: 'PUBLISHED', publishedAt: { lte: new Date() } },
-      orderBy: { publishedAt: 'desc' },
-      take: 30,
-    });
-    response.json({ success: true, data });
+  asyncRoute(async (request: Request, response) => {
+    const parsedLimit = Number(request.query.limit);
+    const parsedOffset = Number(request.query.offset);
+    const limit = Number.isFinite(parsedLimit) && parsedLimit > 0 ? Math.min(parsedLimit, 100) : 30;
+    const offset = Number.isFinite(parsedOffset) && parsedOffset >= 0 ? parsedOffset : 0;
+    const where = { status: 'PUBLISHED' as const, publishedAt: { lte: new Date() } };
+    const [data, total] = await Promise.all([
+      db.video.findMany({ where, orderBy: { publishedAt: 'desc' }, take: limit, skip: offset }),
+      db.video.count({ where }),
+    ]);
+    response.json({ success: true, data, pagination: { total, limit, offset } });
   }),
 );
 
