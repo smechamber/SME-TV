@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import AdSlot from './AdSlot';
 import type { HomepageSection } from '../home-data';
 import HeroHeadlines from './homepage/HeroHeadlines';
 import {
@@ -85,6 +86,7 @@ export default function DynamicHomepage({ sections }: { sections: HomepageSectio
 
   return (
     <div>
+      <AdSlot slot="HOMEPAGE_TOP" />
       {visibleSections.map((section, index) => {
         const stories = section.items.filter(isStory);
         const videos = section.items.filter(isVideo);
@@ -99,6 +101,7 @@ export default function DynamicHomepage({ sections }: { sections: HomepageSectio
           return (
             <div key={section.id} className="space-y-8 pt-6">
               <HeroHeadlines items={section.items} featuredVideoId={section.heroVideoId} />
+              {index === 0 && <AdSlot slot="HOMEPAGE_MIDDLE" />}
               {index === 0 && filters}
             </div>
           );

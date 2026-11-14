@@ -10,4 +10,5 @@ export const articleForm = z.object({
   isFeatured: z.boolean().default(false),
   isBreaking: z.boolean().default(false),
   category: z.string().trim().max(80).optional(),
+  tags: z.array(z.string().trim().min(1).max(60)).max(20).default([]),
 });

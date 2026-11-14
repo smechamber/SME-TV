@@ -18,5 +18,6 @@ export type ManagedContent = {
   capacity?: number | null;
   isFeatured?: boolean;
   isBreaking?: boolean;
+  tags?: string[];
   category?: { name: string } | null;
 };

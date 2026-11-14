@@ -9,12 +9,14 @@ type AdminSidebarProps = {
     | 'content-form'
     | 'homepage'
     | 'news-page-builder'
-    | 'videos-page-builder';
+    | 'videos-page-builder'
+    | 'advertising';
   onOverview: () => void;
   onContentStudio: () => void;
   onHomepage: () => void;
   onNewsPage: () => void;
   onVideosPage: () => void;
+  onAdvertising: () => void;
   onSignOut: () => void;
 };
 
@@ -25,6 +27,7 @@ export default function AdminSidebar({
   onHomepage,
   onNewsPage,
   onVideosPage,
+  onAdvertising,
   onSignOut,
 }: AdminSidebarProps) {
   const [pagesOpen, setPagesOpen] = useState(
@@ -53,6 +56,7 @@ export default function AdminSidebar({
       <span className="px-2 pb-2 text-[9px] font-bold tracking-[.14em] text-[#a8a1b1]">WORKSPACE</span>
       <button className={itemClass(activeView === 'overview')} onClick={onOverview}>Overview</button>
       <button className={itemClass(activeView === 'content-studio' || activeView === 'content-form')} onClick={onContentStudio}>Content studio</button>
+      <button className={itemClass(activeView === 'advertising')} onClick={onAdvertising}>Advertising</button>
       <button
         className={itemClass(
           activeView === 'homepage' ||

@@ -54,7 +54,7 @@ export default function RichTextEditor({ onChange, initialContent = '', token = 
     try { const url = new URL(src); if (!['https:', 'http:'].includes(url.protocol)) throw new Error(); }
     catch { window.alert('Enter a valid http or https image URL.'); return; }
     const alt = window.prompt('Image alt text', '') ?? '';
-    run(() => editor.chain().focus().setImage({ src, alt, title: alt }).run());
+    run(() => editor?.chain().focus().setImage({ src, alt, title: alt }).run());
   }
   async function uploadImage(file?: File) {
     if (!file) return;
@@ -65,12 +65,12 @@ export default function RichTextEditor({ onChange, initialContent = '', token = 
       const payload = await response.json() as { data?: { url: string }; message?: string };
       if (!response.ok || !payload.data?.url) throw new Error(payload.message ?? 'Image upload failed');
       const alt = window.prompt('Image alt text', '') ?? '';
-      run(() => editor.chain().focus().setImage({ src: payload.data!.url, alt, title: alt }).run());
+      run(() => editor?.chain().focus().setImage({ src: payload.data!.url, alt, title: alt }).run());
       setNotice('Image uploaded and added to the content.');
     } catch (error) { setNotice(error instanceof Error ? error.message : 'Image upload failed'); }
     finally { setUploading(false); if (imageInput.current) imageInput.current.value = ''; }
   }
-  function insertYoutube() { const src = window.prompt('YouTube video URL'); if (src) run(() => editor.commands.setYoutubeVideo({ src })); }
+  function insertYoutube() { const src = window.prompt('YouTube video URL'); if (src) run(() => editor?.commands.setYoutubeVideo({ src })); }
 
   const buttonClass = 'rounded px-2 py-1 text-[11px] text-[#4d4655] hover:bg-[#eee5ee] hover:text-[#d92867] disabled:opacity-45';
   const previewDocument = `<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{max-width:760px;margin:40px auto;padding:0 20px;font:18px/1.8 Georgia,serif;color:#302b36}img,video,iframe{max-width:100%}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ddd;padding:8px}</style></head><body>${html}</body></html>`;

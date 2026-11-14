@@ -2,10 +2,12 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import AdSlot from './AdSlot';
 
 export default function Footer() {
   return (
     <>
+      <div className="mx-auto w-full max-w-7xl px-4"><AdSlot slot="FOOTER" /></div>
       <footer className="bg-[#0f172a] text-slate-400 border-t border-slate-800 py-12 px-4 text-xs">
         <div className="max-w-7xl mx-auto flex flex-col items-center text-center space-y-6">
           <Link href="/">

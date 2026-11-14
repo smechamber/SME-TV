@@ -158,6 +158,18 @@ export function ContentEditor({
                   Displayed as a red label on the article.
                 </span>
               </Field>
+              <Field>
+                Article tags
+                <input
+                  className={inputClass}
+                  name="tags"
+                  defaultValue={initialContent?.tags?.join(', ')}
+                  placeholder="e.g. exports, manufacturing, policy"
+                />
+                <span className="text-[10px] font-normal text-[#777283]">
+                  Separate tags with commas. Advertisers can target these tags.
+                </span>
+              </Field>
               <div className="mt-[18px]">
                 <MediaUpload
                   token={token}

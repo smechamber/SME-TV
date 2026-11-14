@@ -10,6 +10,7 @@ import ContentFormPage from './ContentFormPage';
 import OverviewPage from './OverviewPage';
 import HomepageBuilder from './HomepageBuilder';
 import PageAdsBuilder from './NewsAdsBuilder';
+import AdvertisingPage from './AdvertisingPage';
 import type { ManagedContent } from './content-studio/types';
 
 export type ContentType = 'news' | 'video' | 'event';
@@ -42,6 +43,7 @@ export default function AdminWorkspace(props: AdminWorkspaceProps) {
     | 'homepage'
     | 'news-page-builder'
     | 'videos-page-builder'
+    | 'advertising'
   >('overview');
 
   return (
@@ -53,6 +55,7 @@ export default function AdminWorkspace(props: AdminWorkspaceProps) {
         onHomepage={() => setActiveView('homepage')}
         onNewsPage={() => setActiveView('news-page-builder')}
         onVideosPage={() => setActiveView('videos-page-builder')}
+        onAdvertising={() => setActiveView('advertising')}
         onSignOut={props.onSignOut}
       />
       <section className="ml-0 min-h-screen md:ml-[225px]">
@@ -63,6 +66,8 @@ export default function AdminWorkspace(props: AdminWorkspaceProps) {
           <PageAdsBuilder token={props.token} onNotice={props.onNotice} />
         ) : activeView === 'videos-page-builder' ? (
           <PageAdsBuilder token={props.token} onNotice={props.onNotice} page="videos" />
+        ) : activeView === 'advertising' ? (
+          <AdvertisingPage token={props.token} onNotice={props.onNotice} />
         ) : activeView === 'content-studio' ? (
           <ContentStudioPage
             active={props.active}

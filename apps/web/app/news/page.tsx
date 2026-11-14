@@ -1,5 +1,6 @@
 ﻿import Link from 'next/link';
 import Breadcrumbs from '../../components/Breadcrumbs';
+import AdSlot from '../components/AdSlot';
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
 type Article = {
@@ -140,6 +141,7 @@ export default async function NewsPage({
   return (
     <main className="mx-auto w-full max-w-[1180px] px-4 py-6 sm:px-6 ">
       <Breadcrumbs items={[{ label: 'News' }]} />
+      <AdSlot slot="NEWS_LIST_TOP" />
       <span className="text-[12px] font-extrabold tracking-[.16em] text-[#d92867]">
         SME TV NEWS
       </span>

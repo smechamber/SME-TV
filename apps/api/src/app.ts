@@ -10,6 +10,7 @@ import marketRouter from './modules/market/index.js';
 import newsRouter from './modules/news/index.js';
 import videoRouter from './modules/videos/index.js';
 import homepageRouter from './modules/homepage/index.js';
+import advertisingRouter from './modules/advertising/index.js';
 import userRouter from './modules/users/index.js';
 
 export function createApp() {
@@ -37,6 +38,7 @@ export function createApp() {
   app.use('/api', eventRouter);
   app.use('/api', marketRouter);
   app.use('/api', homepageRouter);
+  app.use('/api', advertisingRouter);
   app.use(errorHandler);
   return app;
 }

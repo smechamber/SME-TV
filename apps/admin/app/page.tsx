@@ -199,6 +199,10 @@ function createContentRequest(
         content: media.articleContent,
         imageUrl: media.imageUrl || undefined,
         category: form.get('category'),
+        tags: String(form.get('tags') ?? '')
+          .split(',')
+          .map((tag) => tag.trim())
+          .filter(Boolean),
         isFeatured: form.has('featured'),
         isBreaking: form.has('breaking'),
       },

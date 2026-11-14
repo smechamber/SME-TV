@@ -5,7 +5,8 @@ type AdminTopbarProps = {
     | 'content-form'
     | 'homepage'
     | 'news-page-builder'
-    | 'videos-page-builder';
+    | 'videos-page-builder'
+    | 'advertising';
   onSignOut: () => void;
 };
 
@@ -21,7 +22,9 @@ export default function AdminTopbar({ activeView, onSignOut }: AdminTopbarProps)
             ? 'News Page Builder'
             : activeView === 'videos-page-builder'
               ? 'Videos Page Builder'
-              : 'Content studio';
+              : activeView === 'advertising'
+                ? 'Advertising'
+                : 'Content studio';
 
   return (
     <header className="flex h-[58px] items-center justify-between border-b border-[#ebe8ef] bg-white px-[17px] text-[11px] font-bold md:px-[34px]">

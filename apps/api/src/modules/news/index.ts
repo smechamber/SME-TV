@@ -84,6 +84,7 @@ router.post(
         publishedAt: input.status === 'PUBLISHED' ? new Date() : null,
         authorId: request.user!.id,
         categoryId: category?.id,
+        tags: input.tags,
       },
     });
     response.status(201).json({ success: true, data });
@@ -116,6 +117,7 @@ router.patch(
         isBreaking: input.isBreaking,
         publishedAt: input.status === 'PUBLISHED' ? new Date() : null,
         categoryId: category?.id ?? null,
+        tags: input.tags,
       },
     });
     response.json({ success: true, data });
