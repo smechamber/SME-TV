@@ -15,7 +15,7 @@ type NewsAd = {
 };
 
 const placements: Array<{ value: Placement; label: string }> = [
-  { value: 'ARTICLE_LIST', label: 'Between news articles' },
+  { value: 'ARTICLE_LIST', label: 'Between page items' },
   { value: 'BELOW_SEARCH', label: 'Below the search bar' },
   { value: 'BELOW_EVENTS', label: 'Below upcoming events' },
 ];
@@ -38,13 +38,18 @@ function AdPreview({ imageUrl, name }: { imageUrl: string; name: string }) {
   );
 }
 
-export default function NewsAdsBuilder({
+export default function PageAdsBuilder({
   token,
   onNotice,
+  page = 'news',
 }: {
   token: string;
   onNotice: (message: string) => void;
+  page?: 'news' | 'videos';
 }) {
+  const pageLabel = page === 'videos' ? 'Videos' : 'News';
+  const pageLabelLower = page === 'videos' ? 'videos' : 'news';
+  const apiPath = `${API}/api/admin/${page}-page/ads`;
   const [ads, setAds] = useState<NewsAd[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -60,7 +65,7 @@ export default function NewsAdsBuilder({
 
   useEffect(() => {
     let mounted = true;
-    fetch(`${API}/api/admin/news-page/ads`, {
+    fetch(apiPath, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(async (response) => {
@@ -77,7 +82,7 @@ export default function NewsAdsBuilder({
     return () => {
       mounted = false;
     };
-  }, [token, onNotice]);
+  }, [token, onNotice, apiPath]);
 
   function openAdForm(ad?: NewsAd) {
     setEditingAdId(ad?.id ?? null);
@@ -118,7 +123,7 @@ export default function NewsAdsBuilder({
     setFormError('');
     try {
       const response = await fetch(
-        `${API}/api/admin/news-page/ads${editingAdId ? `/${encodeURIComponent(editingAdId)}` : ''}`,
+        `${apiPath}${editingAdId ? `/${encodeURIComponent(editingAdId)}` : ''}`,
         {
           method: editingAdId ? 'PUT' : 'POST',
           headers: {
@@ -147,7 +152,7 @@ export default function NewsAdsBuilder({
       setClickUrl('');
       setImageUrl('');
       setEditingAdId(null);
-      onNotice('Ad saved and added to the news page.');
+      onNotice(`Ad saved and added to the ${pageLabelLower} page.`);
     } catch (error) {
       setFormError(error instanceof Error ? error.message : 'Unable to save ad');
     } finally {
@@ -156,15 +161,15 @@ export default function NewsAdsBuilder({
   }
 
   async function deleteAd(ad: NewsAd) {
-    if (!window.confirm(`Delete “${ad.name}” from the news page?`)) return;
+    if (!window.confirm(`Delete “${ad.name}” from the ${pageLabelLower} page?`)) return;
     try {
-      const response = await fetch(`${API}/api/admin/news-page/ads/${encodeURIComponent(ad.id)}`, {
+      const response = await fetch(`${apiPath}/${encodeURIComponent(ad.id)}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!response.ok) throw new Error('Unable to delete ad');
       setAds((current) => current.filter((item) => item.id !== ad.id));
-      onNotice('Ad deleted from the news page.');
+      onNotice(`Ad deleted from the ${pageLabelLower} page.`);
     } catch (error) {
       onNotice(error instanceof Error ? error.message : 'Unable to delete ad');
     }
@@ -176,9 +181,9 @@ export default function NewsAdsBuilder({
         <p className="mb-2 text-[10px] font-extrabold tracking-[.15em] text-[#d92867]">
           PUBLISHING CONTROLS
         </p>
-        <h1 className="text-[27px] font-bold tracking-[-.04em]">News Page Builder</h1>
+        <h1 className="text-[27px] font-bold tracking-[-.04em]">{pageLabel} Page Builder</h1>
         <p className="mt-2 text-[13px] text-[#777283]">
-          Create ads for the news page and choose where each one appears.
+          Create ads for the {pageLabelLower} page and choose where each one appears.
         </p>
       </div>
 
@@ -216,7 +221,7 @@ export default function NewsAdsBuilder({
                       required
                       value={clickUrl}
                       onChange={(event) => setClickUrl(event.target.value)}
-                      placeholder="https://example.com or /news"
+                      placeholder={`https://example.com or /${pageLabelLower}`}
                       className="rounded border border-[#dedbe3] px-3 py-2.5 text-xs font-normal"
                     />
                     <span className="font-normal text-[#777283]">
@@ -268,7 +273,7 @@ export default function NewsAdsBuilder({
                   </label>
                   {placement === 'ARTICLE_LIST' && (
                     <label className="grid gap-2 text-xs font-bold text-[#504b5b]">
-                      Show after how many articles?
+                      Show after how many {pageLabelLower === 'videos' ? 'videos' : 'articles'}?
                       <input
                         required
                         min={1}
@@ -281,7 +286,7 @@ export default function NewsAdsBuilder({
                         className="rounded border border-[#dedbe3] px-3 py-2.5 text-xs font-normal"
                       />
                       <span className="font-normal leading-5 text-[#777283]">
-                        Enter 4 to show this ad after the 4th article.
+                        Enter 4 to show this ad after the 4th {pageLabelLower === 'videos' ? 'video' : 'article'}.
                       </span>
                     </label>
                   )}
@@ -290,23 +295,23 @@ export default function NewsAdsBuilder({
                     <div className="grid gap-4 rounded border border-[#ebe8ef] bg-[#fcfbfd] p-4 md:grid-cols-[minmax(0,1fr)_220px]">
                       <div className="space-y-3">
                         <div className="rounded bg-white p-3 text-xs text-[#777283]">
-                          Sample news article
+                          Sample {page === 'videos' ? 'video' : 'news'}
                         </div>
                         {placement === 'ARTICLE_LIST' && (
                           <div className="grid gap-2">
                             <AdPreview imageUrl={imageUrl} name={name} />
                             <span className="text-[11px] text-[#777283]">
-                              Preview: ad appears after article {articlePosition}.
+                              Preview: ad appears after {page === 'videos' ? 'video' : 'article'} {articlePosition}.
                             </span>
                           </div>
                         )}
                         <div className="rounded bg-white p-3 text-xs text-[#777283]">
-                          Next news article
+                          Next {page === 'videos' ? 'video' : 'news article'}
                         </div>
                       </div>
                       <aside className="space-y-3">
                         <div className="rounded bg-white p-3 text-xs text-[#777283]">
-                          Search news
+                          Search {pageLabelLower}
                         </div>
                         {placement === 'BELOW_SEARCH' && (
                           <AdPreview imageUrl={imageUrl} name={name} />
@@ -343,7 +348,7 @@ export default function NewsAdsBuilder({
             </div>
           ) : (
             <div className="rounded border border-dashed border-[#dedbe3] p-8 text-center">
-              <h2 className="text-sm font-bold">Create a news page ad</h2>
+              <h2 className="text-sm font-bold">Create a {pageLabelLower} page ad</h2>
               <p className="mt-2 text-xs text-[#777283]">
                 Add an ad name and destination, then upload the image. Placement and article
                 position are selected on the next step.

@@ -66,7 +66,7 @@ async function getEvents(): Promise<EventItem[]> {
 
 async function getPromos(): Promise<Promo[]> {
   try {
-    const response = await fetch(`${API}/api/news-page`, { cache: 'no-store' });
+    const response = await fetch(`${API}/api/videos-page`, { cache: 'no-store' });
     if (!response.ok) return [];
     const payload = (await response.json()) as { data?: Promo[] };
     return payload.data ?? [];

@@ -2,14 +2,14 @@
 
 import type { FormEvent } from 'react';
 import { useState } from 'react';
-import type { Registration, Stats } from '../types';
+import type { Stats } from '../types';
 import AdminSidebar from './AdminSidebar';
 import AdminTopbar from './AdminTopbar';
 import ContentStudioPage from './ContentStudioPage';
 import ContentFormPage from './ContentFormPage';
 import OverviewPage from './OverviewPage';
 import HomepageBuilder from './HomepageBuilder';
-import NewsPageBuilder from './NewsAdsBuilder';
+import PageAdsBuilder from './NewsAdsBuilder';
 import type { ManagedContent } from './content-studio/types';
 
 export type ContentType = 'news' | 'video' | 'event';
@@ -17,7 +17,6 @@ export type ContentType = 'news' | 'video' | 'event';
 export type AdminWorkspaceProps = {
   token: string;
   stats: Stats;
-  registrations: Registration[];
   notice: string;
   busy: boolean;
   active: ContentType;
@@ -37,15 +36,13 @@ export type AdminWorkspaceProps = {
 
 export default function AdminWorkspace(props: AdminWorkspaceProps) {
   const [activeView, setActiveView] = useState<
-    'overview' | 'content-studio' | 'content-form' | 'homepage' | 'news-page-builder'
+    | 'overview'
+    | 'content-studio'
+    | 'content-form'
+    | 'homepage'
+    | 'news-page-builder'
+    | 'videos-page-builder'
   >('overview');
-
-  function showRegistrations() {
-    setActiveView('overview');
-    window.requestAnimationFrame(() => {
-      document.getElementById('registrations')?.scrollIntoView({ behavior: 'smooth' });
-    });
-  }
 
   return (
     <main className="min-h-screen bg-[#f7f6f9] text-[#282338]">
@@ -55,7 +52,7 @@ export default function AdminWorkspace(props: AdminWorkspaceProps) {
         onContentStudio={() => setActiveView('content-studio')}
         onHomepage={() => setActiveView('homepage')}
         onNewsPage={() => setActiveView('news-page-builder')}
-        onRegistrations={showRegistrations}
+        onVideosPage={() => setActiveView('videos-page-builder')}
         onSignOut={props.onSignOut}
       />
       <section className="ml-0 min-h-screen md:ml-[225px]">
@@ -63,7 +60,9 @@ export default function AdminWorkspace(props: AdminWorkspaceProps) {
         {activeView === 'homepage' ? (
           <HomepageBuilder token={props.token} onNotice={props.onNotice} />
         ) : activeView === 'news-page-builder' ? (
-          <NewsPageBuilder token={props.token} onNotice={props.onNotice} />
+          <PageAdsBuilder token={props.token} onNotice={props.onNotice} />
+        ) : activeView === 'videos-page-builder' ? (
+          <PageAdsBuilder token={props.token} onNotice={props.onNotice} page="videos" />
         ) : activeView === 'content-studio' ? (
           <ContentStudioPage
             active={props.active}

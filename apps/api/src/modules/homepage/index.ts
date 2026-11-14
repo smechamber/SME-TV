@@ -7,6 +7,7 @@ import { asyncRoute, authenticate, requireAdmin } from '../../middleware/auth.js
 const router = Router();
 const NEWS_PAGE_CONFIG_NAME = '__NEWS_PAGE_BUILDER_CONFIG__';
 const NEWS_PAGE_AD_PREFIX = '__NEWS_PAGE_AD__:';
+const VIDEOS_PAGE_AD_PREFIX = '__VIDEOS_PAGE_AD__:';
 const newsPageConfigSchema = z.object({
   imageUrl: z.union([z.string().url(), z.literal('')]),
   placement: z.enum(['ARTICLE_LIST', 'BELOW_SEARCH', 'BELOW_EVENTS']),
@@ -75,6 +76,23 @@ async function getNewsPageAds() {
   return ads;
 }
 
+async function getVideosPageAds() {
+  const sections = await db.homepageSection.findMany({
+    where: { name: { startsWith: VIDEOS_PAGE_AD_PREFIX }, enabled: true },
+    orderBy: { createdAt: 'asc' },
+  });
+  return sections
+    .filter((section) => Boolean(section.contentIds[0]))
+    .map((section) => ({
+      id: section.id,
+      name: section.displayFields[0] ?? 'Untitled ad',
+      imageUrl: section.contentIds[0]!,
+      clickUrl: section.contentIds[1] ?? '/videos',
+      placement: placementFromOrder(section.displayOrder),
+      articlePosition: Number(section.contentIds[2]) || 1,
+    }));
+}
+
 const sectionSchema = z.object({
   name: z.string().trim().min(1).max(80),
   kind: z.enum(['HERO', 'TRENDING', 'LATEST', 'INTERVIEWS', 'NEWS', 'VIDEOS', 'EVENTS', 'CUSTOM']),
@@ -99,14 +117,16 @@ const sectionSchema = z.object({
 const publishedWhere = () => ({ status: 'PUBLISHED' as const, publishedAt: { lte: new Date() } });
 const present = <T>(item: T | undefined): item is T => Boolean(item);
 
-function keepSingleTrendingSection<T extends {
-  id: string;
-  kind: string;
-  enabled: boolean;
-  contentIds: string[];
-  displayOrder: number;
-  createdAt: Date;
-}>(sections: T[]): T[] {
+function keepSingleTrendingSection<
+  T extends {
+    id: string;
+    kind: string;
+    enabled: boolean;
+    contentIds: string[];
+    displayOrder: number;
+    createdAt: Date;
+  },
+>(sections: T[]): T[] {
   const trending = sections
     .filter((section) => section.kind === 'TRENDING')
     .sort(
@@ -120,14 +140,16 @@ function keepSingleTrendingSection<T extends {
   return sections.filter((section) => section.kind !== 'TRENDING' || section.id === retainedId);
 }
 
-async function removeDuplicateTrendingSections<T extends {
-  id: string;
-  kind: string;
-  enabled: boolean;
-  contentIds: string[];
-  displayOrder: number;
-  createdAt: Date;
-}>(sections: T[]): Promise<T[]> {
+async function removeDuplicateTrendingSections<
+  T extends {
+    id: string;
+    kind: string;
+    enabled: boolean;
+    contentIds: string[];
+    displayOrder: number;
+    createdAt: Date;
+  },
+>(sections: T[]): Promise<T[]> {
   const retainedSections = keepSingleTrendingSection(sections);
   const retainedIds = new Set(retainedSections.map((section) => section.id));
   const duplicateIds = sections
@@ -189,7 +211,12 @@ async function getContent(
   }
   const where =
     source === 'MANUAL'
-      ? { status: 'PUBLISHED' as const, startsAt: { gte: new Date() }, id: { in: ids }, clickUrl: { not: null } }
+      ? {
+          status: 'PUBLISHED' as const,
+          startsAt: { gte: new Date() },
+          id: { in: ids },
+          clickUrl: { not: null },
+        }
       : { status: 'PUBLISHED' as const, startsAt: { gte: new Date() }, clickUrl: { not: null } };
   const data = await db.event.findMany({ where, take: itemCount, orderBy: { startsAt: 'asc' } });
   return source === 'MANUAL'
@@ -227,13 +254,19 @@ async function resolveSection(section: {
 router.get(
   '/homepage',
   asyncRoute(async (_request, response) => {
-    const sections = keepSingleTrendingSection(await db.homepageSection.findMany({
-      where: {
-        enabled: true,
-        NOT: [{ name: NEWS_PAGE_CONFIG_NAME }, { name: { startsWith: NEWS_PAGE_AD_PREFIX } }],
-      },
-      orderBy: { displayOrder: 'asc' },
-    }));
+    const sections = keepSingleTrendingSection(
+      await db.homepageSection.findMany({
+        where: {
+          enabled: true,
+          NOT: [
+            { name: NEWS_PAGE_CONFIG_NAME },
+            { name: { startsWith: NEWS_PAGE_AD_PREFIX } },
+            { name: { startsWith: VIDEOS_PAGE_AD_PREFIX } },
+          ],
+        },
+        orderBy: { displayOrder: 'asc' },
+      }),
+    );
     sections.sort((a, b) => {
       if (a.kind === 'HERO') return -1;
       if (b.kind === 'HERO') return 1;
@@ -248,12 +281,18 @@ router.get(
   authenticate,
   requireAdmin,
   asyncRoute(async (_request, response) => {
-    const sections = await removeDuplicateTrendingSections(await db.homepageSection.findMany({
-      where: {
-        NOT: [{ name: NEWS_PAGE_CONFIG_NAME }, { name: { startsWith: NEWS_PAGE_AD_PREFIX } }],
-      },
-      orderBy: { displayOrder: 'asc' },
-    }));
+    const sections = await removeDuplicateTrendingSections(
+      await db.homepageSection.findMany({
+        where: {
+          NOT: [
+            { name: NEWS_PAGE_CONFIG_NAME },
+            { name: { startsWith: NEWS_PAGE_AD_PREFIX } },
+            { name: { startsWith: VIDEOS_PAGE_AD_PREFIX } },
+          ],
+        },
+        orderBy: { displayOrder: 'asc' },
+      }),
+    );
     response.json({ success: true, data: sections });
   }),
 );
@@ -262,6 +301,107 @@ router.get(
   '/news-page',
   asyncRoute(async (_request, response) => {
     response.json({ success: true, data: await getNewsPageAds() });
+  }),
+);
+
+router.get(
+  '/videos-page',
+  asyncRoute(async (_request, response) => {
+    response.json({ success: true, data: await getVideosPageAds() });
+  }),
+);
+
+router.get(
+  '/admin/videos-page/ads',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (_request, response) => {
+    response.json({ success: true, data: await getVideosPageAds() });
+  }),
+);
+
+router.post(
+  '/admin/videos-page/ads',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (request, response) => {
+    const input = newsPageAdSchema.parse(request.body);
+    const placement = ['ARTICLE_LIST', 'BELOW_SEARCH', 'BELOW_EVENTS'].indexOf(input.placement);
+    const data = await db.homepageSection.create({
+      data: {
+        name: `${VIDEOS_PAGE_AD_PREFIX}${randomUUID()}`,
+        kind: 'VIDEOS',
+        layout: 'LIST',
+        design: 'STANDARD',
+        source: 'MANUAL',
+        contentType: 'VIDEO',
+        itemCount: 1,
+        contentIds: [input.imageUrl, input.clickUrl, String(input.articlePosition)],
+        displayFields: [input.name],
+        displayOrder: placement,
+        enabled: true,
+      },
+    });
+    response.status(201).json({
+      success: true,
+      data: {
+        id: data.id,
+        name: input.name,
+        imageUrl: input.imageUrl,
+        clickUrl: input.clickUrl,
+        placement: input.placement,
+        articlePosition: input.articlePosition,
+      },
+    });
+  }),
+);
+
+router.put(
+  '/admin/videos-page/ads/:id',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (request, response) => {
+    const input = newsPageAdSchema.parse(request.body);
+    const id = String(request.params.id);
+    const section = await db.homepageSection.findUnique({ where: { id } });
+    if (!section || !section.name.startsWith(VIDEOS_PAGE_AD_PREFIX)) {
+      return response.status(404).json({ success: false, message: 'Ad not found' });
+    }
+    const placement = ['ARTICLE_LIST', 'BELOW_SEARCH', 'BELOW_EVENTS'].indexOf(input.placement);
+    const data = await db.homepageSection.update({
+      where: { id },
+      data: {
+        contentIds: [input.imageUrl, input.clickUrl, String(input.articlePosition)],
+        displayFields: [input.name],
+        displayOrder: placement,
+      },
+    });
+    response.json({
+      success: true,
+      data: {
+        id: data.id,
+        name: input.name,
+        imageUrl: input.imageUrl,
+        clickUrl: input.clickUrl,
+        placement: input.placement,
+        articlePosition: input.articlePosition,
+      },
+    });
+  }),
+);
+
+router.delete(
+  '/admin/videos-page/ads/:id',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (request, response) => {
+    const id = String(request.params.id);
+    const section = await db.homepageSection.findUnique({ where: { id } });
+    if (!section || !section.name.startsWith(VIDEOS_PAGE_AD_PREFIX)) {
+      return response.status(404).json({ success: false, message: 'Ad not found' });
+    }
+    await db.homepageSection.delete({ where: { id } });
+    response.status(204).send();
   }),
 );
 
@@ -541,7 +681,9 @@ router.delete(
         .status(409)
         .json({ success: false, message: 'The fixed hero section cannot be deleted.' });
     if (section?.kind === 'EVENTS')
-      return response.status(409).json({ success: false, message: 'The Upcoming Events section can be disabled instead.' });
+      return response
+        .status(409)
+        .json({ success: false, message: 'The Upcoming Events section can be disabled instead.' });
     await db.homepageSection.delete({ where: { id } });
     response.status(204).send();
   }),

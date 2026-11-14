@@ -209,7 +209,7 @@ export default function HomepageBuilder({
           <p className="mb-2 text-[10px] font-extrabold tracking-[.15em] text-[#d92867]">
             PUBLISHING CONTROLS
           </p>
-          <h1 className="text-[27px] font-bold tracking-[-.04em]">Homepage builder</h1>
+          <h1 className="text-[27px] font-bold tracking-[-.04em]">Homepage</h1>
           <p className="mt-2 text-[13px] text-[#777283]">
             Set the fixed hero, then arrange the content sections below it.
           </p>

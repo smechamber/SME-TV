@@ -4,7 +4,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import AdminLogin from './components/AdminLogin';
 import AdminWorkspace, { type ContentType } from './components/AdminWorkspace';
 import type { ManagedContent } from './components/content-studio/types';
-import { initialStats, type Registration, type Stats } from './types';
+import { initialStats, type Stats } from './types';
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
 
@@ -13,7 +13,6 @@ export default function AdminPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [stats, setStats] = useState<Stats>(initialStats);
-  const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
   const [active, setActive] = useState<ContentType>('news');
@@ -49,11 +48,6 @@ export default function AdminPage() {
       const statsPayload = (await statsResponse.json()) as { data: Stats };
       setStats(statsPayload.data);
 
-      const registrationsResponse = await fetch(`${API}/api/admin/registrations`, { headers });
-      if (registrationsResponse.ok) {
-        const payload = (await registrationsResponse.json()) as { data?: Registration[] };
-        setRegistrations(payload.data ?? []);
-      }
     } catch (error) {
       setNotice(error instanceof Error ? error.message : 'Unable to load the admin dashboard');
       clearSession();
@@ -166,7 +160,6 @@ export default function AdminPage() {
     <AdminWorkspace
       token={token}
       stats={stats}
-      registrations={registrations}
       notice={notice}
       busy={busy}
       active={active}

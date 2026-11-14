@@ -3,12 +3,18 @@
 import { useEffect, useState } from 'react';
 
 type AdminSidebarProps = {
-  activeView: 'overview' | 'content-studio' | 'content-form' | 'homepage' | 'news-page-builder';
+  activeView:
+    | 'overview'
+    | 'content-studio'
+    | 'content-form'
+    | 'homepage'
+    | 'news-page-builder'
+    | 'videos-page-builder';
   onOverview: () => void;
   onContentStudio: () => void;
   onHomepage: () => void;
   onNewsPage: () => void;
-  onRegistrations: () => void;
+  onVideosPage: () => void;
   onSignOut: () => void;
 };
 
@@ -18,12 +24,21 @@ export default function AdminSidebar({
   onContentStudio,
   onHomepage,
   onNewsPage,
-  onRegistrations,
+  onVideosPage,
   onSignOut,
 }: AdminSidebarProps) {
-  const [pagesOpen, setPagesOpen] = useState(activeView === 'homepage' || activeView === 'news-page-builder');
+  const [pagesOpen, setPagesOpen] = useState(
+    activeView === 'homepage' ||
+      activeView === 'news-page-builder' ||
+      activeView === 'videos-page-builder',
+  );
   useEffect(() => {
-    if (activeView === 'homepage' || activeView === 'news-page-builder') setPagesOpen(true);
+    if (
+      activeView === 'homepage' ||
+      activeView === 'news-page-builder' ||
+      activeView === 'videos-page-builder'
+    )
+      setPagesOpen(true);
   }, [activeView]);
   const itemClass = (selected = false) =>
     `w-full rounded px-3 py-3 text-left text-xs transition ${
@@ -39,19 +54,23 @@ export default function AdminSidebar({
       <button className={itemClass(activeView === 'overview')} onClick={onOverview}>Overview</button>
       <button className={itemClass(activeView === 'content-studio' || activeView === 'content-form')} onClick={onContentStudio}>Content studio</button>
       <button
-        className={itemClass(activeView === 'homepage' || activeView === 'news-page-builder')}
+        className={itemClass(
+          activeView === 'homepage' ||
+            activeView === 'news-page-builder' ||
+            activeView === 'videos-page-builder',
+        )}
         onClick={() => setPagesOpen((open) => !open)}
         aria-expanded={pagesOpen}
       >
-        Pages Builder
+        Pages
       </button>
       {pagesOpen && (
         <div className="ml-3 grid border-l border-white/15 pl-2">
-          <button className={itemClass(activeView === 'homepage')} onClick={onHomepage}>Homepage Builder</button>
+          <button className={itemClass(activeView === 'homepage')} onClick={onHomepage}>Homepage</button>
           <button className={itemClass(activeView === 'news-page-builder')} onClick={onNewsPage}>News Page Builder</button>
+          <button className={itemClass(activeView === 'videos-page-builder')} onClick={onVideosPage}>Videos Page Builder</button>
         </div>
       )}
-      <button className={itemClass()} onClick={onRegistrations}>Registrations</button>
       <div className="mt-auto flex items-center gap-2 border-t border-white/10 px-1 pt-4">
         <span className="grid h-[30px] w-[30px] place-items-center rounded-full bg-[#ad4275] text-xs font-bold">A</span>
         <span className="grid gap-1 text-[10px]">
