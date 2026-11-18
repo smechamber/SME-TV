@@ -1,4 +1,4 @@
-﻿import Link from 'next/link';
+import Link from 'next/link';
 import Breadcrumbs from '../../components/Breadcrumbs';
 import AdSlot from '../components/AdSlot';
 
@@ -214,6 +214,7 @@ export default async function NewsPage({
         </section>
 
         <aside className="space-y-7">
+          <AdSlot slot="NEWS_SEARCH_TOP" />
           <form action="/news" method="GET" role="search">
             {category && <input type="hidden" name="category" value={category} />}
             {archive && <input type="hidden" name="archive" value={archive} />}
@@ -237,12 +238,14 @@ export default async function NewsPage({
               </button>
             </div>
           </form>
+          <AdSlot slot="NEWS_SEARCH_BOTTOM" />
           {newsPageAds
             .filter((ad) => ad.placement === 'BELOW_SEARCH')
             .map((ad) => (
               <NewsPagePromo key={ad.id} ad={ad} />
             ))}
 
+          <AdSlot slot="NEWS_EVENTS_TOP" />
           <section>
             <h2 className="border-b-2 border-[#d92867] pb-2 text-base font-extrabold text-[#1b1930]">
               Upcoming events
@@ -280,12 +283,14 @@ export default async function NewsPage({
               View all events
             </Link>
           </section>
+          <AdSlot slot="NEWS_EVENTS_BOTTOM" />
           {newsPageAds
             .filter((ad) => ad.placement === 'BELOW_EVENTS')
             .map((ad) => (
               <NewsPagePromo key={ad.id} ad={ad} />
             ))}
 
+          <AdSlot slot="NEWS_ARCHIVES_TOP" />
           <section>
             <h2 className="border-b-2 border-[#d92867] pb-2 text-base font-extrabold text-[#1b1930]">
               Archives
@@ -307,6 +312,7 @@ export default async function NewsPage({
               <p className="py-3 text-sm text-[#6e6b7c]">No archived articles yet.</p>
             )}
           </section>
+          <AdSlot slot="NEWS_ARCHIVES_BOTTOM" />
         </aside>
       </div>
     </main>

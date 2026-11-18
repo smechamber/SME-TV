@@ -53,7 +53,7 @@ async function getVideos(): Promise<Video[]> {
   }
   return videos;
 }
-        
+
 async function getEvents(): Promise<EventItem[]> {
   try {
     const response = await fetch(`${API}/api/events`, { next: { revalidate: 60 } });
@@ -238,6 +238,7 @@ export default async function VideosPage({
         </section>
 
         <aside className="space-y-7">
+          <AdSlot slot="VIDEOS_SEARCH_TOP" />
           <form action="/videos" method="GET" role="search">
             {archive && <input type="hidden" name="archive" value={archive} />}
             <label htmlFor="video-search" className="mb-2 block text-sm font-bold text-[#1b1930]">
@@ -260,12 +261,14 @@ export default async function VideosPage({
               </button>
             </div>
           </form>
+          <AdSlot slot="VIDEOS_SEARCH_BOTTOM" />
           {promos
             .filter((promo) => promo.placement === 'BELOW_SEARCH')
             .map((promo) => (
               <PromoCard key={promo.id} promo={promo} />
             ))}
 
+          <AdSlot slot="VIDEOS_EVENTS_TOP" />
           <section>
             <h2 className="border-b-2 border-[#d92867] pb-2 text-base font-extrabold text-[#1b1930]">
               Upcoming events
@@ -303,12 +306,14 @@ export default async function VideosPage({
               View all events
             </Link>
           </section>
+          <AdSlot slot="VIDEOS_EVENTS_BOTTOM" />
           {promos
             .filter((promo) => promo.placement === 'BELOW_EVENTS')
             .map((promo) => (
               <PromoCard key={promo.id} promo={promo} />
             ))}
 
+          <AdSlot slot="VIDEOS_ARCHIVES_TOP" />
           <section>
             <h2 className="border-b-2 border-[#d92867] pb-2 text-base font-extrabold text-[#1b1930]">
               Archives
@@ -330,6 +335,7 @@ export default async function VideosPage({
               <p className="py-3 text-sm text-[#6e6b7c]">No archived videos yet.</p>
             )}
           </section>
+          <AdSlot slot="VIDEOS_ARCHIVES_BOTTOM" />
         </aside>
       </div>
     </main>
