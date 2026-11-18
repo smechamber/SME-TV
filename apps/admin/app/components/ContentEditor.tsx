@@ -167,7 +167,7 @@ export function ContentEditor({
                   placeholder="e.g. exports, manufacturing, policy"
                 />
                 <span className="text-[10px] font-normal text-[#777283]">
-                  Separate tags with commas. Advertisers can target these tags.
+                  Separate tags with commas to help organize and search articles.
                 </span>
               </Field>
               <div className="mt-[18px]">

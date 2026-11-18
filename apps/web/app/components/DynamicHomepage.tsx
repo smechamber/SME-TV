@@ -167,6 +167,7 @@ export default function DynamicHomepage({ sections }: { sections: HomepageSectio
           </section>
         );
       })}
+      <AdSlot slot="HOMEPAGE_BOTTOM" />
     </div>
   );
 }

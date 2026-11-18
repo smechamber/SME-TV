@@ -7,13 +7,9 @@ const contentClass = 'text-[17px] leading-[1.85] text-[#302b36] [&_h2]:mt-8 [&_h
 export default function ArticleContent({
   content,
   articleId,
-  categoryId,
-  tags,
 }: {
   content: string;
   articleId: string;
-  categoryId?: string | null;
-  tags: string[];
 }) {
   const closingParagraphs = [...content.matchAll(/<\/p\s*>/gi)];
   const splitAt = closingParagraphs.length > 1 ? closingParagraphs[Math.floor(closingParagraphs.length / 2)]!.index! + closingParagraphs[Math.floor(closingParagraphs.length / 2)]![0].length : -1;
@@ -22,7 +18,7 @@ export default function ArticleContent({
   return (
     <>
       <div className={`my-6 ${contentClass}`} dangerouslySetInnerHTML={{ __html: before }} />
-      <AdSlot slot="ARTICLE_MIDDLE" articleId={articleId} categoryId={categoryId} tags={tags} />
+      <AdSlot slot="ARTICLE_MIDDLE" contentId={articleId} contentType="ARTICLE" />
       {after && <div className={`my-6 ${contentClass}`} dangerouslySetInnerHTML={{ __html: after }} />}
     </>
   );

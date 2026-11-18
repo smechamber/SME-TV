@@ -53,7 +53,7 @@ async function getVideos(): Promise<Video[]> {
   }
   return videos;
 }
-
+        
 async function getEvents(): Promise<EventItem[]> {
   try {
     const response = await fetch(`${API}/api/events`, { next: { revalidate: 60 } });

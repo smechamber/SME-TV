@@ -60,100 +60,44 @@ model Article {
   tags        String[]        @default([])
   author      User?           @relation(fields: [authorId], references: [id], onDelete: SetNull)
   category    Category?       @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  advertisementTargets AdvertisementArticle[]
   @@index([status, publishedAt])
   @@index([categoryId, publishedAt])
 }
 
-model Advertiser {
-  id          String       @id @default(cuid())
-  companyName String
-  contactName String?
-  email       String?
-  phone       String?
-  website     String?
-  notes       String?      @db.Text
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  campaigns   AdCampaign[]
-  events      AdEvent[]
-  @@index([companyName])
+model Advertisement {
+  id                String                @id @default(cuid())
+  name              String
+  imageUrl          String
+  redirectUrl       String
+  enabled           Boolean               @default(true)
+  locations         AdSlot[]              @default([])
+  articleTargetMode ContentTargetMode     @default(ALL)
+  videoTargetMode   ContentTargetMode     @default(ALL)
+  sidebarPosition   AdSidebarPosition     @default(BOTH)
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+  articles          AdvertisementArticle[]
+  videos            AdvertisementVideo[]
+  @@index([enabled, createdAt])
 }
 
-model AdCampaign {
-  id          String       @id @default(cuid())
-  advertiserId String
-  name        String
-  status      CampaignStatus @default(DRAFT)
-  startsAt    DateTime
-  endsAt      DateTime
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  advertiser  Advertiser   @relation(fields: [advertiserId], references: [id], onDelete: Restrict)
-  creatives   AdCreative[]
-  placements  AdPlacement[]
-  events      AdEvent[]
-  @@index([status, startsAt, endsAt])
-  @@index([advertiserId, createdAt])
+model AdvertisementArticle {
+  advertisementId String
+  articleId       String
+  advertisement   Advertisement @relation(fields: [advertisementId], references: [id], onDelete: Cascade)
+  article         Article       @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  @@id([advertisementId, articleId])
+  @@index([articleId])
 }
 
-model AdCreative {
-  id          String       @id @default(cuid())
-  campaignId  String
-  name        String
-  mediaType   AdMediaType
-  desktopUrl  String?
-  tabletUrl   String?
-  mobileUrl   String?
-  clickUrl    String
-  altText     String?
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  campaign    AdCampaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  placements  AdPlacement[]
-  events      AdEvent[]
-  @@index([campaignId, createdAt])
-}
-
-model AdPlacement {
-  id                   String       @id @default(cuid())
-  campaignId           String
-  creativeId           String
-  slot                 AdSlot
-  targetArticleIds     String[]     @default([])
-  targetCategoryIds    String[]     @default([])
-  targetTags           String[]     @default([])
-  excludedArticleIds   String[]     @default([])
-  defaultForOtherArticles Boolean   @default(false)
-  enabled              Boolean      @default(true)
-  priority             Int          @default(0)
-  createdAt            DateTime     @default(now())
-  updatedAt            DateTime     @updatedAt
-  campaign             AdCampaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  creative             AdCreative  @relation(fields: [creativeId], references: [id], onDelete: Cascade)
-  events               AdEvent[]
-  @@index([slot, enabled, priority])
-  @@index([campaignId, slot])
-}
-
-model AdEvent {
-  id            String       @id @default(cuid())
-  advertiserId  String
-  campaignId    String
-  creativeId    String
-  placementId   String
-  eventType     AdEventType
-  slot          AdSlot
-  articleId     String?
-  device        AdDevice     @default(DESKTOP)
-  createdAt     DateTime     @default(now())
-  advertiser    Advertiser  @relation(fields: [advertiserId], references: [id], onDelete: Cascade)
-  campaign      AdCampaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  creative      AdCreative  @relation(fields: [creativeId], references: [id], onDelete: Cascade)
-  placement     AdPlacement @relation(fields: [placementId], references: [id], onDelete: Cascade)
-  @@index([eventType, createdAt])
-  @@index([campaignId, createdAt])
-  @@index([advertiserId, createdAt])
-  @@index([slot, createdAt])
+model AdvertisementVideo {
+  advertisementId String
+  videoId         String
+  advertisement   Advertisement @relation(fields: [advertisementId], references: [id], onDelete: Cascade)
+  video           Video         @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  @@id([advertisementId, videoId])
+  @@index([videoId])
 }
 
 model Video {
@@ -174,6 +118,7 @@ model Video {
   categoryId  String?
   author      User?         @relation(fields: [authorId], references: [id], onDelete: SetNull)
   category    Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  advertisementTargets AdvertisementVideo[]
   @@index([status, publishedAt])
 }
 
@@ -297,33 +242,28 @@ enum HomepageContentType {
   EVENT
   MIXED
 }
-enum CampaignStatus {
-  DRAFT
-  ACTIVE
-  PAUSED
-  COMPLETED
-}
-enum AdMediaType {
-  IMAGE
-  VIDEO
-}
 enum AdSlot {
   HOMEPAGE_TOP
   HOMEPAGE_MIDDLE
+  HOMEPAGE_BOTTOM
   ARTICLE_TOP
   ARTICLE_MIDDLE
   ARTICLE_BOTTOM
-  SIDEBAR
+  ARTICLE_SIDEBAR
+  VIDEO_TOP
+  VIDEO_MIDDLE
+  VIDEO_BOTTOM
+  VIDEO_SIDEBAR
   FOOTER
   NEWS_LIST_TOP
   VIDEO_LIST_TOP
 }
-enum AdEventType {
-  IMPRESSION
-  CLICK
+enum ContentTargetMode {
+  ALL
+  SELECTED
 }
-enum AdDevice {
-  DESKTOP
-  TABLET
-  MOBILE
+enum AdSidebarPosition {
+  LEFT
+  RIGHT
+  BOTH
 }

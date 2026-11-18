@@ -1,8 +1,10 @@
 import Breadcrumbs from '../../../components/Breadcrumbs';
 import { notFound } from 'next/navigation';
+import AdSlot from '../../components/AdSlot';
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
 type Video = {
+  id: string;
   title: string;
   slug: string;
   description?: string | null;
@@ -32,8 +34,11 @@ export default async function VideoPage({ params }: { params: { slug: string } }
   const youtube = video.videoType === 'YOUTUBE' && /^[\w-]{11}$/.test(video.youtubeId ?? '');
 
   return (
-    <main className="mx-auto w-full max-w-[820px] px-4 py-10 sm:px-6 sm:py-6">
+    <main className="mx-auto grid w-full max-w-[1500px] gap-6 px-4 py-10 sm:px-6 sm:py-6 lg:grid-cols-[minmax(0,300px)_minmax(0,820px)_minmax(0,300px)]">
+      <AdSlot slot="VIDEO_SIDEBAR" contentId={video.id} contentType="VIDEO" side="LEFT" />
+      <article>
       <Breadcrumbs items={[{ label: 'Videos', href: '/videos' }, { label: video.title }]} />
+      <AdSlot slot="VIDEO_TOP" contentId={video.id} contentType="VIDEO" />
 
       <h1 className="mt-3 text-4xl leading-tight tracking-[-.05em] text-[#1b1930] sm:text-5xl">
         {video.title}
@@ -59,12 +64,16 @@ export default async function VideoPage({ params }: { params: { slug: string } }
           </div>
         )}
       </div>
+      <AdSlot slot="VIDEO_MIDDLE" contentId={video.id} contentType="VIDEO" />
       {video.description && (
         <div
           className="my-6 text-[17px] leading-[1.85] text-[#302b36] [&_h2]:mt-8 [&_h2]:font-sans [&_h2]:text-2xl [&_h2]:font-bold [&_h3]:mt-7 [&_h3]:font-sans [&_h3]:text-xl [&_h3]:font-bold [&_img]:my-5 [&_img]:h-auto [&_img]:max-w-full [&_iframe]:my-5 [&_iframe]:aspect-video [&_iframe]:w-full [&_table]:my-5 [&_table]:w-full [&_table]:border-collapse [&_th]:border [&_th]:border-[#eeeaf0] [&_th]:p-2 [&_td]:border [&_td]:border-[#eeeaf0] [&_td]:p-2"
           dangerouslySetInnerHTML={{ __html: video.description }}
         />
       )}
+      <AdSlot slot="VIDEO_BOTTOM" contentId={video.id} contentType="VIDEO" />
+      </article>
+      <AdSlot slot="VIDEO_SIDEBAR" contentId={video.id} contentType="VIDEO" side="RIGHT" />
     </main>
   );
 }

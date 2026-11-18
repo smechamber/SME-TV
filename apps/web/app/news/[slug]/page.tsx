@@ -31,7 +31,8 @@ export default async function ArticlePage({ params }: { params: { slug: string }
   const item = await getArticle(params.slug);
   if (!item) notFound();
   return (
-    <main className="mx-auto grid w-full max-w-[1200px] gap-8 px-4 py-10 sm:px-6 sm:py-6 lg:grid-cols-[minmax(0,820px)_300px]">
+    <main className="mx-auto grid w-full max-w-[1500px] gap-6 px-4 py-10 sm:px-6 sm:py-6 lg:grid-cols-[minmax(0,300px)_minmax(0,820px)_minmax(0,300px)]">
+      <AdSlot slot="ARTICLE_SIDEBAR" contentId={item.id} contentType="ARTICLE" side="LEFT" />
       <article>
       <Breadcrumbs items={[{ label: 'News', href: '/news' }, { label: item.title }]} />
       <span className="text-[10px] font-extrabold tracking-[.16em] text-[#d92867]">
@@ -45,7 +46,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
         SME TV newsroom
         {item.publishedAt ? ` - ${new Date(item.publishedAt).toLocaleDateString('en-IN')}` : ''}
       </div>
-      <AdSlot slot="ARTICLE_TOP" articleId={item.id} categoryId={item.category?.id} tags={item.tags} />
+      <AdSlot slot="ARTICLE_TOP" contentId={item.id} contentType="ARTICLE" />
       {item.imageUrl && (
         <Image
           className="my-6 h-auto max-h-[500px] w-full object-cover"
@@ -56,10 +57,10 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           unoptimized
         />
       )}
-      <ArticleContent content={item.content} articleId={item.id} categoryId={item.category?.id} tags={item.tags ?? []} />
-      <AdSlot slot="ARTICLE_BOTTOM" articleId={item.id} categoryId={item.category?.id} tags={item.tags} />
+      <ArticleContent content={item.content} articleId={item.id} />
+      <AdSlot slot="ARTICLE_BOTTOM" contentId={item.id} contentType="ARTICLE" />
       </article>
-      <aside className="block lg:sticky lg:top-6 lg:self-start"><AdSlot slot="SIDEBAR" articleId={item.id} categoryId={item.category?.id} tags={item.tags} /></aside>
+      <AdSlot slot="ARTICLE_SIDEBAR" contentId={item.id} contentType="ARTICLE" side="RIGHT" />
     </main>
   );
 }
