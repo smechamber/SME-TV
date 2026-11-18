@@ -31,36 +31,40 @@ export default async function ArticlePage({ params }: { params: { slug: string }
   const item = await getArticle(params.slug);
   if (!item) notFound();
   return (
-    <main className="mx-auto grid w-full max-w-[1500px] gap-6 px-4 py-10 sm:px-6 sm:py-6 lg:grid-cols-[minmax(0,300px)_minmax(0,820px)_minmax(0,300px)]">
-      <AdSlot slot="ARTICLE_SIDEBAR" contentId={item.id} contentType="ARTICLE" side="LEFT" />
-      <article>
-      <Breadcrumbs items={[{ label: 'News', href: '/news' }, { label: item.title }]} />
-      <span className="text-[10px] font-extrabold tracking-[.16em] text-[#d92867]">
-        {item.category?.name ?? 'SME TV NEWS'}
-      </span>
-      <h1 className="mt-3 text-4xl leading-tight tracking-[-.05em] text-[#1b1930] sm:text-5xl">
-        {item.title}
-      </h1>
-      <p className="mt-4 text-lg leading-relaxed text-[#6e6b7c]">{item.summary}</p>
-      <div className="mt-3 border-b border-[#eeeaf0] py-2 text-xs text-[#8d8795]">
-        SME TV newsroom
-        {item.publishedAt ? ` - ${new Date(item.publishedAt).toLocaleDateString('en-IN')}` : ''}
+    <main className="mx-auto grid w-full max-w-[1500px] gap-6 px-4 py-10 sm:px-6 sm:py-6 2xl:grid-cols-[minmax(0,1fr)_820px_minmax(0,1fr)]">
+      <div className="hidden 2xl:block">
+        <AdSlot slot="ARTICLE_SIDEBAR" contentId={item.id} contentType="ARTICLE" side="LEFT" />
       </div>
-      <AdSlot slot="ARTICLE_TOP" contentId={item.id} contentType="ARTICLE" />
-      {item.imageUrl && (
-        <Image
-          className="my-6 h-auto max-h-[500px] w-full object-cover"
-          src={item.imageUrl}
-          alt=""
-          width={1200}
-          height={675}
-          unoptimized
-        />
-      )}
-      <ArticleContent content={item.content} articleId={item.id} />
-      <AdSlot slot="ARTICLE_BOTTOM" contentId={item.id} contentType="ARTICLE" />
+      <article className="mx-auto w-full max-w-[820px]">
+        <Breadcrumbs items={[{ label: 'News', href: '/news' }, { label: item.title }]} />
+        <span className="text-[10px] font-extrabold tracking-[.16em] text-[#d92867]">
+          {item.category?.name ?? 'SME TV NEWS'}
+        </span>
+        <h1 className="mt-3 text-4xl leading-tight tracking-[-.05em] text-[#1b1930] sm:text-5xl">
+          {item.title}
+        </h1>
+        <p className="mt-4 text-lg leading-relaxed text-[#6e6b7c]">{item.summary}</p>
+        <div className="mt-3 border-b border-[#eeeaf0] py-2 text-xs text-[#8d8795]">
+          SME TV newsroom
+          {item.publishedAt ? ` - ${new Date(item.publishedAt).toLocaleDateString('en-IN')}` : ''}
+        </div>
+        <AdSlot slot="ARTICLE_TOP" contentId={item.id} contentType="ARTICLE" />
+        {item.imageUrl && (
+          <Image
+            className="my-6 h-auto max-h-[500px] w-full object-cover"
+            src={item.imageUrl}
+            alt=""
+            width={1200}
+            height={675}
+            unoptimized
+          />
+        )}
+        <ArticleContent content={item.content} articleId={item.id} />
+        <AdSlot slot="ARTICLE_BOTTOM" contentId={item.id} contentType="ARTICLE" />
       </article>
-      <AdSlot slot="ARTICLE_SIDEBAR" contentId={item.id} contentType="ARTICLE" side="RIGHT" />
+      <div className="hidden 2xl:block">
+        <AdSlot slot="ARTICLE_SIDEBAR" contentId={item.id} contentType="ARTICLE" side="RIGHT" />
+      </div>
     </main>
   );
 }
